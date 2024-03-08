@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.kapt)
     alias(libs.plugins.hilt.android)
+    id(libs.secrets.get().group!!)
 }
 
 android {
@@ -77,4 +78,9 @@ dependencies {
 
 kapt {
     correctErrorTypes = true
+}
+
+secrets {
+    propertiesFileName = "secrets.properties"
+    defaultPropertiesFileName = "local.defaults.properties"
 }
