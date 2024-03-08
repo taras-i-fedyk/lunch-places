@@ -67,6 +67,9 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
 
+    // maps
+    implementation(libs.maps.compose)
+
     // dependency injection
     implementation(libs.hilt)
     kapt(libs.hilt.compiler)
