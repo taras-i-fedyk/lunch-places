@@ -20,19 +20,24 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            Content()
+            MainContent()
         }
     }
 }
 
 @Composable
-private fun Content() {
+private fun MainContent() {
     LunchPlacesTheme {
-        GoogleMap(
-            modifier = Modifier.fillMaxSize()
-        )
-        LocationPermissionHandling()
+        MainScreen()
     }
+}
+
+@Composable
+private fun MainScreen() {
+    GoogleMap(
+        modifier = Modifier.fillMaxSize()
+    )
+    LocationPermissionHandling()
 }
 
 @OptIn(ExperimentalPermissionsApi::class)
@@ -53,6 +58,6 @@ private fun LocationPermissionHandling() {
 
 @Preview(showBackground = true)
 @Composable
-fun DefaultPreview() {
-    Content()
+fun MainPreview() {
+    MainContent()
 }
