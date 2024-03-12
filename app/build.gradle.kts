@@ -84,6 +84,9 @@ dependencies {
     // maps
     implementation(libs.maps.compose)
 
+    // permission handling
+    implementation(libs.accompanist.permissions)
+
     // Android Studio Preview
     implementation(libs.androidx.compose.ui.tooling.preview)
     debugImplementation(libs.androidx.compose.ui.tooling)
