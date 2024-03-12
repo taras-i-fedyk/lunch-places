@@ -81,7 +81,8 @@ dependencies {
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.ui.graphics)
 
-    // maps
+    // location and maps
+    implementation(libs.play.services.location)
     implementation(libs.maps.compose)
 
     // permission handling
