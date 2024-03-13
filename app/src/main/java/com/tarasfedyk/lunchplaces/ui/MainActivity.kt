@@ -9,9 +9,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.maps.android.compose.GoogleMap
+import com.tarasfedyk.lunchplaces.biz.MainViewModel
 import com.tarasfedyk.lunchplaces.ui.theme.LunchPlacesTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -33,7 +35,9 @@ private fun MainContent() {
 }
 
 @Composable
-private fun MainScreen() {
+private fun MainScreen(
+    viewModel: MainViewModel = hiltViewModel()
+) {
     GoogleMap(
         modifier = Modifier.fillMaxSize()
     )

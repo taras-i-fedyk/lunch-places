@@ -82,6 +82,7 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
 
     // location and maps
+    implementation(libs.kotlinx.coroutines.play.services)
     implementation(libs.play.services.location)
     implementation(libs.maps.compose)
 
