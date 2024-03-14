@@ -24,7 +24,7 @@ class MainViewModel @Inject constructor(
 
     private val currentLocationDeterminer: ReplaceableLaunchCoroutine =
         ReplaceableLaunchCoroutine(viewModelScope) { determineCurrentLocationInternal() }
-    private val _currentLocationFlow: MutableSharedFlow<Location?> = MutableSharedFlow()
+    private val _currentLocationFlow: MutableSharedFlow<Location?> = MutableSharedFlow(replay = 1)
     val currentLocationFlow: SharedFlow<Location?> = _currentLocationFlow.asSharedFlow()
 
     fun determineCurrentLocation() {
