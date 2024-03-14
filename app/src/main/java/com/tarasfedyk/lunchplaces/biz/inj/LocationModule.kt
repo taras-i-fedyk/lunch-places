@@ -12,6 +12,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 @Module
 @InstallIn(ViewModelComponent::class)
 object LocationModule {
+
     @Provides
     fun provideFusedLocationClient(
         @ApplicationContext appContext: Context

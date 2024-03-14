@@ -19,49 +19,50 @@ import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             MainContent()
         }
     }
-}
 
-@Composable
-private fun MainContent() {
-    LunchPlacesTheme {
-        MainScreen()
-    }
-}
-
-@Composable
-private fun MainScreen(
-    viewModel: MainViewModel = hiltViewModel()
-) {
-    GoogleMap(
-        modifier = Modifier.fillMaxSize()
-    )
-    LocationPermissionHandling()
-}
-
-@OptIn(ExperimentalPermissionsApi::class)
-@Composable
-private fun LocationPermissionHandling() {
-    val locationPermissionsState = rememberMultiplePermissionsState(
-        permissions = listOf(
-            Manifest.permission.ACCESS_COARSE_LOCATION,
-            Manifest.permission.ACCESS_FINE_LOCATION
-        )
-    )
-    LaunchedEffect(locationPermissionsState) {
-        if (!locationPermissionsState.allPermissionsGranted) {
-            locationPermissionsState.launchMultiplePermissionRequest()
+    @Composable
+    private fun MainContent() {
+        LunchPlacesTheme {
+            MainScreen()
         }
     }
-}
 
-@Preview(showBackground = true)
-@Composable
-fun MainPreview() {
-    MainContent()
+    @Composable
+    private fun MainScreen(
+        viewModel: MainViewModel = hiltViewModel()
+    ) {
+        GoogleMap(
+            modifier = Modifier.fillMaxSize()
+        )
+        LocationPermissionHandling()
+    }
+
+    @OptIn(ExperimentalPermissionsApi::class)
+    @Composable
+    private fun LocationPermissionHandling() {
+        val locationPermissionsState = rememberMultiplePermissionsState(
+            permissions = listOf(
+                Manifest.permission.ACCESS_COARSE_LOCATION,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            )
+        )
+        LaunchedEffect(locationPermissionsState) {
+            if (!locationPermissionsState.allPermissionsGranted) {
+                locationPermissionsState.launchMultiplePermissionRequest()
+            }
+        }
+    }
+
+    @Preview(showBackground = true)
+    @Composable
+    fun MainPreview() {
+        MainContent()
+    }
 }
