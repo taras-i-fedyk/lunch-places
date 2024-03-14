@@ -7,13 +7,17 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.maps.android.compose.GoogleMap
-import com.tarasfedyk.lunchplaces.biz.MainViewModel
+import com.tarasfedyk.lunchplaces.biz.LocationViewModel
+import com.tarasfedyk.lunchplaces.biz.data.LocationState
 import com.tarasfedyk.lunchplaces.ui.theme.LunchPlacesTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -30,23 +34,28 @@ class MainActivity : ComponentActivity() {
     @Composable
     private fun MainContent() {
         LunchPlacesTheme {
-            MainScreen()
+            MapScreen()
         }
     }
 
     @Composable
-    private fun MainScreen(
-        viewModel: MainViewModel = hiltViewModel()
+    private fun MapScreen(
+        locationViewModel: LocationViewModel = hiltViewModel()
     ) {
+        val locationState: LocationState by locationViewModel.locationStateFlow.collectAsStateWithLifecycle()
         GoogleMap(
             modifier = Modifier.fillMaxSize()
         )
-        LocationPermissionHandling()
+        LocationPermissionsRequest(
+            onAnyLocationPermissionGranted = { locationViewModel.determineCurrentLocation() }
+        )
     }
 
     @OptIn(ExperimentalPermissionsApi::class)
     @Composable
-    private fun LocationPermissionHandling() {
+    private fun LocationPermissionsRequest(
+        onAnyLocationPermissionGranted: () -> Unit
+    ) {
         val locationPermissionsState = rememberMultiplePermissionsState(
             permissions = listOf(
                 Manifest.permission.ACCESS_COARSE_LOCATION,
@@ -56,6 +65,9 @@ class MainActivity : ComponentActivity() {
         LaunchedEffect(locationPermissionsState) {
             if (!locationPermissionsState.allPermissionsGranted) {
                 locationPermissionsState.launchMultiplePermissionRequest()
+            }
+            if (locationPermissionsState.permissions.any { it.status.isGranted }) {
+                onAnyLocationPermissionGranted()
             }
         }
     }
