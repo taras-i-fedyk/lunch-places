@@ -64,25 +64,25 @@ class MainActivity : ComponentActivity() {
         val locationPermissionsState = rememberMultiplePermissionsState(
             permissions = listOf(ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION)
         )
-        val supportsCoarseLocationOnly by remember {
+        val permitsCoarseLocationOnly by remember {
             derivedStateOf {
                 locationPermissionsState.isPermissionGranted(ACCESS_COARSE_LOCATION) &&
                 !locationPermissionsState.isPermissionGranted(ACCESS_FINE_LOCATION)
             }
         }
-        val supportsFineLocation by remember {
+        val permitsFineLocation by remember {
             derivedStateOf {
                 locationPermissionsState.isPermissionGranted(ACCESS_FINE_LOCATION)
             }
         }
 
-        LaunchedEffect(supportsCoarseLocationOnly) {
-            if (supportsCoarseLocationOnly) {
+        LaunchedEffect(permitsCoarseLocationOnly) {
+            if (permitsCoarseLocationOnly) {
                 onSomeLocationPermissionGranted()
             }
         }
-        LaunchedEffect(supportsFineLocation) {
-            if (supportsFineLocation) {
+        LaunchedEffect(permitsFineLocation) {
+            if (permitsFineLocation) {
                 onSomeLocationPermissionGranted()
             } else {
                 locationPermissionsState.launchMultiplePermissionRequest()
