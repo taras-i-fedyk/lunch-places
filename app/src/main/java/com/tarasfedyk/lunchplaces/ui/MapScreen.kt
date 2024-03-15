@@ -1,6 +1,7 @@
 package com.tarasfedyk.lunchplaces.ui
 
-import android.Manifest
+import android.Manifest.permission.ACCESS_COARSE_LOCATION
+import android.Manifest.permission.ACCESS_FINE_LOCATION
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -37,17 +38,17 @@ private fun LocationPermissionsRequest(
     onSomeLocationPermissionGranted: () -> Unit
 ) {
     val locationPermissionsState = rememberMultiplePermissionsState(
-        permissions = listOf(Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION)
+        permissions = listOf(ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION)
     )
     val permitsCoarseLocationOnly by remember {
         derivedStateOf {
-            locationPermissionsState.isPermissionGranted(Manifest.permission.ACCESS_COARSE_LOCATION) &&
-                    !locationPermissionsState.isPermissionGranted(Manifest.permission.ACCESS_FINE_LOCATION)
+            locationPermissionsState.isPermissionGranted(ACCESS_COARSE_LOCATION) &&
+            !locationPermissionsState.isPermissionGranted(ACCESS_FINE_LOCATION)
         }
     }
     val permitsFineLocation by remember {
         derivedStateOf {
-            locationPermissionsState.isPermissionGranted(Manifest.permission.ACCESS_FINE_LOCATION)
+            locationPermissionsState.isPermissionGranted(ACCESS_FINE_LOCATION)
         }
     }
 
