@@ -49,9 +49,11 @@ class MainActivity : ComponentActivity() {
         GoogleMap(
             modifier = Modifier.fillMaxSize()
         )
-        LocationPermissionsRequest(
-            onSomeLocationPermissionGranted = { locationViewModel.determineCurrentLocation() }
-        )
+
+        val onSomeLocationPermissionGranted = remember(locationViewModel) {
+            return@remember locationViewModel::determineCurrentLocation
+        }
+        LocationPermissionsRequest(onSomeLocationPermissionGranted)
     }
 
     @OptIn(ExperimentalPermissionsApi::class)
