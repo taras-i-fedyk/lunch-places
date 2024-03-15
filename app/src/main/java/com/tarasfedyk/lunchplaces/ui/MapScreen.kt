@@ -18,7 +18,6 @@ import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
 import com.tarasfedyk.lunchplaces.biz.LocationViewModel
 import com.tarasfedyk.lunchplaces.biz.data.LocationState
-import com.tarasfedyk.lunchplaces.biz.util.isAnyPermissionGranted
 import com.tarasfedyk.lunchplaces.biz.util.isPermissionGranted
 
 @Composable
@@ -26,7 +25,6 @@ fun MapScreen(
     locationViewModel: LocationViewModel
 ) {
     val locationState: LocationState by locationViewModel.locationStateFlow.collectAsStateWithLifecycle()
-
     var mapProperties by remember { mutableStateOf(MapProperties()) }
     GoogleMap(
         modifier = Modifier.fillMaxSize(),
@@ -52,33 +50,33 @@ private fun LocationPermissionsRequest(
     onSomeLocationPermissionGranted: () -> Unit
 ) {
     val locationPermissionsState = rememberMultiplePermissionsState(
-        permissions = listOf(ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION)
-    )
-    val areAllLocationPermissionsDenied by remember {
-        derivedStateOf {
-            !locationPermissionsState.isAnyPermissionGranted()
+        permissions = listOf(ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION),
+        onPermissionsResult = { locationPermissionStatuses ->
+            val areAllLocationPermissionsDenied =
+                locationPermissionStatuses.values.none { isGranted ->
+                    isGranted == true
+                }
+            if (areAllLocationPermissionsDenied) {
+                onAllLocationPermissionsDenied()
+            }
         }
-    }
+    )
+
     val isSolelyCoarseLocationPermissionGranted by remember {
         derivedStateOf {
             locationPermissionsState.isPermissionGranted(ACCESS_COARSE_LOCATION) &&
             !locationPermissionsState.isPermissionGranted(ACCESS_FINE_LOCATION)
         }
     }
-    val isFineLocationPermissionGranted by remember {
-        derivedStateOf {
-            locationPermissionsState.isPermissionGranted(ACCESS_FINE_LOCATION)
-        }
-    }
-
-    LaunchedEffect(areAllLocationPermissionsDenied) {
-        if (areAllLocationPermissionsDenied) {
-            onAllLocationPermissionsDenied()
-        }
-    }
     LaunchedEffect(isSolelyCoarseLocationPermissionGranted) {
         if (isSolelyCoarseLocationPermissionGranted) {
             onSomeLocationPermissionGranted()
+        }
+    }
+
+    val isFineLocationPermissionGranted by remember {
+        derivedStateOf {
+            locationPermissionsState.isPermissionGranted(ACCESS_FINE_LOCATION)
         }
     }
     LaunchedEffect(isFineLocationPermissionGranted) {
