@@ -40,7 +40,7 @@ private val LightColorScheme = lightColorScheme(
 @Composable
 fun LunchPlacesTheme(
     isDarkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
+    // Dynamic Color is available on Android 12+
     isDynamicColor: Boolean = true,
     content: @Composable () -> Unit
 ) {

@@ -6,7 +6,6 @@ import androidx.lifecycle.viewModelScope
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.Priority
 import com.google.android.gms.tasks.CancellationTokenSource
-import com.tarasfedyk.lunchplaces.biz.data.CurrentLocation
 import com.tarasfedyk.lunchplaces.biz.data.LocationState
 import com.tarasfedyk.lunchplaces.biz.util.ReplaceableLaunchCoroutine
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -43,14 +42,10 @@ class LocationViewModel @Inject constructor(
                 Priority.PRIORITY_HIGH_ACCURACY, cancellationTokenSource.token
             )
             val currentLocation = currentLocationTask.await(cancellationTokenSource)
-            _locationStateFlow.value = LocationState(
-                CurrentLocation(value = currentLocation)
-            )
+            _locationStateFlow.value = LocationState(currentLocation = currentLocation)
         } catch (e: Exception) {
             if (e !is CancellationException) {
-                _locationStateFlow.value = LocationState(
-                    CurrentLocation(exception = e)
-                )
+                _locationStateFlow.value = LocationState(currentLocationError = e)
             }
         }
     }
