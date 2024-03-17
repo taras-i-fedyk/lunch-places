@@ -63,8 +63,10 @@ fun MapScreen(
     LaunchedEffect(locationState) {
         locationState.currentLocation?.let { currentLocation ->
             val currentLatLng = currentLocation.toLatLng()
-            val reasonableZoomLevel = calculateReasonableZoomLevel(currentLocation)
-            val cameraUpdate = CameraUpdateFactory.newLatLngZoom(currentLatLng, reasonableZoomLevel)
+            val recommendedZoomLevel = recommendZoomLevel(currentLocation)
+            val cameraUpdate = CameraUpdateFactory.newLatLngZoom(
+                currentLatLng, recommendedZoomLevel
+            )
             cameraPositionState.animate(cameraUpdate)
         }
     }
@@ -110,7 +112,7 @@ private fun LocationPermissionsRequest(
     }
 }
 
-private fun calculateReasonableZoomLevel(location: Location): Float =
+private fun recommendZoomLevel(location: Location): Float =
     // based on how close the location's accuracy is to the maximum accuracy
-    // and the fact that the maximum accuracy should be accompanied by the maximum zoom
+    // and the fact that the maximum accuracy should be accompanied by the maximum magnification
     ZOOM_LEVEL_MAX - (log2(location.accuracy) - log2(LOCATION_ACCURACY_MAX))
