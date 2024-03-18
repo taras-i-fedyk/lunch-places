@@ -25,7 +25,7 @@ class MainActivity : ComponentActivity() {
     }
 
     @Composable
-    private fun MainContent(locationViewModel: LocationViewModel = hiltViewModel()) {
+    fun MainContent(locationViewModel: LocationViewModel = hiltViewModel()) {
         val locationState by locationViewModel.locationStateFlow.collectAsStateWithLifecycle()
         val onDetermineCurrentLocation = locationViewModel::determineCurrentLocation
         MapScreen(locationState, onDetermineCurrentLocation)
@@ -33,7 +33,7 @@ class MainActivity : ComponentActivity() {
 
     @Preview(showBackground = true)
     @Composable
-    private fun MainPreview() {
+    fun MainPreview() {
         LunchPlacesTheme {
             MainContent()
         }
