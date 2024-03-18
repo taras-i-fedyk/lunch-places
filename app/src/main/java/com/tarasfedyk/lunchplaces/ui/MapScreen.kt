@@ -12,14 +12,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.rememberCameraPositionState
-import com.tarasfedyk.lunchplaces.biz.LocationViewModel
 import com.tarasfedyk.lunchplaces.biz.data.LocationState
 import com.tarasfedyk.lunchplaces.biz.util.areAllValuesFalse
 import com.tarasfedyk.lunchplaces.biz.util.isPermissionGranted
@@ -33,32 +31,30 @@ private const val LOCATION_ACCURACY_MAX: Float = 4f
 
 @Composable
 fun MapScreen(
-    locationViewModel: LocationViewModel
+    locationState: LocationState,
+    onDetermineCurrentLocation: () -> Unit
 ) {
-    val locationState: LocationState by locationViewModel.locationStateFlow.collectAsStateWithLifecycle()
-    val cameraPositionState = rememberCameraPositionState()
     var mapProperties by remember {
         mutableStateOf(
             MapProperties(maxZoomPreference = ZOOM_LEVEL_MAX)
         )
     }
-
+    val cameraPositionState = rememberCameraPositionState()
     GoogleMap(
         modifier = Modifier.fillMaxSize(),
         properties = mapProperties,
         cameraPositionState = cameraPositionState
     )
 
-    val onAllLocationPermissionsDenied = {
-        mapProperties = mapProperties.copy(isMyLocationEnabled = false)
-    }
-    val onSomeLocationPermissionGranted = remember(locationViewModel) {
-        {
+    LocationPermissionsRequest(
+        onAllLocationPermissionsDenied = {
+            mapProperties = mapProperties.copy(isMyLocationEnabled = false)
+        },
+        onSomeLocationPermissionGranted = {
             mapProperties = mapProperties.copy(isMyLocationEnabled = true)
-            locationViewModel.determineCurrentLocation()
+            onDetermineCurrentLocation()
         }
-    }
-    LocationPermissionsRequest(onAllLocationPermissionsDenied, onSomeLocationPermissionGranted)
+    )
 
     LaunchedEffect(locationState) {
         locationState.currentLocation?.let { currentLocation ->
