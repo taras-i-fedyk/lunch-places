@@ -31,7 +31,9 @@ class MainActivity : ComponentActivity() {
     }
 
     @Composable
-    fun MainContent(locationViewModel: LocationViewModel = hiltViewModel()) {
+    fun MainContent(
+        locationViewModel: LocationViewModel = hiltViewModel()
+    ) {
         val locationState by locationViewModel.locationStateFlow.collectAsStateWithLifecycle()
         val onDetermineCurrentLocation = locationViewModel::determineCurrentLocation
         MapScreen(locationState, onDetermineCurrentLocation)
