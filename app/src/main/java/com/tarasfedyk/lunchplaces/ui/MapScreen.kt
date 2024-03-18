@@ -3,7 +3,6 @@ package com.tarasfedyk.lunchplaces.ui
 import android.Manifest.permission.ACCESS_COARSE_LOCATION
 import android.Manifest.permission.ACCESS_FINE_LOCATION
 import android.location.Location
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -11,7 +10,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -41,7 +39,6 @@ fun MapScreen(
     }
     val cameraPositionState = rememberCameraPositionState()
     GoogleMap(
-        modifier = Modifier.fillMaxSize(),
         properties = mapProperties,
         cameraPositionState = cameraPositionState
     )
