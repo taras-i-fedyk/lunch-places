@@ -3,6 +3,7 @@ package com.tarasfedyk.lunchplaces.ui
 import android.Manifest.permission.ACCESS_COARSE_LOCATION
 import android.Manifest.permission.ACCESS_FINE_LOCATION
 import android.location.Location
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -15,6 +16,7 @@ import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
+import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.tarasfedyk.lunchplaces.biz.data.LocationState
 import com.tarasfedyk.lunchplaces.biz.util.areAllValuesFalse
@@ -32,15 +34,17 @@ fun MapScreen(
     locationState: LocationState,
     onDetermineCurrentLocation: () -> Unit
 ) {
+    val cameraPositionState = rememberCameraPositionState()
     var mapProperties by remember {
         mutableStateOf(
             MapProperties(maxZoomPreference = ZOOM_LEVEL_MAX)
         )
     }
-    val cameraPositionState = rememberCameraPositionState()
     GoogleMap(
+        cameraPositionState = cameraPositionState,
         properties = mapProperties,
-        cameraPositionState = cameraPositionState
+        uiSettings = MapUiSettings(zoomControlsEnabled = false),
+        contentPadding = PaddingValues(top = SEARCH_BAR_BOTTOM_Y)
     )
 
     LocationPermissionsRequest(
@@ -79,6 +83,7 @@ private fun LocationPermissionsRequest(
             }
         }
     )
+
     val isSolelyCoarseLocationPermissionGranted by remember {
         derivedStateOf {
             locationPermissionsState.isPermissionGranted(ACCESS_COARSE_LOCATION) &&

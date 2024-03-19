@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Lunch Places</string>
+    <string name="search_hint">Search lunch places</string>
 </resources>
