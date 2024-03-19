@@ -5,7 +5,11 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.NavHost
@@ -32,11 +36,25 @@ class MainActivity : ComponentActivity() {
     fun MainContent(
         locationViewModel: LocationViewModel = hiltViewModel()
     ) {
+        var searchBarBottomY by remember { mutableStateOf(0.dp) }
         val locationState by locationViewModel.locationStateFlow.collectAsStateWithLifecycle()
         val onDetermineCurrentLocation = locationViewModel::determineCurrentLocation
-        MapScreen(paddingTop = SEARCH_BAR_BOTTOM_Y, locationState, onDetermineCurrentLocation)
-        NavHost(navController = rememberNavController(), startDestination = SEARCH_ROUTE) {
-            searchScreen(locationState, onDetermineCurrentLocation)
+
+        MapScreen(
+            paddingTop = searchBarBottomY,
+            locationState,
+            onDetermineCurrentLocation
+        )
+
+        NavHost(
+            navController = rememberNavController(),
+            startDestination = SEARCH_ROUTE
+        ) {
+            searchScreen(
+                onSearchBarBottomYChanged = { searchBarBottomY = it },
+                locationState,
+                onDetermineCurrentLocation
+            )
         }
     }
 

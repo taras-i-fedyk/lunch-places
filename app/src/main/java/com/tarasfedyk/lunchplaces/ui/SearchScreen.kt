@@ -10,6 +10,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -22,14 +23,10 @@ import androidx.compose.ui.unit.dp
 import com.tarasfedyk.lunchplaces.R
 import com.tarasfedyk.lunchplaces.biz.data.LocationState
 
-// the y coordinate of the bottom edge of a search bar
-// (when the search bar is inactive and is not yet replaced with a search view)
-// TODO: replace this with a solution that is not based on hard-coding any values
-val SEARCH_BAR_BOTTOM_Y: Dp = 64.dp
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchScreen(
+    onSearchBarBottomYChanged: (Dp) -> Unit,
     locationState: LocationState,
     onDetermineCurrentLocation: () -> Unit
 ) {
@@ -51,5 +48,13 @@ fun SearchScreen(
             content = {},
             onSearch = { focusManager.clearFocus() }
         )
+    }
+
+    LaunchedEffect(Unit) {
+        // the y coordinate of the bottom edge of the search bar
+        // (when the search bar is inactive and is not yet replaced with the search view)
+        // TODO: replace this with a solution that is not based on hard-coding any values
+        val searchBarBottomY = 64.dp
+        onSearchBarBottomYChanged(searchBarBottomY)
     }
 }
