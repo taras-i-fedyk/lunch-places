@@ -11,6 +11,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.unit.Dp
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -31,20 +32,21 @@ private const val LOCATION_ACCURACY_MAX: Float = 4f
 
 @Composable
 fun MapScreen(
+    paddingTop: Dp,
     locationState: LocationState,
     onDetermineCurrentLocation: () -> Unit
 ) {
-    val cameraPositionState = rememberCameraPositionState()
     var mapProperties by remember {
         mutableStateOf(
             MapProperties(maxZoomPreference = ZOOM_LEVEL_MAX)
         )
     }
+    val cameraPositionState = rememberCameraPositionState()
     GoogleMap(
-        cameraPositionState = cameraPositionState,
-        properties = mapProperties,
+        contentPadding = PaddingValues(top = paddingTop),
         uiSettings = MapUiSettings(zoomControlsEnabled = false),
-        contentPadding = PaddingValues(top = SEARCH_BAR_BOTTOM_Y)
+        properties = mapProperties,
+        cameraPositionState = cameraPositionState
     )
 
     LocationPermissionsRequest(

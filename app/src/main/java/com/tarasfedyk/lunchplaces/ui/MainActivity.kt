@@ -8,11 +8,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import com.tarasfedyk.lunchplaces.biz.LocationViewModel
-import com.tarasfedyk.lunchplaces.biz.data.LocationState
 import com.tarasfedyk.lunchplaces.ui.nav.SEARCH_ROUTE
 import com.tarasfedyk.lunchplaces.ui.nav.searchScreen
 import com.tarasfedyk.lunchplaces.ui.theme.AppTheme
@@ -36,17 +34,8 @@ class MainActivity : ComponentActivity() {
     ) {
         val locationState by locationViewModel.locationStateFlow.collectAsStateWithLifecycle()
         val onDetermineCurrentLocation = locationViewModel::determineCurrentLocation
-        MapScreen(locationState, onDetermineCurrentLocation)
-        NavGraph(locationState, onDetermineCurrentLocation)
-    }
-
-    @Composable
-    private fun NavGraph(
-        locationState: LocationState,
-        onDetermineCurrentLocation: () -> Unit,
-        navController: NavHostController = rememberNavController()
-    ) {
-        NavHost(navController, startDestination = SEARCH_ROUTE) {
+        MapScreen(paddingTop = SEARCH_BAR_BOTTOM_Y, locationState, onDetermineCurrentLocation)
+        NavHost(navController = rememberNavController(), startDestination = SEARCH_ROUTE) {
             searchScreen(locationState, onDetermineCurrentLocation)
         }
     }
