@@ -11,15 +11,13 @@ const val SEARCH_ROUTE = "search"
 fun NavGraphBuilder.searchScreen(
     onSearchBarBottomYChanged: (Dp) -> Unit,
     locationState: LocationState,
-    onDetermineCurrentLocation: () -> Unit,
-    onNavigateUp: () -> Unit
+    onDetermineCurrentLocation: () -> Unit
 ) {
     composable(SEARCH_ROUTE) {
         SearchScreen(
             onSearchBarBottomYChanged,
             locationState,
-            onDetermineCurrentLocation,
-            onNavigateUp
+            onDetermineCurrentLocation
         )
     }
 }

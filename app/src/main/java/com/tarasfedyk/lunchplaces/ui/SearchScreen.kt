@@ -32,8 +32,7 @@ import com.tarasfedyk.lunchplaces.biz.data.LocationState
 fun SearchScreen(
     onSearchBarBottomYChanged: (Dp) -> Unit,
     locationState: LocationState,
-    onDetermineCurrentLocation: () -> Unit,
-    onNavigateUp: () -> Unit
+    onDetermineCurrentLocation: () -> Unit
 ) {
     val focusManager = LocalFocusManager.current
 
@@ -44,10 +43,15 @@ fun SearchScreen(
         SearchIcon()
     }
     val upIcon: @Composable () -> Unit = {
-        UpIcon { onNavigateUp() }
+        UpIcon {
+            query = ""
+            isActive = false
+        }
     }
     val clearIcon: @Composable () -> Unit = {
-        ClearIcon { query = "" }
+        ClearIcon {
+            query = ""
+        }
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
@@ -62,7 +66,12 @@ fun SearchScreen(
             query = query,
             onQueryChange = { query = it },
             content = {},
-            onSearch = { focusManager.clearFocus() }
+            onSearch = {
+                if (query.isEmpty())
+                    isActive = false
+                else
+                    focusManager.clearFocus()
+            }
         )
     }
 
