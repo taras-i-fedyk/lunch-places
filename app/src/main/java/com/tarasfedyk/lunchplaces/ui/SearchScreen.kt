@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -31,13 +32,20 @@ import com.tarasfedyk.lunchplaces.biz.data.LocationState
 fun SearchScreen(
     onSearchBarBottomYChanged: (Dp) -> Unit,
     locationState: LocationState,
-    onDetermineCurrentLocation: () -> Unit
+    onDetermineCurrentLocation: () -> Unit,
+    onNavigateUp: () -> Unit
 ) {
     val focusManager = LocalFocusManager.current
 
     var isActive by rememberSaveable { mutableStateOf(false) }
     var query by rememberSaveable { mutableStateOf("") }
 
+    val searchIcon: @Composable () -> Unit = {
+        SearchIcon()
+    }
+    val upIcon: @Composable () -> Unit = {
+        UpIcon { onNavigateUp() }
+    }
     val clearIcon: @Composable () -> Unit = {
         ClearIcon { query = "" }
     }
@@ -46,9 +54,9 @@ fun SearchScreen(
         SearchBar(
             modifier = Modifier.fillMaxWidth(),
             shadowElevation = 6.dp,
-            leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
-            trailingIcon = if (isActive) clearIcon else null,
             placeholder = { Hint() },
+            leadingIcon = if (isActive) upIcon else searchIcon,
+            trailingIcon = if (isActive) clearIcon else null,
             active = isActive,
             onActiveChange = { isActive = it },
             query = query,
@@ -68,13 +76,25 @@ fun SearchScreen(
 }
 
 @Composable
-private fun ClearIcon(onClicked: () -> Unit) {
+private fun Hint() {
+    Text(stringResource(R.string.search_hint))
+}
+
+@Composable
+private fun SearchIcon() {
+    Icon(Icons.Default.Search, contentDescription = null)
+}
+
+@Composable
+private fun UpIcon(onClicked: () -> Unit) {
     IconButton(onClick = onClicked) {
-        Icon(Icons.Default.Clear, contentDescription = null)
+        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
     }
 }
 
 @Composable
-private fun Hint() {
-    Text(stringResource(R.string.search_hint))
+private fun ClearIcon(onClicked: () -> Unit) {
+    IconButton(onClick = onClicked) {
+        Icon(Icons.Default.Clear, contentDescription = null)
+    }
 }
