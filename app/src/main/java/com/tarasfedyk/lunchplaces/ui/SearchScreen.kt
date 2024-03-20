@@ -62,13 +62,13 @@ fun SearchScreen(
         onActiveChange = { isActive = it },
         query = query,
         onQueryChange = { query = it },
-        content = {},
         onSearch = {
             if (query.isEmpty())
                 isActive = false
             else
                 focusManager.clearFocus()
-        }
+        },
+        content = {}
     )
 
     LaunchedEffect(Unit) {
