@@ -34,7 +34,7 @@ private const val LOCATION_ACCURACY_MAX: Float = 4f
 
 @Composable
 fun MapScreen(
-    paddingTop: Dp,
+    mapPaddingTop: Dp,
     locationState: LocationState,
     onDetermineCurrentLocation: () -> Unit
 ) {
@@ -46,20 +46,22 @@ fun MapScreen(
     val cameraPositionState = rememberCameraPositionState()
     GoogleMap(
         modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(top = paddingTop),
+        contentPadding = PaddingValues(top = mapPaddingTop),
         uiSettings = MapUiSettings(zoomControlsEnabled = false),
         properties = mapProperties,
         cameraPositionState = cameraPositionState
     )
 
+    val onAllLocationPermissionsDenied = {
+        mapProperties = mapProperties.copy(isMyLocationEnabled = false)
+    }
+    val onSomeLocationPermissionGranted = {
+        mapProperties = mapProperties.copy(isMyLocationEnabled = true)
+        onDetermineCurrentLocation()
+    }
     LocationPermissionsRequest(
-        onAllLocationPermissionsDenied = {
-            mapProperties = mapProperties.copy(isMyLocationEnabled = false)
-        },
-        onSomeLocationPermissionGranted = {
-            mapProperties = mapProperties.copy(isMyLocationEnabled = true)
-            onDetermineCurrentLocation()
-        }
+        onAllLocationPermissionsDenied,
+        onSomeLocationPermissionGranted
     )
 
     LaunchedEffect(locationState) {
@@ -80,13 +82,14 @@ private fun LocationPermissionsRequest(
     onAllLocationPermissionsDenied: () -> Unit,
     onSomeLocationPermissionGranted: () -> Unit
 ) {
+    val onLocationsPermissionsResult: (Map<String, Boolean>) -> Unit = { locationPermissionFlags ->
+        if (locationPermissionFlags.areAllValuesFalse()) {
+            onAllLocationPermissionsDenied()
+        }
+    }
     val locationPermissionsState = rememberMultiplePermissionsState(
         permissions = listOf(ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION),
-        onPermissionsResult = { locationPermissionStatuses ->
-            if (locationPermissionStatuses.areAllValuesFalse()) {
-                onAllLocationPermissionsDenied()
-            }
-        }
+        onPermissionsResult = onLocationsPermissionsResult
     )
 
     val isSolelyCoarseLocationPermissionGranted by remember {

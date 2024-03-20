@@ -8,6 +8,7 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.SearchBar
+import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -51,10 +52,10 @@ fun SearchScreen(
     }
 
     LaunchedEffect(Unit) {
-        // the y coordinate of the bottom edge of the search bar
-        // (when the search bar is inactive and is not yet replaced with the search view)
         // TODO: replace this with a solution that is not based on hard-coding any values
-        val searchBarBottomY = 64.dp
+        val searchBarPaddingTop = 8.dp
+        val searchBarHeight = SearchBarDefaults.InputFieldHeight
+        val searchBarBottomY = searchBarPaddingTop + searchBarHeight
         onSearchBarBottomYChanged(searchBarBottomY)
     }
 }
