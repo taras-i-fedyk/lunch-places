@@ -4,9 +4,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
@@ -36,12 +38,17 @@ fun SearchScreen(
     var isActive by rememberSaveable { mutableStateOf(false) }
     var query by rememberSaveable { mutableStateOf("") }
 
+    val clearIcon: @Composable () -> Unit = {
+        ClearIcon { query = "" }
+    }
+
     Column(modifier = Modifier.fillMaxSize()) {
         SearchBar(
             modifier = Modifier.fillMaxWidth(),
             shadowElevation = 6.dp,
             leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
-            placeholder = { Text(stringResource(R.string.search_hint)) },
+            trailingIcon = if (isActive) clearIcon else null,
+            placeholder = { Hint() },
             active = isActive,
             onActiveChange = { isActive = it },
             query = query,
@@ -58,4 +65,16 @@ fun SearchScreen(
         val searchBarBottomY = searchBarPaddingTop + searchBarHeight
         onSearchBarBottomYChanged(searchBarBottomY)
     }
+}
+
+@Composable
+private fun ClearIcon(onClicked: () -> Unit) {
+    IconButton(onClick = onClicked) {
+        Icon(Icons.Default.Clear, contentDescription = null)
+    }
+}
+
+@Composable
+private fun Hint() {
+    Text(stringResource(R.string.search_hint))
 }

@@ -36,7 +36,7 @@ class MainActivity : ComponentActivity() {
     }
 
     @Composable
-    fun MainContent(
+    private fun MainContent(
         locationViewModel: LocationViewModel = hiltViewModel()
     ) {
         var mapPaddingTop by remember { mutableStateOf(0.dp) }
@@ -60,7 +60,7 @@ class MainActivity : ComponentActivity() {
     }
 
     @Composable
-    fun NavGraph(
+    private fun NavGraph(
         onSearchBarBottomYChanged: (Dp) -> Unit,
         locationState: LocationState,
         onDetermineCurrentLocation: () -> Unit,
