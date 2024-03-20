@@ -73,7 +73,8 @@ class MainActivity : ComponentActivity() {
             searchScreen(
                 onSearchBarBottomYChanged,
                 locationState,
-                onDetermineCurrentLocation
+                onDetermineCurrentLocation,
+                onNavigateUp = { navController.navigateUp() }
             )
         }
     }
