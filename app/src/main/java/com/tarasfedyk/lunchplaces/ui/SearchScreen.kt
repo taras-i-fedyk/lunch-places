@@ -1,7 +1,5 @@
 package com.tarasfedyk.lunchplaces.ui
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -54,26 +52,24 @@ fun SearchScreen(
         }
     }
 
-    Column(modifier = Modifier.fillMaxSize()) {
-        SearchBar(
-            modifier = Modifier.fillMaxWidth(),
-            shadowElevation = 6.dp,
-            placeholder = { Hint() },
-            leadingIcon = if (isActive) upIcon else searchIcon,
-            trailingIcon = if (isActive) clearIcon else null,
-            active = isActive,
-            onActiveChange = { isActive = it },
-            query = query,
-            onQueryChange = { query = it },
-            content = {},
-            onSearch = {
-                if (query.isEmpty())
-                    isActive = false
-                else
-                    focusManager.clearFocus()
-            }
-        )
-    }
+    SearchBar(
+        modifier = Modifier.fillMaxWidth(),
+        shadowElevation = 6.dp,
+        placeholder = { Hint() },
+        leadingIcon = if (isActive) upIcon else searchIcon,
+        trailingIcon = if (isActive) clearIcon else null,
+        active = isActive,
+        onActiveChange = { isActive = it },
+        query = query,
+        onQueryChange = { query = it },
+        content = {},
+        onSearch = {
+            if (query.isEmpty())
+                isActive = false
+            else
+                focusManager.clearFocus()
+        }
+    )
 
     LaunchedEffect(Unit) {
         // TODO: replace this with a solution that is not based on hard-coding any values
