@@ -59,29 +59,16 @@ class MainActivity : ComponentActivity() {
         val onSearchBarBottomYChanged: (Dp) -> Unit = { searchBarBottomY ->
             mapContentTopPadding = searchBarBottomY
         }
-        NavGraph(
-            onSearchBarBottomYChanged,
-            locationState,
-            onDetermineCurrentLocation
-        )
+        NavGraph(onSearchBarBottomYChanged)
     }
 
     @Composable
     private fun NavGraph(
         onSearchBarBottomYChanged: (Dp) -> Unit,
-        locationState: LocationState,
-        onDetermineCurrentLocation: () -> Unit,
         navController: NavHostController = rememberNavController()
     ) {
-        NavHost(
-            navController,
-            startDestination = SEARCH_ROUTE
-        ) {
-            searchScreen(
-                onSearchBarBottomYChanged,
-                locationState,
-                onDetermineCurrentLocation
-            )
+        NavHost(navController, startDestination = SEARCH_ROUTE) {
+            searchScreen(onSearchBarBottomYChanged)
         }
     }
 

@@ -24,14 +24,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.tarasfedyk.lunchplaces.R
-import com.tarasfedyk.lunchplaces.biz.data.LocationState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchScreen(
-    onSearchBarBottomYChanged: (Dp) -> Unit,
-    locationState: LocationState,
-    onDetermineCurrentLocation: () -> Unit
+    onSearchBarBottomYChanged: (Dp) -> Unit
 ) {
     val focusManager = LocalFocusManager.current
 
@@ -41,8 +38,8 @@ fun SearchScreen(
     val searchIcon: @Composable () -> Unit = {
         SearchIcon()
     }
-    val upIcon: @Composable () -> Unit = {
-        UpIcon {
+    val upNavIcon: @Composable () -> Unit = {
+        UpNavIcon {
             query = ""
             isActive = false
         }
@@ -57,7 +54,7 @@ fun SearchScreen(
         modifier = Modifier.fillMaxWidth(),
         shadowElevation = 6.dp,
         placeholder = { Hint() },
-        leadingIcon = if (isActive) upIcon else searchIcon,
+        leadingIcon = if (isActive) upNavIcon else searchIcon,
         trailingIcon = if (isActive) clearIcon else null,
         active = isActive,
         onActiveChange = { isActive = it },
@@ -92,7 +89,7 @@ private fun SearchIcon() {
 }
 
 @Composable
-private fun UpIcon(onClicked: () -> Unit) {
+private fun UpNavIcon(onClicked: () -> Unit) {
     IconButton(onClick = onClicked) {
         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
     }
@@ -109,8 +106,6 @@ private fun ClearIcon(onClicked: () -> Unit) {
 @Composable
 private fun SearchPreview() {
     SearchScreen(
-        onSearchBarBottomYChanged = {},
-        locationState = LocationState(),
-        onDetermineCurrentLocation = {}
+        onSearchBarBottomYChanged = {}
     )
 }
