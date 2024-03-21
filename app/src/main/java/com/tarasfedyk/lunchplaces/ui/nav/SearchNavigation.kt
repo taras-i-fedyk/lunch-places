@@ -7,7 +7,9 @@ import com.tarasfedyk.lunchplaces.ui.SearchScreen
 
 const val SEARCH_ROUTE = "search"
 
-fun NavGraphBuilder.searchScreen(onSearchBarBottomYChanged: (Dp) -> Unit) {
+fun NavGraphBuilder.searchScreen(
+    onSearchBarBottomYChanged: (Dp) -> Unit
+) {
     composable(SEARCH_ROUTE) {
         SearchScreen(onSearchBarBottomYChanged)
     }

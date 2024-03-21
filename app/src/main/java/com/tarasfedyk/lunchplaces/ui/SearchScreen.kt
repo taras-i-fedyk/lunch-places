@@ -1,5 +1,6 @@
 package com.tarasfedyk.lunchplaces.ui
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -38,36 +39,45 @@ fun SearchScreen(
     val searchIcon: @Composable () -> Unit = {
         SearchIcon()
     }
-    val upNavIcon: @Composable () -> Unit = {
-        UpNavIcon {
+    val clearIconButton: @Composable () -> Unit = {
+        ClearIconButton {
             query = ""
-            isActive = false
         }
     }
-    val clearIcon: @Composable () -> Unit = {
-        ClearIcon {
-            query = ""
+
+    val onGoBack = {
+        query = ""
+        isActive = false
+    }
+    val upNavIconButton: @Composable () -> Unit = {
+        UpNavIconButton {
+            onGoBack()
         }
+    }
+
+    val onSearch = { _: String ->
+        if (query.isEmpty())
+            isActive = false
+        else
+            focusManager.clearFocus()
     }
 
     SearchBar(
         modifier = Modifier.fillMaxWidth(),
         shadowElevation = 6.dp,
         placeholder = { Hint() },
-        leadingIcon = if (isActive) upNavIcon else searchIcon,
-        trailingIcon = if (isActive) clearIcon else null,
+        leadingIcon = if (isActive) upNavIconButton else searchIcon,
+        trailingIcon = if (isActive) clearIconButton else null,
         active = isActive,
         onActiveChange = { isActive = it },
         query = query,
         onQueryChange = { query = it },
-        onSearch = {
-            if (query.isEmpty())
-                isActive = false
-            else
-                focusManager.clearFocus()
-        },
-        content = {}
-    )
+        onSearch = onSearch
+    ) {
+        BackHandler(enabled = isActive) {
+            onGoBack()
+        }
+    }
 
     LaunchedEffect(Unit) {
         // TODO: replace this with a solution not based on hard-coding any values
@@ -89,14 +99,14 @@ private fun SearchIcon() {
 }
 
 @Composable
-private fun UpNavIcon(onClicked: () -> Unit) {
+private fun UpNavIconButton(onClicked: () -> Unit) {
     IconButton(onClick = onClicked) {
         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
     }
 }
 
 @Composable
-private fun ClearIcon(onClicked: () -> Unit) {
+private fun ClearIconButton(onClicked: () -> Unit) {
     IconButton(onClick = onClicked) {
         Icon(Icons.Default.Clear, contentDescription = null)
     }
