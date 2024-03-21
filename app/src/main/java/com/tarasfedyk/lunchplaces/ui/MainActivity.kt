@@ -39,19 +39,26 @@ class MainActivity : ComponentActivity() {
     private fun MainContent(
         locationViewModel: LocationViewModel = hiltViewModel()
     ) {
-        var mapPaddingTop by remember { mutableStateOf(0.dp) }
-        val onSearchBarBottomYChanged: (Dp) -> Unit = { searchBarBottomY ->
-           mapPaddingTop = searchBarBottomY
-        }
-
         val locationState by locationViewModel.locationStateFlow.collectAsStateWithLifecycle()
         val onDetermineCurrentLocation = locationViewModel::determineCurrentLocation
+        MainContentImpl(locationState, onDetermineCurrentLocation)
+    }
 
+    @Composable
+    private fun MainContentImpl(
+        locationState: LocationState,
+        onDetermineCurrentLocation: () -> Unit
+    ) {
+        var mapPaddingTop by remember { mutableStateOf(0.dp) }
         MapScreen(
             mapPaddingTop,
             locationState,
             onDetermineCurrentLocation
         )
+
+        val onSearchBarBottomYChanged: (Dp) -> Unit = { searchBarBottomY ->
+            mapPaddingTop = searchBarBottomY
+        }
         NavGraph(
             onSearchBarBottomYChanged,
             locationState,
@@ -82,7 +89,10 @@ class MainActivity : ComponentActivity() {
     @Composable
     fun MainPreview() {
         AppTheme {
-            MainContent()
+            MainContentImpl(
+                locationState = LocationState(),
+                onDetermineCurrentLocation = {}
+            )
         }
     }
 }

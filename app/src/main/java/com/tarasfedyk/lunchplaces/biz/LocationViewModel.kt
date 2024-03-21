@@ -23,7 +23,7 @@ class LocationViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val currentLocationDeterminer: ReplaceableLaunchCoroutine =
-        ReplaceableLaunchCoroutine(viewModelScope) { determineCurrentLocationInternal() }
+        ReplaceableLaunchCoroutine(viewModelScope) { determineCurrentLocationImpl() }
 
     private val _locationStateFlow: MutableStateFlow<LocationState> =
         MutableStateFlow(LocationState())
@@ -35,7 +35,7 @@ class LocationViewModel @Inject constructor(
 
     @OptIn(ExperimentalCoroutinesApi::class)
     @SuppressLint("MissingPermission")
-    private suspend fun determineCurrentLocationInternal() {
+    private suspend fun determineCurrentLocationImpl() {
         try {
             val cancellationTokenSource = CancellationTokenSource()
             val currentLocationTask = fusedLocationClient.getCurrentLocation(

@@ -13,9 +13,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
@@ -24,6 +25,7 @@ import com.google.maps.android.compose.rememberCameraPositionState
 import com.tarasfedyk.lunchplaces.biz.data.LocationState
 import com.tarasfedyk.lunchplaces.biz.util.areAllValuesFalse
 import com.tarasfedyk.lunchplaces.biz.util.isPermissionGranted
+import com.tarasfedyk.lunchplaces.biz.util.rememberMultiplePermissionsStateWrapper
 import com.tarasfedyk.lunchplaces.biz.util.toLatLng
 import kotlin.math.log2
 
@@ -87,7 +89,9 @@ private fun LocationPermissionsRequest(
             onAllLocationPermissionsDenied()
         }
     }
-    val locationPermissionsState = rememberMultiplePermissionsState(
+    // TODO: in case the Preview mode starts supporting permissions,
+    // TODO: replace this with a direct call to the Accompanist library function
+    val locationPermissionsState = rememberMultiplePermissionsStateWrapper(
         permissions = listOf(ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION),
         onPermissionsResult = onLocationsPermissionsResult
     )
@@ -122,3 +126,13 @@ private fun recommendZoomLevel(location: Location): Float =
     // based on how close the location's accuracy is to the maximum accuracy
     // and the fact that the maximum accuracy should be accompanied by the maximum magnification
     ZOOM_LEVEL_MAX - (log2(location.accuracy) - log2(LOCATION_ACCURACY_MAX))
+
+@Preview(showBackground = true)
+@Composable
+fun MapPreview() {
+    MapScreen(
+        mapPaddingTop = 0.dp,
+        locationState = LocationState(),
+        onDetermineCurrentLocation = {}
+    )
+}
