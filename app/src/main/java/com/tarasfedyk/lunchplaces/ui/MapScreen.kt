@@ -36,7 +36,7 @@ private const val LOCATION_ACCURACY_MAX: Float = 4f
 
 @Composable
 fun MapScreen(
-    mapPaddingTop: Dp,
+    mapContentTopPadding: Dp,
     locationState: LocationState,
     onDetermineCurrentLocation: () -> Unit
 ) {
@@ -48,7 +48,7 @@ fun MapScreen(
     val cameraPositionState = rememberCameraPositionState()
     GoogleMap(
         modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(top = mapPaddingTop),
+        contentPadding = PaddingValues(top = mapContentTopPadding),
         uiSettings = MapUiSettings(zoomControlsEnabled = false),
         properties = mapProperties,
         cameraPositionState = cameraPositionState
@@ -131,7 +131,7 @@ private fun recommendZoomLevel(location: Location): Float =
 @Composable
 private fun MapPreview() {
     MapScreen(
-        mapPaddingTop = 0.dp,
+        mapContentTopPadding = 0.dp,
         locationState = LocationState(),
         onDetermineCurrentLocation = {}
     )

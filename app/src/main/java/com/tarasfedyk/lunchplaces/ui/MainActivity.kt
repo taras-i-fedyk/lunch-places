@@ -49,15 +49,15 @@ class MainActivity : ComponentActivity() {
         locationState: LocationState,
         onDetermineCurrentLocation: () -> Unit
     ) {
-        var mapPaddingTop by remember { mutableStateOf(0.dp) }
+        var mapContentTopPadding by remember { mutableStateOf(0.dp) }
         MapScreen(
-            mapPaddingTop,
+            mapContentTopPadding,
             locationState,
             onDetermineCurrentLocation
         )
 
         val onSearchBarBottomYChanged: (Dp) -> Unit = { searchBarBottomY ->
-            mapPaddingTop = searchBarBottomY
+            mapContentTopPadding = searchBarBottomY
         }
         NavGraph(
             onSearchBarBottomYChanged,

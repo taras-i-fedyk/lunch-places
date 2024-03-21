@@ -74,9 +74,9 @@ fun SearchScreen(
 
     LaunchedEffect(Unit) {
         // TODO: replace this with a solution not based on hard-coding any values
-        val searchBarPaddingTop = 8.dp
+        val searchBarTopPadding = 8.dp
         val searchBarHeight = SearchBarDefaults.InputFieldHeight
-        val searchBarBottomY = searchBarPaddingTop + searchBarHeight
+        val searchBarBottomY = searchBarTopPadding + searchBarHeight
         onSearchBarBottomYChanged(searchBarBottomY)
     }
 }
