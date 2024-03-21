@@ -87,7 +87,7 @@ class MainActivity : ComponentActivity() {
 
     @Preview(showBackground = true)
     @Composable
-    fun MainPreview() {
+    private fun MainPreview() {
         AppTheme {
             MainContentImpl(
                 locationState = LocationState(),

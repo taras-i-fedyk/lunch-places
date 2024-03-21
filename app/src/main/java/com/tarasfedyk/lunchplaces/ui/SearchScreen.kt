@@ -107,7 +107,7 @@ private fun ClearIcon(onClicked: () -> Unit) {
 
 @Preview(showBackground = true)
 @Composable
-fun SearchPreview() {
+private fun SearchPreview() {
     SearchScreen(
         onSearchBarBottomYChanged = {},
         locationState = LocationState(),

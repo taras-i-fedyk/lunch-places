@@ -129,7 +129,7 @@ private fun recommendZoomLevel(location: Location): Float =
 
 @Preview(showBackground = true)
 @Composable
-fun MapPreview() {
+private fun MapPreview() {
     MapScreen(
         mapPaddingTop = 0.dp,
         locationState = LocationState(),
