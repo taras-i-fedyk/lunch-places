@@ -23,9 +23,8 @@ fun MultiplePermissionsState.isPermissionGranted(permission: String): Boolean =
 fun rememberMultiplePermissionsStateWrapper(
     permissions: List<String>,
     onPermissionsResult: (Map<String, Boolean>) -> Unit = {},
-): MultiplePermissionsState {
-    val isInspection = LocalInspectionMode.current
-    return if (isInspection) {
+): MultiplePermissionsState =
+    if (LocalInspectionMode.current) {
         object : MultiplePermissionsState {
             override val permissions: List<PermissionState> = emptyList()
             override val revokedPermissions: List<PermissionState> = emptyList()
@@ -36,6 +35,5 @@ fun rememberMultiplePermissionsStateWrapper(
     } else {
         rememberMultiplePermissionsState(permissions, onPermissionsResult)
     }
-}
 
 fun Location.toLatLng(): LatLng = LatLng(latitude, longitude)

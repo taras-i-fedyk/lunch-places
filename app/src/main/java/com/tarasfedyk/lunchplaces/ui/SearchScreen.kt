@@ -75,6 +75,7 @@ fun SearchScreen(
         }
     }
 
+    // TODO: adjust the horizontal padding in a smooth way
     SearchBar(
         modifier = Modifier.fillMaxWidth(),
         shadowElevation = 6.dp,
@@ -93,8 +94,8 @@ fun SearchScreen(
         }
     }
 
+    // TODO: replace this with a solution not based on hard-coding any values
     LaunchedEffect(Unit) {
-        // TODO: replace this with a solution not based on hard-coding any values
         val searchBarTopPadding = 8.dp
         val searchBarHeight = SearchBarDefaults.InputFieldHeight
         val searchBarBottomY = searchBarTopPadding + searchBarHeight
