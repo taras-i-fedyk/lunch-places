@@ -80,7 +80,7 @@ fun SearchScreen(
         shadowElevation = 6.dp,
         placeholder = { Hint() },
         leadingIcon = if (isActive) upNavIconButton else searchIcon,
-        trailingIcon = if (isActive) clearIconButton else null,
+        trailingIcon = if (isFocused) clearIconButton else null,
         interactionSource = interactionSource,
         active = isActive,
         onActiveChange = { isActive = it },
