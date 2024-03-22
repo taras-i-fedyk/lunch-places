@@ -1,6 +1,8 @@
 package com.tarasfedyk.lunchplaces.ui
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -16,6 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -31,35 +34,45 @@ import com.tarasfedyk.lunchplaces.R
 fun SearchScreen(
     onSearchBarBottomYChanged: (Dp) -> Unit
 ) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isFocused by interactionSource.collectIsFocusedAsState()
     val focusManager = LocalFocusManager.current
 
     var isActive by rememberSaveable { mutableStateOf(false) }
-    var query by rememberSaveable { mutableStateOf("") }
+    var currentQuery by rememberSaveable { mutableStateOf("") }
+    var sentQuery by rememberSaveable { mutableStateOf("") }
+
+    val onGoBack = {
+        if (isFocused && sentQuery.isNotEmpty()) {
+            currentQuery = sentQuery
+            focusManager.clearFocus()
+        } else {
+            sentQuery = ""
+            currentQuery = ""
+            isActive = false
+        }
+    }
+    val onSearch = { _: String ->
+        sentQuery = currentQuery
+        if (sentQuery.isNotEmpty()) {
+            focusManager.clearFocus()
+        } else {
+            isActive = false
+        }
+    }
 
     val searchIcon: @Composable () -> Unit = {
         SearchIcon()
     }
     val clearIconButton: @Composable () -> Unit = {
         ClearIconButton {
-            query = ""
+            currentQuery = ""
         }
-    }
-
-    val onGoBack = {
-        query = ""
-        isActive = false
     }
     val upNavIconButton: @Composable () -> Unit = {
         UpNavIconButton {
             onGoBack()
         }
-    }
-
-    val onSearch = { _: String ->
-        if (query.isEmpty())
-            isActive = false
-        else
-            focusManager.clearFocus()
     }
 
     SearchBar(
@@ -68,10 +81,11 @@ fun SearchScreen(
         placeholder = { Hint() },
         leadingIcon = if (isActive) upNavIconButton else searchIcon,
         trailingIcon = if (isActive) clearIconButton else null,
+        interactionSource = interactionSource,
         active = isActive,
         onActiveChange = { isActive = it },
-        query = query,
-        onQueryChange = { query = it },
+        query = currentQuery,
+        onQueryChange = { currentQuery = it },
         onSearch = onSearch
     ) {
         BackHandler(enabled = isActive) {
