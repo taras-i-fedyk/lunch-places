@@ -23,6 +23,7 @@ import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.tarasfedyk.lunchplaces.biz.data.LocationState
+import com.tarasfedyk.lunchplaces.biz.data.Status
 import com.tarasfedyk.lunchplaces.biz.util.areAllValuesFalse
 import com.tarasfedyk.lunchplaces.biz.util.isPermissionGranted
 import com.tarasfedyk.lunchplaces.biz.util.rememberMultiplePermissionsStateWrapper
@@ -67,7 +68,8 @@ fun MapScreen(
     )
 
     LaunchedEffect(locationState) {
-        locationState.currentLocation?.let { currentLocation ->
+        if (locationState.currentLocationStatus is Status.Success<*>) {
+            val currentLocation = locationState.currentLocationStatus.result as Location
             val currentLatLng = currentLocation.toLatLng()
             val recommendedZoomLevel = recommendZoomLevel(currentLocation)
             val cameraUpdate = CameraUpdateFactory.newLatLngZoom(

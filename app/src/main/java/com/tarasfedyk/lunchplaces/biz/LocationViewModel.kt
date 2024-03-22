@@ -7,6 +7,7 @@ import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.Priority
 import com.google.android.gms.tasks.CancellationTokenSource
 import com.tarasfedyk.lunchplaces.biz.data.LocationState
+import com.tarasfedyk.lunchplaces.biz.data.Status
 import com.tarasfedyk.lunchplaces.biz.util.ReplaceableLaunchCoroutine
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CancellationException
@@ -24,6 +25,8 @@ class LocationViewModel @Inject constructor(
 
     private val currentLocationDeterminer: ReplaceableLaunchCoroutine =
         ReplaceableLaunchCoroutine(viewModelScope) { determineCurrentLocationImpl() }
+    private val lunchPlacesSearcher: ReplaceableLaunchCoroutine =
+        ReplaceableLaunchCoroutine(viewModelScope) { searchLunchPlacesImpl() }
 
     private val _locationStateFlow: MutableStateFlow<LocationState> =
         MutableStateFlow(LocationState())
@@ -37,16 +40,33 @@ class LocationViewModel @Inject constructor(
     @SuppressLint("MissingPermission")
     private suspend fun determineCurrentLocationImpl() {
         try {
+            _locationStateFlow.value = LocationState(
+                currentLocationStatus = Status.Pending
+            )
             val cancellationTokenSource = CancellationTokenSource()
             val currentLocationTask = fusedLocationClient.getCurrentLocation(
                 Priority.PRIORITY_HIGH_ACCURACY, cancellationTokenSource.token
             )
             val currentLocation = currentLocationTask.await(cancellationTokenSource)
-            _locationStateFlow.value = LocationState(currentLocation = currentLocation)
+            _locationStateFlow.value = LocationState(
+                currentLocationStatus = Status.Success(currentLocation)
+            )
         } catch (e: Exception) {
             if (e !is CancellationException) {
-                _locationStateFlow.value = LocationState(currentLocationError = e)
+                _locationStateFlow.value = LocationState(
+                    currentLocationStatus = Status.Failure(e)
+                )
+            } else {
+                _locationStateFlow.value = LocationState(
+                    currentLocationStatus = Status.Cancel
+                )
             }
         }
     }
+
+    fun searchLunchPlaces() {
+        lunchPlacesSearcher.replaceableLaunch()
+    }
+
+    private suspend fun searchLunchPlacesImpl() {}
 }
