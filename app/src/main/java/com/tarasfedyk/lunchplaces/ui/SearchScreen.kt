@@ -3,7 +3,10 @@ package com.tarasfedyk.lunchplaces.ui
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
@@ -34,11 +37,12 @@ import com.tarasfedyk.lunchplaces.R
 fun SearchScreen(
     onSearchBarBottomYChanged: (Dp) -> Unit
 ) {
+    var isActive by rememberSaveable { mutableStateOf(false) }
+
+    val focusManager = LocalFocusManager.current
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
-    val focusManager = LocalFocusManager.current
 
-    var isActive by rememberSaveable { mutableStateOf(false) }
     var currentQuery by rememberSaveable { mutableStateOf("") }
     var sentQuery by rememberSaveable { mutableStateOf("") }
 
@@ -64,14 +68,14 @@ fun SearchScreen(
     val searchIcon: @Composable () -> Unit = {
         SearchIcon()
     }
-    val clearIconButton: @Composable () -> Unit = {
-        ClearIconButton {
-            currentQuery = ""
-        }
-    }
     val upNavIconButton: @Composable () -> Unit = {
         UpNavIconButton {
             onGoBack()
+        }
+    }
+    val clearIconButton: @Composable () -> Unit = {
+        ClearIconButton {
+            currentQuery = ""
         }
     }
 
@@ -79,16 +83,19 @@ fun SearchScreen(
     SearchBar(
         modifier = Modifier.fillMaxWidth(),
         shadowElevation = 6.dp,
-        placeholder = { Hint() },
+        placeholder = { SearchHint() },
         leadingIcon = if (isActive) upNavIconButton else searchIcon,
         trailingIcon = if (isFocused) clearIconButton else null,
-        interactionSource = interactionSource,
         active = isActive,
         onActiveChange = { isActive = it },
+        interactionSource = interactionSource,
         query = currentQuery,
         onQueryChange = { currentQuery = it },
         onSearch = onSearch
     ) {
+        if (!isFocused) {
+            SearchResults()
+        }
         BackHandler(enabled = isActive) {
             onGoBack()
         }
@@ -104,7 +111,7 @@ fun SearchScreen(
 }
 
 @Composable
-private fun Hint() {
+private fun SearchHint() {
     Text(stringResource(R.string.search_hint))
 }
 
@@ -124,6 +131,22 @@ private fun UpNavIconButton(onClicked: () -> Unit) {
 private fun ClearIconButton(onClicked: () -> Unit) {
     IconButton(onClick = onClicked) {
         Icon(Icons.Default.Clear, contentDescription = null)
+    }
+}
+
+@Composable
+private fun SearchResults() {
+    LazyColumn(
+        contentPadding = PaddingValues(all = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        val list = List(size = 100) { "Text $it" }
+        items(count = list.size) {
+            Text(
+                text = list[it],
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
     }
 }
 
