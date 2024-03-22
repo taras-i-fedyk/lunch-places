@@ -68,8 +68,8 @@ fun MapScreen(
     )
 
     LaunchedEffect(locationState) {
-        if (locationState.currentLocationStatus is Status.Success<*>) {
-            val currentLocation = locationState.currentLocationStatus.result as Location
+        if (locationState.currentLocationStatus is Status.Success<Location>) {
+            val currentLocation = locationState.currentLocationStatus.result
             val currentLatLng = currentLocation.toLatLng()
             val recommendedZoomLevel = recommendZoomLevel(currentLocation)
             val cameraUpdate = CameraUpdateFactory.newLatLngZoom(

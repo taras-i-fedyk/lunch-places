@@ -56,10 +56,6 @@ class LocationViewModel @Inject constructor(
                 _locationStateFlow.value = LocationState(
                     currentLocationStatus = Status.Failure(e)
                 )
-            } else {
-                _locationStateFlow.value = LocationState(
-                    currentLocationStatus = Status.Cancel
-                )
             }
         }
     }
