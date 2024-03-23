@@ -9,6 +9,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.maps.android.compose.CameraPositionState
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapUiSettings
@@ -59,6 +60,10 @@ fun MapScreen(
             val cameraUpdate = CameraUpdateFactory.newLatLngZoom(
                 currentLatLng, recommendedZoomLevel
             )
+            cameraPositionState.animate(cameraUpdate)
+        } else if (!isCurrentLocationEnabled) {
+            val cameraPosition = CameraPositionState().position
+            val cameraUpdate = CameraUpdateFactory.newCameraPosition(cameraPosition)
             cameraPositionState.animate(cameraUpdate)
         }
     }
