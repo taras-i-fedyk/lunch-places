@@ -1,21 +1,13 @@
 package com.tarasfedyk.lunchplaces.ui
 
-import android.Manifest.permission.ACCESS_COARSE_LOCATION
-import android.Manifest.permission.ACCESS_FINE_LOCATION
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
@@ -24,9 +16,6 @@ import com.google.maps.android.compose.rememberCameraPositionState
 import com.tarasfedyk.lunchplaces.biz.data.Location
 import com.tarasfedyk.lunchplaces.biz.data.GeoState
 import com.tarasfedyk.lunchplaces.biz.data.Status
-import com.tarasfedyk.lunchplaces.ui.util.areAllValuesFalse
-import com.tarasfedyk.lunchplaces.ui.util.isPermissionGranted
-import com.tarasfedyk.lunchplaces.ui.util.rememberMultiplePermissionsStateWrapper
 import kotlin.math.log2
 
 // the higher the magnification, the larger the value (in abstract units)
@@ -37,14 +26,14 @@ private const val LOCATION_ACCURACY_MAX: Float = 4f
 @Composable
 fun MapScreen(
     mapContentTopPadding: Dp,
+    isCurrentLocationEnabled: Boolean,
     geoState: GeoState,
     onDetermineCurrentLocation: () -> Unit
 ) {
-    var mapProperties by remember {
-        mutableStateOf(
-            MapProperties(maxZoomPreference = ZOOM_LEVEL_MAX)
-        )
-    }
+    val mapProperties = MapProperties(
+        maxZoomPreference = ZOOM_LEVEL_MAX,
+        isMyLocationEnabled = isCurrentLocationEnabled
+    )
     val cameraPositionState = rememberCameraPositionState()
     val onCurrentLocationButtonClicked = {
         onDetermineCurrentLocation()
@@ -59,20 +48,11 @@ fun MapScreen(
         onMyLocationButtonClick = onCurrentLocationButtonClicked
     )
 
-    val onAllLocationPermissionsDenied = {
-        mapProperties = mapProperties.copy(isMyLocationEnabled = false)
-    }
-    val onSomeLocationPermissionGranted = {
-        mapProperties = mapProperties.copy(isMyLocationEnabled = true)
-        onDetermineCurrentLocation()
-    }
-    LocationPermissionsRequest(
-        onAllLocationPermissionsDenied,
-        onSomeLocationPermissionGranted
-    )
-
-    LaunchedEffect(geoState) {
-        if (geoState.currentLocationStatus is Status.Success<Location>) {
+    LaunchedEffect(key1 = isCurrentLocationEnabled, key2 = geoState) {
+        if (
+            isCurrentLocationEnabled &&
+            geoState.currentLocationStatus is Status.Success<Location>
+        ) {
             val currentLocation = geoState.currentLocationStatus.result
             val currentLatLng = currentLocation.latLng
             val recommendedZoomLevel = recommendZoomLevel(currentLocation)
@@ -80,50 +60,6 @@ fun MapScreen(
                 currentLatLng, recommendedZoomLevel
             )
             cameraPositionState.animate(cameraUpdate)
-        }
-    }
-}
-
-@OptIn(ExperimentalPermissionsApi::class)
-@Composable
-private fun LocationPermissionsRequest(
-    onAllLocationPermissionsDenied: () -> Unit,
-    onSomeLocationPermissionGranted: () -> Unit
-) {
-    val onLocationsPermissionsResult: (Map<String, Boolean>) -> Unit = { locationPermissionFlags ->
-        if (locationPermissionFlags.areAllValuesFalse()) {
-            onAllLocationPermissionsDenied()
-        }
-    }
-    // TODO: in case the Preview mode starts supporting permissions,
-    // TODO: replace this with a direct call to the Accompanist library function
-    val locationPermissionsState = rememberMultiplePermissionsStateWrapper(
-        permissions = listOf(ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION),
-        onPermissionsResult = onLocationsPermissionsResult
-    )
-
-    val isSolelyCoarseLocationPermissionGranted by remember {
-        derivedStateOf {
-            locationPermissionsState.isPermissionGranted(ACCESS_COARSE_LOCATION) &&
-            !locationPermissionsState.isPermissionGranted(ACCESS_FINE_LOCATION)
-        }
-    }
-    val isFineLocationPermissionGranted by remember {
-        derivedStateOf {
-            locationPermissionsState.isPermissionGranted(ACCESS_FINE_LOCATION)
-        }
-    }
-
-    LaunchedEffect(isSolelyCoarseLocationPermissionGranted) {
-        if (isSolelyCoarseLocationPermissionGranted) {
-            onSomeLocationPermissionGranted()
-        }
-    }
-    LaunchedEffect(isFineLocationPermissionGranted) {
-        if (isFineLocationPermissionGranted) {
-            onSomeLocationPermissionGranted()
-        } else {
-            locationPermissionsState.launchMultiplePermissionRequest()
         }
     }
 }
@@ -138,6 +74,7 @@ private fun recommendZoomLevel(location: Location): Float =
 private fun MapPreview() {
     MapScreen(
         mapContentTopPadding = 0.dp,
+        isCurrentLocationEnabled = true,
         geoState = GeoState(),
         onDetermineCurrentLocation = {}
     )
