@@ -1,4 +1,4 @@
-package com.tarasfedyk.lunchplaces.biz.converter
+package com.tarasfedyk.lunchplaces.biz.util
 
 import com.google.android.gms.maps.model.LatLng
 import com.tarasfedyk.lunchplaces.biz.data.Location
