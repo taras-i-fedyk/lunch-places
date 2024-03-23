@@ -46,12 +46,17 @@ fun MapScreen(
         )
     }
     val cameraPositionState = rememberCameraPositionState()
+    val onCurrentLocationButtonClicked = {
+        onDetermineCurrentLocation()
+        true
+    }
     GoogleMap(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(top = mapContentTopPadding),
         uiSettings = MapUiSettings(zoomControlsEnabled = false),
         properties = mapProperties,
-        cameraPositionState = cameraPositionState
+        cameraPositionState = cameraPositionState,
+        onMyLocationButtonClick = onCurrentLocationButtonClicked
     )
 
     val onAllLocationPermissionsDenied = {
