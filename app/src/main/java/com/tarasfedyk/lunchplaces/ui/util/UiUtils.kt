@@ -1,6 +1,5 @@
-package com.tarasfedyk.lunchplaces.biz.util
+package com.tarasfedyk.lunchplaces.ui.util
 
-import android.location.Location
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalInspectionMode
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -8,7 +7,6 @@ import com.google.accompanist.permissions.MultiplePermissionsState
 import com.google.accompanist.permissions.PermissionState
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
-import com.google.android.gms.maps.model.LatLng
 
 fun Map<String, Boolean>.areAllValuesFalse(): Boolean = values.none { it }
 
@@ -35,5 +33,3 @@ fun rememberMultiplePermissionsStateWrapper(
     } else {
         rememberMultiplePermissionsState(permissions, onPermissionsResult)
     }
-
-fun Location.toLatLng(): LatLng = LatLng(latitude, longitude)

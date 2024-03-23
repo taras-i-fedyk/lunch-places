@@ -1,7 +1,5 @@
 package com.tarasfedyk.lunchplaces.biz.data
 
-import android.location.Location
-
-data class LocationState(
+data class GeoState(
     val currentLocationStatus: Status<Location>? = null
 )

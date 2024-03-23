@@ -6,7 +6,8 @@ import androidx.lifecycle.viewModelScope
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.Priority
 import com.google.android.gms.tasks.CancellationTokenSource
-import com.tarasfedyk.lunchplaces.biz.data.LocationState
+import com.tarasfedyk.lunchplaces.biz.converter.asLocation
+import com.tarasfedyk.lunchplaces.biz.data.GeoState
 import com.tarasfedyk.lunchplaces.biz.data.Status
 import com.tarasfedyk.lunchplaces.biz.util.ReplaceableLaunchCoroutine
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -19,7 +20,7 @@ import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
 @HiltViewModel
-class LocationViewModel @Inject constructor(
+class GeoViewModel @Inject constructor(
     private val fusedLocationClient: FusedLocationProviderClient
 ) : ViewModel() {
 
@@ -28,9 +29,9 @@ class LocationViewModel @Inject constructor(
     private val lunchPlacesSearcher: ReplaceableLaunchCoroutine =
         ReplaceableLaunchCoroutine(viewModelScope) { searchLunchPlacesImpl() }
 
-    private val _locationStateFlow: MutableStateFlow<LocationState> =
-        MutableStateFlow(LocationState())
-    val locationStateFlow: StateFlow<LocationState> = _locationStateFlow.asStateFlow()
+    private val _geoStateFlow: MutableStateFlow<GeoState> =
+        MutableStateFlow(GeoState())
+    val geoStateFlow: StateFlow<GeoState> = _geoStateFlow.asStateFlow()
 
     fun determineCurrentLocation() {
         currentLocationDeterminer.replaceableLaunch()
@@ -40,20 +41,27 @@ class LocationViewModel @Inject constructor(
     @SuppressLint("MissingPermission")
     private suspend fun determineCurrentLocationImpl() {
         try {
-            _locationStateFlow.value = LocationState(
+            _geoStateFlow.value = GeoState(
                 currentLocationStatus = Status.Pending
             )
             val cancellationTokenSource = CancellationTokenSource()
             val currentLocationTask = fusedLocationClient.getCurrentLocation(
                 Priority.PRIORITY_HIGH_ACCURACY, cancellationTokenSource.token
             )
-            val currentLocation = currentLocationTask.await(cancellationTokenSource)
-            _locationStateFlow.value = LocationState(
-                currentLocationStatus = Status.Success(currentLocation)
-            )
+            val mutableCurrentLocation = currentLocationTask.await(cancellationTokenSource)
+            if (mutableCurrentLocation != null) {
+                val currentLocation = mutableCurrentLocation.asLocation()
+                _geoStateFlow.value = GeoState(
+                    currentLocationStatus = Status.Success(currentLocation)
+                )
+            } else {
+                _geoStateFlow.value = GeoState(
+                    currentLocationStatus = Status.Failure()
+                )
+            }
         } catch (e: Exception) {
             if (e !is CancellationException) {
-                _locationStateFlow.value = LocationState(
+                _geoStateFlow.value = GeoState(
                     currentLocationStatus = Status.Failure(e)
                 )
             }

@@ -16,8 +16,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
-import com.tarasfedyk.lunchplaces.biz.LocationViewModel
-import com.tarasfedyk.lunchplaces.biz.data.LocationState
+import com.tarasfedyk.lunchplaces.biz.GeoViewModel
+import com.tarasfedyk.lunchplaces.biz.data.GeoState
 import com.tarasfedyk.lunchplaces.ui.nav.SEARCH_ROUTE
 import com.tarasfedyk.lunchplaces.ui.nav.searchScreen
 import com.tarasfedyk.lunchplaces.ui.theme.AppTheme
@@ -37,22 +37,22 @@ class MainActivity : ComponentActivity() {
 
     @Composable
     private fun MainContent(
-        locationViewModel: LocationViewModel = hiltViewModel()
+        geoViewModel: GeoViewModel = hiltViewModel()
     ) {
-        val locationState by locationViewModel.locationStateFlow.collectAsStateWithLifecycle()
-        val onDetermineCurrentLocation = locationViewModel::determineCurrentLocation
-        MainContentImpl(locationState, onDetermineCurrentLocation)
+        val geoState by geoViewModel.geoStateFlow.collectAsStateWithLifecycle()
+        val onDetermineCurrentLocation = geoViewModel::determineCurrentLocation
+        MainContentImpl(geoState, onDetermineCurrentLocation)
     }
 
     @Composable
     private fun MainContentImpl(
-        locationState: LocationState,
+        geoState: GeoState,
         onDetermineCurrentLocation: () -> Unit
     ) {
         var mapContentTopPadding by remember { mutableStateOf(0.dp) }
         MapScreen(
             mapContentTopPadding,
-            locationState,
+            geoState,
             onDetermineCurrentLocation
         )
 
@@ -77,7 +77,7 @@ class MainActivity : ComponentActivity() {
     private fun MainPreview() {
         AppTheme {
             MainContentImpl(
-                locationState = LocationState(),
+                geoState = GeoState(),
                 onDetermineCurrentLocation = {}
             )
         }
