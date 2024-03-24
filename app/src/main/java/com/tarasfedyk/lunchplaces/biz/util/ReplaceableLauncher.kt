@@ -8,21 +8,18 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
 /**
- * A coroutine whose multiple instances cannot run simultaneously.
- * Calling [replaceableLaunch] cancels the currently running instance of the coroutine
- * and launches its new instance right afterward.
+ * Launches coroutines in such a way that
+ * a newly launched coroutine gracefully replaces the previously launched one.
  *
- * @property scope the scope in which to launch an instance of this coroutine.
- * @property block the block of code to execute within the running instance of this coroutine.
+ * @property scope the scope in which to launch coroutines
  */
-class ReplaceableLaunchCoroutine(
-    private val scope: CoroutineScope,
-    private val block: suspend () -> Unit
+class ReplaceableLauncher(
+    private val scope: CoroutineScope
 ) {
     private val mutex = Mutex()
     private var job: Job? = null
 
-    fun replaceableLaunch() {
+    fun launch(block: suspend CoroutineScope.() -> Unit) {
         scope.launch {
             mutex.withLock {
                 job?.cancelAndJoin()

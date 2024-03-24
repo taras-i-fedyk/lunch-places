@@ -8,7 +8,7 @@ import com.google.android.gms.location.Priority
 import com.google.android.gms.tasks.CancellationTokenSource
 import com.tarasfedyk.lunchplaces.biz.data.GeoState
 import com.tarasfedyk.lunchplaces.biz.data.Status
-import com.tarasfedyk.lunchplaces.biz.util.ReplaceableLaunchCoroutine
+import com.tarasfedyk.lunchplaces.biz.util.ReplaceableLauncher
 import com.tarasfedyk.lunchplaces.biz.util.asLocation
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CancellationException
@@ -24,17 +24,16 @@ class GeoViewModel @Inject constructor(
     private val fusedLocationClient: FusedLocationProviderClient
 ) : ViewModel() {
 
-    private val currentLocationDeterminer: ReplaceableLaunchCoroutine =
-        ReplaceableLaunchCoroutine(viewModelScope) { determineCurrentLocationImpl() }
-    private val lunchPlacesSearcher: ReplaceableLaunchCoroutine =
-        ReplaceableLaunchCoroutine(viewModelScope) { searchLunchPlacesImpl() }
+    private val currentLocationLauncher: ReplaceableLauncher = ReplaceableLauncher(viewModelScope)
+    private val lunchPlacesLauncher: ReplaceableLauncher = ReplaceableLauncher(viewModelScope)
 
-    private val _geoStateFlow: MutableStateFlow<GeoState> =
-        MutableStateFlow(GeoState())
+    private val _geoStateFlow: MutableStateFlow<GeoState> = MutableStateFlow(GeoState())
     val geoStateFlow: StateFlow<GeoState> = _geoStateFlow.asStateFlow()
 
     fun determineCurrentLocation() {
-        currentLocationDeterminer.replaceableLaunch()
+        currentLocationLauncher.launch {
+            determineCurrentLocationImpl()
+        }
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -68,9 +67,11 @@ class GeoViewModel @Inject constructor(
         }
     }
 
-    fun searchLunchPlaces() {
-        lunchPlacesSearcher.replaceableLaunch()
+    fun searchLunchPlaces(query: String) {
+        lunchPlacesLauncher.launch {
+            searchLunchPlacesImpl(query)
+        }
     }
 
-    private suspend fun searchLunchPlacesImpl() {}
+    private suspend fun searchLunchPlacesImpl(query: String) {}
 }
