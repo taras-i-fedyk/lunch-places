@@ -73,6 +73,7 @@ class MainActivity : ComponentActivity() {
 
         val onAllLocationPermissionsDenied = {
             isCurrentLocationEnabled = false
+            onDetermineCurrentLocation()
             // TODO: notify the user about the need to grant the location permissions
         }
         val onSomeLocationPermissionGranted = {
