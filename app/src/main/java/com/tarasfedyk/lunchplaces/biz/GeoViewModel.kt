@@ -96,10 +96,10 @@ class GeoViewModel @Inject constructor(
                     lunchPlacesStatus = Status.Success(query, lunchPlaces)
                 )
             } else {
-                val currentLocationException =
+                val currentLocationError =
                     (currentLocationTerminalStatus as Status.Failure).error
                 _geoStateFlow.value = _geoStateFlow.value.copy(
-                    lunchPlacesStatus = Status.Failure(query, currentLocationException)
+                    lunchPlacesStatus = Status.Failure(query, currentLocationError)
                 )
             }
         } catch (e: Exception) {
