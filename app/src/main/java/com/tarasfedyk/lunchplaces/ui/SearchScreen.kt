@@ -66,7 +66,7 @@ fun SearchScreen(
             focusManager.clearFocus()
             onSearchLunchPlaces(sentQuery)
         } else {
-            isActive = false
+            onGoBack()
         }
     }
 
