@@ -31,11 +31,15 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.tarasfedyk.lunchplaces.R
+import com.tarasfedyk.lunchplaces.biz.data.LunchPlace
+import com.tarasfedyk.lunchplaces.biz.data.Status
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchScreen(
-    onSearchBarBottomYChanged: (Dp) -> Unit
+    onSearchBarBottomYChanged: (Dp) -> Unit,
+    lunchPlacesStatus: Status<String, List<LunchPlace>>?,
+    onSearchLunchPlaces: (String) -> Unit
 ) {
     var isActive by rememberSaveable { mutableStateOf(false) }
 
@@ -60,6 +64,7 @@ fun SearchScreen(
         sentQuery = currentQuery
         if (sentQuery.isNotEmpty()) {
             focusManager.clearFocus()
+            onSearchLunchPlaces(sentQuery)
         } else {
             isActive = false
         }
@@ -94,7 +99,7 @@ fun SearchScreen(
         onSearch = onSearch
     ) {
         if (!isFocused) {
-            SearchResults()
+            SearchStatus(lunchPlacesStatus)
         }
         BackHandler(enabled = isActive) {
             onGoBack()
@@ -135,15 +140,28 @@ private fun ClearIconButton(onClicked: () -> Unit) {
 }
 
 @Composable
-private fun SearchResults() {
+private fun SearchStatus(
+    lunchPlacesStatus: Status<String, List<LunchPlace>>?
+) {
+    when (lunchPlacesStatus) {
+        null -> {}
+        is Status.Pending -> {}
+        is Status.Success -> { SearchResult(lunchPlacesStatus.result) }
+        is Status.Failure -> {}
+    }
+}
+
+@Composable
+private fun SearchResult(
+    lunchPlaces: List<LunchPlace>
+) {
     LazyColumn(
         contentPadding = PaddingValues(all = 16.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        val list = List(size = 100) { "Text $it" }
-        items(count = list.size) {
+        items(count = lunchPlaces.size) { i ->
             Text(
-                text = list[it],
+                text = lunchPlaces[i].id,
                 modifier = Modifier.fillMaxWidth()
             )
         }
@@ -154,6 +172,8 @@ private fun SearchResults() {
 @Composable
 private fun SearchPreview() {
     SearchScreen(
-        onSearchBarBottomYChanged = {}
+        onSearchBarBottomYChanged = {},
+        lunchPlacesStatus = null,
+        onSearchLunchPlaces = {}
     )
 }

@@ -22,6 +22,8 @@ import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.tarasfedyk.lunchplaces.biz.GeoViewModel
 import com.tarasfedyk.lunchplaces.biz.data.GeoState
+import com.tarasfedyk.lunchplaces.biz.data.LunchPlace
+import com.tarasfedyk.lunchplaces.biz.data.Status
 import com.tarasfedyk.lunchplaces.ui.nav.SEARCH_ROUTE
 import com.tarasfedyk.lunchplaces.ui.nav.searchScreen
 import com.tarasfedyk.lunchplaces.ui.theme.AppTheme
@@ -48,13 +50,15 @@ class MainActivity : ComponentActivity() {
     ) {
         val geoState by geoViewModel.geoStateFlow.collectAsStateWithLifecycle()
         val onDetermineCurrentLocation = geoViewModel::determineCurrentLocation
-        MainContentImpl(geoState, onDetermineCurrentLocation)
+        val onSearchLunchPlaces = geoViewModel::searchLunchPlaces
+        MainContentImpl(geoState, onDetermineCurrentLocation, onSearchLunchPlaces)
     }
 
     @Composable
     private fun MainContentImpl(
         geoState: GeoState,
-        onDetermineCurrentLocation: () -> Unit
+        onDetermineCurrentLocation: () -> Unit,
+        onSearchLunchPlaces: (String) -> Unit
     ) {
         var isCurrentLocationEnabled by remember { mutableStateOf(false) }
 
@@ -69,7 +73,11 @@ class MainActivity : ComponentActivity() {
         val onSearchBarBottomYChanged: (Dp) -> Unit = { searchBarBottomY ->
             mapContentTopPadding = searchBarBottomY
         }
-        NavGraph(onSearchBarBottomYChanged)
+        NavGraph(
+            onSearchBarBottomYChanged,
+            geoState.lunchPlacesStatus,
+            onSearchLunchPlaces
+        )
 
         val onAllLocationPermissionsDenied = {
             isCurrentLocationEnabled = false
@@ -89,10 +97,12 @@ class MainActivity : ComponentActivity() {
     @Composable
     private fun NavGraph(
         onSearchBarBottomYChanged: (Dp) -> Unit,
+        lunchPlacesStatus: Status<String, List<LunchPlace>>?,
+        onSearchLunchPlaces: (String) -> Unit,
         navController: NavHostController = rememberNavController()
     ) {
         NavHost(navController, startDestination = SEARCH_ROUTE) {
-            searchScreen(onSearchBarBottomYChanged)
+            searchScreen(onSearchBarBottomYChanged, lunchPlacesStatus, onSearchLunchPlaces)
         }
     }
 
@@ -146,7 +156,8 @@ class MainActivity : ComponentActivity() {
         AppTheme {
             MainContentImpl(
                 geoState = GeoState(),
-                onDetermineCurrentLocation = {}
+                onDetermineCurrentLocation = {},
+                onSearchLunchPlaces = {}
             )
         }
     }

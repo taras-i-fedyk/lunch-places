@@ -1,5 +1,6 @@
 package com.tarasfedyk.lunchplaces.ui
 
+import android.location.Location
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -9,12 +10,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.CameraPositionState
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.rememberCameraPositionState
-import com.tarasfedyk.lunchplaces.biz.data.Location
 import com.tarasfedyk.lunchplaces.biz.data.GeoState
 import com.tarasfedyk.lunchplaces.biz.data.Status
 import kotlin.math.log2
@@ -52,10 +53,10 @@ fun MapScreen(
     LaunchedEffect(key1 = isCurrentLocationEnabled, key2 = geoState) {
         if (
             isCurrentLocationEnabled &&
-            geoState.currentLocationStatus is Status.Success<Location>
+            geoState.currentLocationStatus is Status.Success<*, Location>
         ) {
             val currentLocation = geoState.currentLocationStatus.result
-            val currentLatLng = currentLocation.latLng
+            val currentLatLng = LatLng(currentLocation.latitude, currentLocation.longitude)
             val recommendedZoomLevel = recommendZoomLevel(currentLocation)
             val cameraUpdate = CameraUpdateFactory.newLatLngZoom(
                 currentLatLng, recommendedZoomLevel

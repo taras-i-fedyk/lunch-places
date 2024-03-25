@@ -1,8 +1,19 @@
 package com.tarasfedyk.lunchplaces.biz.data
 
-sealed class Status<out T> {
-    data object Pending : Status<Nothing>()
-    sealed class Terminal<T> : Status<T>()
-    data class Success<T>(val result: T) : Terminal<T>()
-    data class Failure(val exception: Exception? = null) : Terminal<Nothing>()
+sealed class Status<Input, out Output> {
+    data class Pending<Input>(
+        val arg: Input
+    ) : Status<Input, Nothing>()
+
+    sealed class Terminal<Input, Output> : Status<Input, Output>()
+
+    data class Success<Input, Output>(
+        val arg: Input,
+        val result: Output
+    ) : Terminal<Input, Output>()
+
+    data class Failure<Input>(
+        val arg: Input,
+        val error: Throwable
+    ) : Terminal<Input, Nothing>()
 }
