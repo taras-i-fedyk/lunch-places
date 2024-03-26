@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.kotlin.kapt)
     alias(libs.plugins.hilt)
     id(libs.secrets.get().group!!)
+    id(libs.plugins.kotlin.parcelize.get().pluginId)
 }
 
 android {

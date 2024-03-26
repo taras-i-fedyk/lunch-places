@@ -14,6 +14,6 @@ sealed class Status<Input, out Output> {
 
     data class Failure<Input>(
         val arg: Input,
-        val error: Throwable
+        val error: Error
     ) : Terminal<Input, Nothing>()
 }

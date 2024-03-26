@@ -39,7 +39,8 @@ import com.tarasfedyk.lunchplaces.biz.data.Status
 fun SearchScreen(
     onSearchBarBottomYChanged: (Dp) -> Unit,
     lunchPlacesStatus: Status<String, List<LunchPlace>>?,
-    onSearchLunchPlaces: (String) -> Unit
+    onSearchLunchPlaces: (String) -> Unit,
+    onDiscardLunchPlaces: () -> Unit
 ) {
     var isActive by rememberSaveable { mutableStateOf(false) }
 
@@ -58,6 +59,7 @@ fun SearchScreen(
             sentQuery = ""
             currentQuery = ""
             isActive = false
+            onDiscardLunchPlaces()
         }
     }
     val onSearch = { _: String ->
@@ -181,6 +183,7 @@ private fun SearchPreview() {
     SearchScreen(
         onSearchBarBottomYChanged = {},
         lunchPlacesStatus = null,
-        onSearchLunchPlaces = {}
+        onSearchLunchPlaces = {},
+        onDiscardLunchPlaces = {}
     )
 }

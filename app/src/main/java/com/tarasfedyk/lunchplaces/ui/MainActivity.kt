@@ -1,6 +1,7 @@
 package com.tarasfedyk.lunchplaces.ui
 
-import android.Manifest
+import android.Manifest.permission.ACCESS_COARSE_LOCATION
+import android.Manifest.permission.ACCESS_FINE_LOCATION
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -16,7 +17,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -51,14 +51,24 @@ class MainActivity : ComponentActivity() {
         val geoState by geoViewModel.geoStateFlow.collectAsStateWithLifecycle()
         val onDetermineCurrentLocation = geoViewModel::determineCurrentLocation
         val onSearchLunchPlaces = geoViewModel::searchLunchPlaces
-        MainContentImpl(geoState, onDetermineCurrentLocation, onSearchLunchPlaces)
+        val onRefreshLunchPlaces = geoViewModel::refreshLunchPlaces
+        val onDiscardLunchPlaces = geoViewModel::discardLunchPlaces
+        MainContentImpl(
+            geoState,
+            onDetermineCurrentLocation,
+            onSearchLunchPlaces,
+            onRefreshLunchPlaces,
+            onDiscardLunchPlaces
+        )
     }
 
     @Composable
     private fun MainContentImpl(
         geoState: GeoState,
         onDetermineCurrentLocation: () -> Unit,
-        onSearchLunchPlaces: (String) -> Unit
+        onSearchLunchPlaces: (String) -> Unit,
+        onRefreshLunchPlaces: () -> Unit,
+        onDiscardLunchPlaces: () -> Unit
     ) {
         var isCurrentLocationDisplayed by remember { mutableStateOf(false) }
 
@@ -76,20 +86,21 @@ class MainActivity : ComponentActivity() {
         NavGraph(
             onSearchBarBottomYChanged,
             geoState.lunchPlacesStatus,
-            onSearchLunchPlaces
+            onSearchLunchPlaces,
+            onDiscardLunchPlaces
         )
 
         val onAllLocationPermissionsDenied = {
             isCurrentLocationDisplayed = false
-            // TODO: display a snackbar about no location access
-
             onDetermineCurrentLocation()
+            onRefreshLunchPlaces()
+            // TODO: display a snackbar about no location access
         }
         val onSomeLocationPermissionGranted = {
             isCurrentLocationDisplayed = true
-            // TODO: hide the snackbar about no location access
-
             onDetermineCurrentLocation()
+            onRefreshLunchPlaces()
+            // TODO: hide the snackbar about no location access
         }
         LocationPermissionsRequest(
             onAllLocationPermissionsDenied,
@@ -102,10 +113,18 @@ class MainActivity : ComponentActivity() {
         onSearchBarBottomYChanged: (Dp) -> Unit,
         lunchPlacesStatus: Status<String, List<LunchPlace>>?,
         onSearchLunchPlaces: (String) -> Unit,
-        navController: NavHostController = rememberNavController()
+        onDiscardLunchPlaces: () -> Unit
     ) {
-        NavHost(navController, startDestination = SEARCH_ROUTE) {
-            searchScreen(onSearchBarBottomYChanged, lunchPlacesStatus, onSearchLunchPlaces)
+        NavHost(
+            navController = rememberNavController(),
+            startDestination = SEARCH_ROUTE
+        ) {
+            searchScreen(
+                onSearchBarBottomYChanged,
+                lunchPlacesStatus,
+                onSearchLunchPlaces,
+                onDiscardLunchPlaces
+            )
         }
     }
 
@@ -115,27 +134,27 @@ class MainActivity : ComponentActivity() {
         onAllLocationPermissionsDenied: () -> Unit,
         onSomeLocationPermissionGranted: () -> Unit
     ) {
-        val onLocationsPermissionsResult: (Map<String, Boolean>) -> Unit = { locationPermissionFlags ->
-            if (locationPermissionFlags.areAllValuesFalse()) {
-                onAllLocationPermissionsDenied()
+        val onLocationsPermissionsResult: (Map<String, Boolean>) -> Unit =
+            { locationPermissionFlags ->
+                if (locationPermissionFlags.areAllValuesFalse()) {
+                    onAllLocationPermissionsDenied()
+                }
             }
-        }
-        // TODO: in case the Preview mode starts supporting permissions,
-        // TODO: replace this with a direct call to the Accompanist library function
+        // TODO: replace this with a direct call in a Preview-friendly way
         val locationPermissionsState = rememberMultiplePermissionsStateWrapper(
-            permissions = listOf(Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION),
+            permissions = listOf(ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION),
             onPermissionsResult = onLocationsPermissionsResult
         )
 
         val isSolelyCoarseLocationPermissionGranted by remember {
             derivedStateOf {
-                locationPermissionsState.isPermissionGranted(Manifest.permission.ACCESS_COARSE_LOCATION) &&
-                !locationPermissionsState.isPermissionGranted(Manifest.permission.ACCESS_FINE_LOCATION)
+                locationPermissionsState.isPermissionGranted(ACCESS_COARSE_LOCATION) &&
+                !locationPermissionsState.isPermissionGranted(ACCESS_FINE_LOCATION)
             }
         }
         val isFineLocationPermissionGranted by remember {
             derivedStateOf {
-                locationPermissionsState.isPermissionGranted(Manifest.permission.ACCESS_FINE_LOCATION)
+                locationPermissionsState.isPermissionGranted(ACCESS_FINE_LOCATION)
             }
         }
 
@@ -160,7 +179,9 @@ class MainActivity : ComponentActivity() {
             MainContentImpl(
                 geoState = GeoState(),
                 onDetermineCurrentLocation = {},
-                onSearchLunchPlaces = {}
+                onSearchLunchPlaces = {},
+                onRefreshLunchPlaces = {},
+                onDiscardLunchPlaces = {}
             )
         }
     }
