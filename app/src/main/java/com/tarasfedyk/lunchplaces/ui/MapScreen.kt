@@ -28,13 +28,13 @@ private const val LOCATION_ACCURACY_MAX: Float = 4f
 @Composable
 fun MapScreen(
     mapContentTopPadding: Dp,
-    isCurrentLocationEnabled: Boolean,
+    isCurrentLocationDisplayed: Boolean,
     geoState: GeoState,
     onDetermineCurrentLocation: () -> Unit
 ) {
     val mapProperties = MapProperties(
         maxZoomPreference = ZOOM_LEVEL_MAX,
-        isMyLocationEnabled = isCurrentLocationEnabled
+        isMyLocationEnabled = isCurrentLocationDisplayed
     )
     val cameraPositionState = rememberCameraPositionState()
     val onCurrentLocationButtonClicked = {
@@ -50,9 +50,9 @@ fun MapScreen(
         onMyLocationButtonClick = onCurrentLocationButtonClicked
     )
 
-    LaunchedEffect(key1 = isCurrentLocationEnabled, key2 = geoState) {
+    LaunchedEffect(key1 = isCurrentLocationDisplayed, key2 = geoState) {
         if (
-            isCurrentLocationEnabled &&
+            isCurrentLocationDisplayed &&
             geoState.currentLocationStatus is Status.Success<*, Location>
         ) {
             val currentLocation = geoState.currentLocationStatus.result
@@ -62,7 +62,7 @@ fun MapScreen(
                 currentLatLng, recommendedZoomLevel
             )
             cameraPositionState.animate(cameraUpdate)
-        } else if (!isCurrentLocationEnabled) {
+        } else if (!isCurrentLocationDisplayed) {
             val cameraPosition = CameraPositionState().position
             val cameraUpdate = CameraUpdateFactory.newCameraPosition(cameraPosition)
             cameraPositionState.animate(cameraUpdate)
@@ -80,7 +80,7 @@ private fun recommendZoomLevel(location: Location): Float =
 private fun MapPreview() {
     MapScreen(
         mapContentTopPadding = 0.dp,
-        isCurrentLocationEnabled = true,
+        isCurrentLocationDisplayed = true,
         geoState = GeoState(),
         onDetermineCurrentLocation = {}
     )

@@ -60,12 +60,12 @@ class MainActivity : ComponentActivity() {
         onDetermineCurrentLocation: () -> Unit,
         onSearchLunchPlaces: (String) -> Unit
     ) {
-        var isCurrentLocationEnabled by remember { mutableStateOf(false) }
+        var isCurrentLocationDisplayed by remember { mutableStateOf(false) }
 
         var mapContentTopPadding by remember { mutableStateOf(0.dp) }
         MapScreen(
             mapContentTopPadding,
-            isCurrentLocationEnabled,
+            isCurrentLocationDisplayed,
             geoState,
             onDetermineCurrentLocation
         )
@@ -80,12 +80,15 @@ class MainActivity : ComponentActivity() {
         )
 
         val onAllLocationPermissionsDenied = {
-            isCurrentLocationEnabled = false
+            isCurrentLocationDisplayed = false
+            // TODO: display a snackbar about no location access
+
             onDetermineCurrentLocation()
-            // TODO: notify the user about the need to grant the location permissions
         }
         val onSomeLocationPermissionGranted = {
-            isCurrentLocationEnabled = true
+            isCurrentLocationDisplayed = true
+            // TODO: hide the snackbar about no location access
+
             onDetermineCurrentLocation()
         }
         LocationPermissionsRequest(

@@ -145,9 +145,16 @@ private fun SearchStatus(
 ) {
     when (lunchPlacesStatus) {
         null -> {}
-        is Status.Pending -> {}
-        is Status.Success -> { SearchResult(lunchPlacesStatus.result) }
-        is Status.Failure -> {}
+        is Status.Pending -> {
+            // TODO: display a progress bar
+        }
+        is Status.Success -> {
+            val lunchPlaces = lunchPlacesStatus.result
+            SearchResult(lunchPlaces)
+        }
+        is Status.Failure -> {
+            // TODO: display a snackbar about the search error
+        }
     }
 }
 

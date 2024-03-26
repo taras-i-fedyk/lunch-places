@@ -87,21 +87,17 @@ class GeoViewModel @Inject constructor(
             val currentLocationTerminalStatus = geoStateFlow
                 .first { it.currentLocationStatus is Status.Terminal }
                 .currentLocationStatus
-
-            if (currentLocationTerminalStatus is Status.Success) {
-                val lunchPlaces = List(size = 100) { i ->
-                    LunchPlace(id = (i + 1).toString())
-                }
-                _geoStateFlow.value = _geoStateFlow.value.copy(
-                    lunchPlacesStatus = Status.Success(query, lunchPlaces)
-                )
-            } else {
-                val currentLocationError =
-                    (currentLocationTerminalStatus as Status.Failure).error
-                _geoStateFlow.value = _geoStateFlow.value.copy(
-                    lunchPlacesStatus = Status.Failure(query, currentLocationError)
-                )
+            if (currentLocationTerminalStatus is Status.Failure) {
+                val currentLocationError = currentLocationTerminalStatus.error
+                throw currentLocationError
             }
+
+            val lunchPlaces = List(size = 100) { i ->
+                LunchPlace(id = (i + 1).toString())
+            }
+            _geoStateFlow.value = _geoStateFlow.value.copy(
+                lunchPlacesStatus = Status.Success(query, lunchPlaces)
+            )
         } catch (e: Exception) {
             if (e !is RuntimeException || e is SecurityException) {
                 _geoStateFlow.value = _geoStateFlow.value.copy(
