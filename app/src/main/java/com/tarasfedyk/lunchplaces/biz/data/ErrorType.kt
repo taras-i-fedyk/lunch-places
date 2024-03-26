@@ -1,5 +1,5 @@
 package com.tarasfedyk.lunchplaces.biz.data
 
-enum class Error {
+enum class ErrorType {
     NULL_LOCATION, LOCATION_ACCESS, UNKNOWN
 }

@@ -6,7 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.Priority
 import com.google.android.gms.tasks.CancellationTokenSource
-import com.tarasfedyk.lunchplaces.biz.data.Error
+import com.tarasfedyk.lunchplaces.biz.data.ErrorType
 import com.tarasfedyk.lunchplaces.biz.data.GeoState
 import com.tarasfedyk.lunchplaces.biz.data.LunchPlace
 import com.tarasfedyk.lunchplaces.biz.data.Status
@@ -54,18 +54,21 @@ class GeoViewModel @Inject constructor(
             val currentLocation = currentLocationTask.await(cancellationTokenSource)
 
             _geoStateFlow.value = _geoStateFlow.value.copy(
-                currentLocationStatus =
-                    if (currentLocation != null) {
-                        Status.Success(Unit, currentLocation)
-                    } else {
-                        Status.Failure(Unit, Error.NULL_LOCATION)
-                    }
+                currentLocationStatus = if (currentLocation != null) {
+                    Status.Success(Unit, currentLocation)
+                } else {
+                    Status.Failure(Unit, ErrorType.NULL_LOCATION)
+                }
             )
         } catch (e: Exception) {
             if (e !is RuntimeException || e is SecurityException) {
-                val error = if (e is SecurityException) Error.LOCATION_ACCESS else Error.UNKNOWN
+                val errorType = if (e is SecurityException) {
+                    ErrorType.LOCATION_ACCESS
+                } else {
+                    ErrorType.UNKNOWN
+                }
                 _geoStateFlow.value = _geoStateFlow.value.copy(
-                    currentLocationStatus = Status.Failure(Unit, error)
+                    currentLocationStatus = Status.Failure(Unit, errorType)
                 )
             } else {
                 throw e
@@ -98,15 +101,15 @@ class GeoViewModel @Inject constructor(
                     lunchPlacesStatus = Status.Success(query, lunchPlaces)
                 )
             } else {
-                val currentLocationError = (currentLocationTerminalStatus as Status.Failure).error
+                val errorType = (currentLocationTerminalStatus as Status.Failure).errorType
                 _geoStateFlow.value = _geoStateFlow.value.copy(
-                    lunchPlacesStatus = Status.Failure(query, currentLocationError)
+                    lunchPlacesStatus = Status.Failure(query, errorType)
                 )
             }
         } catch (e: Exception) {
             if (e !is RuntimeException) {
                 _geoStateFlow.value = _geoStateFlow.value.copy(
-                    lunchPlacesStatus = Status.Failure(query, Error.UNKNOWN)
+                    lunchPlacesStatus = Status.Failure(query, ErrorType.UNKNOWN)
                 )
             } else {
                 throw e
@@ -116,17 +119,9 @@ class GeoViewModel @Inject constructor(
 
     fun refreshLunchPlaces() {
         viewModelScope.launch {
-            when (val lunchPlacesStatus = geoStateFlow.value.lunchPlacesStatus) {
-                null -> {}
-                is Status.Pending -> {
-                    searchLunchPlaces(lunchPlacesStatus.arg)
-                }
-                is Status.Success -> {
-                    searchLunchPlaces(lunchPlacesStatus.arg)
-                }
-                is Status.Failure -> {
-                    searchLunchPlaces(lunchPlacesStatus.arg)
-                }
+            val lunchPlacesStatus = geoStateFlow.value.lunchPlacesStatus
+            if (lunchPlacesStatus != null) {
+                searchLunchPlaces(lunchPlacesStatus.arg)
             }
         }
     }
