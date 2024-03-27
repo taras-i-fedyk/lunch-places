@@ -107,8 +107,7 @@ data class GeoState(
                     }
                     StatusType.SUCCESS -> {
                         val classLoader = LunchPlace::class.java.classLoader
-                        val result =
-                            (parcel.readParcelableArray(classLoader) as Array<LunchPlace>).toList()
+                        val result = parcel.readParcelableArray(classLoader)!!.toList() as List<LunchPlace>
                         Status.Success(arg, result)
                     }
                     StatusType.FAILURE -> {

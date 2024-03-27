@@ -1,6 +1,8 @@
 package com.tarasfedyk.lunchplaces.biz
 
 import android.annotation.SuppressLint
+import androidx.annotation.MainThread
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -24,7 +26,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class GeoViewModel @Inject constructor(
-    private val fusedLocationClient: FusedLocationProviderClient
+    private val fusedLocationClient: FusedLocationProviderClient,
+    private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
     private val currentLocationLauncher: ReplaceableLauncher = ReplaceableLauncher(viewModelScope)
@@ -32,6 +35,12 @@ class GeoViewModel @Inject constructor(
 
     private val _geoStateFlow: MutableStateFlow<GeoState> = MutableStateFlow(GeoState())
     val geoStateFlow: StateFlow<GeoState> = _geoStateFlow.asStateFlow()
+
+    init {
+        savedStateHandle.get<GeoState>(GEO_STATE_KEY)?.let { savedGeoState ->
+            _geoStateFlow.value = savedGeoState
+        }
+    }
 
     fun determineCurrentLocation() {
         currentLocationLauncher.launch {
@@ -43,9 +52,7 @@ class GeoViewModel @Inject constructor(
     @SuppressLint("MissingPermission")
     private suspend fun determineCurrentLocationImpl() {
         try {
-            _geoStateFlow.value = _geoStateFlow.value.copy(
-                currentLocationStatus = Status.Pending(Unit)
-            )
+            updateGeoState { it.copy(currentLocationStatus = Status.Pending(Unit)) }
 
             val cancellationTokenSource = CancellationTokenSource()
             val currentLocationTask = fusedLocationClient.getCurrentLocation(
@@ -53,13 +60,12 @@ class GeoViewModel @Inject constructor(
             )
             val currentLocation = currentLocationTask.await(cancellationTokenSource)
 
-            _geoStateFlow.value = _geoStateFlow.value.copy(
-                currentLocationStatus = if (currentLocation != null) {
-                    Status.Success(Unit, currentLocation)
-                } else {
-                    Status.Failure(Unit, ErrorType.NULL_LOCATION)
-                }
-            )
+            val currentLocationStatus = if (currentLocation != null) {
+                Status.Success(Unit, currentLocation)
+            } else {
+                Status.Failure(Unit, ErrorType.NULL_LOCATION)
+            }
+            updateGeoState { it.copy(currentLocationStatus = currentLocationStatus) }
         } catch (e: Exception) {
             if (e !is RuntimeException || e is SecurityException) {
                 val errorType = if (e is SecurityException) {
@@ -67,9 +73,7 @@ class GeoViewModel @Inject constructor(
                 } else {
                     ErrorType.UNKNOWN
                 }
-                _geoStateFlow.value = _geoStateFlow.value.copy(
-                    currentLocationStatus = Status.Failure(Unit, errorType)
-                )
+                updateGeoState { it.copy(currentLocationStatus = Status.Failure(Unit, errorType)) }
             } else {
                 throw e
             }
@@ -84,9 +88,7 @@ class GeoViewModel @Inject constructor(
 
     private suspend fun searchLunchPlacesImpl(query: String) {
         try {
-            _geoStateFlow.value = _geoStateFlow.value.copy(
-                lunchPlacesStatus = Status.Pending(query)
-            )
+            updateGeoState { it.copy(lunchPlacesStatus = Status.Pending(query)) }
 
             determineCurrentLocation()
             val currentLocationTerminalStatus = geoStateFlow
@@ -98,20 +100,14 @@ class GeoViewModel @Inject constructor(
                     LunchPlace(id = (i + 1).toString())
                 }
 
-                _geoStateFlow.value = _geoStateFlow.value.copy(
-                    lunchPlacesStatus = Status.Success(query, lunchPlaces)
-                )
+                updateGeoState { it.copy(lunchPlacesStatus = Status.Success(query, lunchPlaces)) }
             } else {
                 val errorType = (currentLocationTerminalStatus as Status.Failure).errorType
-                _geoStateFlow.value = _geoStateFlow.value.copy(
-                    lunchPlacesStatus = Status.Failure(query, errorType)
-                )
+                updateGeoState { it.copy(lunchPlacesStatus = Status.Failure(query, errorType)) }
             }
         } catch (e: Exception) {
             if (e !is RuntimeException) {
-                _geoStateFlow.value = _geoStateFlow.value.copy(
-                    lunchPlacesStatus = Status.Failure(query, ErrorType.UNKNOWN)
-                )
+                updateGeoState { it.copy( lunchPlacesStatus = Status.Failure(query, ErrorType.UNKNOWN)) }
             } else {
                 throw e
             }
@@ -129,9 +125,19 @@ class GeoViewModel @Inject constructor(
 
     fun discardLunchPlaces() {
         viewModelScope.launch {
-            _geoStateFlow.value = _geoStateFlow.value.copy(
-                lunchPlacesStatus = null
-            )
+            updateGeoState { it.copy(lunchPlacesStatus = null) }
         }
+    }
+
+    @MainThread
+    private fun updateGeoState(function: (GeoState) -> GeoState) {
+        val currentGeoState = _geoStateFlow.value
+        val newGeoState = function(currentGeoState)
+        _geoStateFlow.value = newGeoState
+        savedStateHandle[GEO_STATE_KEY] = newGeoState
+    }
+
+    companion object {
+        private const val GEO_STATE_KEY: String = "geo_state"
     }
 }
