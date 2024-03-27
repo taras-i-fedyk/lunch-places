@@ -4,6 +4,8 @@ import android.location.Location
 import android.os.Parcel
 import android.os.Parcelable
 import androidx.compose.runtime.Stable
+import com.tarasfedyk.lunchplaces.biz.util.readBool
+import com.tarasfedyk.lunchplaces.biz.util.writeBool
 import kotlinx.parcelize.Parceler
 import kotlinx.parcelize.Parcelize
 
@@ -13,36 +15,108 @@ data class GeoState(
     val currentLocationStatus: Status<Unit, Location>? = null,
     val lunchPlacesStatus: Status<String, List<LunchPlace>>? = null
 ) : Parcelable {
+
     private companion object : Parceler<GeoState> {
         override fun GeoState.write(parcel: Parcel, flags: Int) {
-            /*when (currentLocationStatus) {
-                null -> {}
-                is Status.Pending -> {}
-                is Status.Success -> {
-                    val isSuccess = true
-                    parcel.writeInt(if (isSuccess) 1 else 0)
-                    parcel.writeParcelable(currentLocationStatus.result, flags)
+            writeCurrentLocationStatus(parcel, flags)
+            writeLunchPlacesStatus(parcel, flags)
+        }
+
+        private fun GeoState.writeCurrentLocationStatus(parcel: Parcel, flags: Int) {
+            val isCurrentLocationStatusNull = currentLocationStatus == null
+            parcel.writeBool(isCurrentLocationStatusNull)
+            if (currentLocationStatus != null) {
+                when (currentLocationStatus) {
+                    is Status.Pending -> {
+                        parcel.writeSerializable(StatusType.PENDING)
+                    }
+                    is Status.Success -> {
+                        parcel.writeSerializable(StatusType.SUCCESS)
+                        parcel.writeParcelable(currentLocationStatus.result, flags)
+                    }
+                    is Status.Failure -> {
+                        parcel.writeSerializable(StatusType.FAILURE)
+                        parcel.writeSerializable(currentLocationStatus.errorType)
+                    }
                 }
-                is Status.Failure -> {
-                    val isSuccess = false
-                    parcel.writeInt(if (isSuccess) 1 else 0)
-                    parcel.writeSerializable(currentLocationStatus.error)
+            }
+        }
+
+        private fun GeoState.writeLunchPlacesStatus(parcel: Parcel, flags: Int) {
+            val isLunchPlacesStatusNull = lunchPlacesStatus == null
+            parcel.writeBool(isLunchPlacesStatusNull)
+            if (lunchPlacesStatus != null) {
+                when (lunchPlacesStatus) {
+                    is Status.Pending -> {
+                        parcel.writeSerializable(StatusType.PENDING)
+                        parcel.writeString(lunchPlacesStatus.arg)
+                    }
+                    is Status.Success -> {
+                        parcel.writeSerializable(StatusType.SUCCESS)
+                        parcel.writeString(lunchPlacesStatus.arg)
+                        parcel.writeParcelableArray(lunchPlacesStatus.result.toTypedArray(), flags)
+                    }
+                    is Status.Failure -> {
+                        parcel.writeSerializable(StatusType.FAILURE)
+                        parcel.writeString(lunchPlacesStatus.arg)
+                        parcel.writeSerializable(lunchPlacesStatus.errorType)
+                    }
                 }
-            }*/
+            }
         }
 
         override fun create(parcel: Parcel): GeoState {
-            /*val isSuccess = parcel.readInt() != 0
-            val currentLocationStatus: Status<Unit, Location>? =
-                if (isSuccess) {
-                    val result = parcel.readParcelable<Location>(Location::class.java.classLoader) as Location
-                    Status.Success(Unit, result)
-                } else {
-                    val error = parcel.readSerializable() as Error
-                    Status.Failure(Unit, error)
+            val currentLocationStatus = readCurrentLocationStatus(parcel)
+            val lunchPlacesStatus = readLunchPlacesStatus(parcel)
+            return GeoState(currentLocationStatus, lunchPlacesStatus)
+        }
+
+        private fun readCurrentLocationStatus(parcel: Parcel): Status<Unit, Location>? {
+            val isCurrentLocationStatusNull = parcel.readBool()
+            if (isCurrentLocationStatusNull) {
+                return null
+            } else {
+                val statusType = parcel.readSerializable() as StatusType
+                return when (statusType) {
+                    StatusType.PENDING -> {
+                        Status.Pending(Unit)
+                    }
+                    StatusType.SUCCESS -> {
+                        val classLoader = Location::class.java.classLoader
+                        val result = parcel.readParcelable<Location>(classLoader) as Location
+                        Status.Success(Unit, result)
+                    }
+                    StatusType.FAILURE -> {
+                        val errorType = parcel.readSerializable() as ErrorType
+                        Status.Failure(Unit, errorType)
+                    }
                 }
-            return GeoState(currentLocationStatus, null)*/
-            return GeoState()
+            }
+        }
+
+        private fun readLunchPlacesStatus(parcel: Parcel): Status<String, List<LunchPlace>>? {
+            val isLunchPlacesStatusNull = parcel.readBool()
+            if (isLunchPlacesStatusNull) {
+                return null
+            } else {
+                val statusType = parcel.readSerializable() as StatusType
+                val arg = parcel.readString() as String
+                return when (statusType) {
+                    StatusType.PENDING -> {
+                        Status.Pending(arg)
+                    }
+                    StatusType.SUCCESS -> {
+                        val classLoader = LunchPlace::class.java.classLoader
+                        val result =
+                            (parcel.readParcelableArray(classLoader) as Array<LunchPlace>).toList()
+                        Status.Success(arg, result)
+                    }
+                    StatusType.FAILURE -> {
+                        val errorType = parcel.readSerializable() as ErrorType
+                        Status.Failure(arg, errorType)
+                    }
+                }
+            }
         }
     }
 }

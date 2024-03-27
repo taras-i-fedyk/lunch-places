@@ -97,6 +97,7 @@ class GeoViewModel @Inject constructor(
                 val lunchPlaces = List(size = 100) { i ->
                     LunchPlace(id = (i + 1).toString())
                 }
+
                 _geoStateFlow.value = _geoStateFlow.value.copy(
                     lunchPlacesStatus = Status.Success(query, lunchPlaces)
                 )
