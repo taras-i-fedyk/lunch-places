@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -113,10 +114,11 @@ class MainActivity : ComponentActivity() {
         onSearchBarBottomYChanged: (Dp) -> Unit,
         lunchPlacesStatus: Status<String, List<LunchPlace>>?,
         onSearchLunchPlaces: (String) -> Unit,
-        onDiscardLunchPlaces: () -> Unit
+        onDiscardLunchPlaces: () -> Unit,
+        navController: NavHostController = rememberNavController()
     ) {
         NavHost(
-            navController = rememberNavController(),
+            navController,
             startDestination = SEARCH_ROUTE
         ) {
             searchScreen(
