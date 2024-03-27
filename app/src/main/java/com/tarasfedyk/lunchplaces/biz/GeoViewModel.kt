@@ -10,7 +10,6 @@ import com.google.android.gms.location.Priority
 import com.google.android.gms.tasks.CancellationTokenSource
 import com.tarasfedyk.lunchplaces.biz.data.ErrorType
 import com.tarasfedyk.lunchplaces.biz.data.GeoState
-import com.tarasfedyk.lunchplaces.biz.data.LunchPlace
 import com.tarasfedyk.lunchplaces.biz.data.Status
 import com.tarasfedyk.lunchplaces.biz.util.ReplaceableLauncher
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -27,6 +26,7 @@ import javax.inject.Inject
 @HiltViewModel
 class GeoViewModel @Inject constructor(
     private val fusedLocationClient: FusedLocationProviderClient,
+    private val repo: Repo,
     private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -96,9 +96,7 @@ class GeoViewModel @Inject constructor(
                 .currentLocationStatus
 
             if (currentLocationTerminalStatus is Status.Success) {
-                val lunchPlaces = List(size = 100) { i ->
-                    LunchPlace(id = (i + 1).toString())
-                }
+                val lunchPlaces = repo.searchLunchPlaces(query)
 
                 updateGeoState { it.copy(lunchPlacesStatus = Status.Success(query, lunchPlaces)) }
             } else {
