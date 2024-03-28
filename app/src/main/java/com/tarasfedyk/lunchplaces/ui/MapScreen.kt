@@ -1,6 +1,5 @@
 package com.tarasfedyk.lunchplaces.ui
 
-import android.location.Location
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -10,13 +9,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.google.android.gms.maps.CameraUpdateFactory
-import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.CameraPositionState
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.tarasfedyk.lunchplaces.biz.data.GeoState
+import com.tarasfedyk.lunchplaces.biz.data.LocationSnapshot
 import com.tarasfedyk.lunchplaces.biz.data.Status
 import kotlin.math.log2
 
@@ -53,27 +52,25 @@ fun MapScreen(
     LaunchedEffect(key1 = isCurrentLocationDisplayed, key2 = geoState) {
         if (
             isCurrentLocationDisplayed &&
-            geoState.currentLocationStatus is Status.Success<*, Location>
+            geoState.currentLocationStatus is Status.Success<*, LocationSnapshot>
         ) {
             val currentLocation = geoState.currentLocationStatus.result
-            val currentLatLng = LatLng(currentLocation.latitude, currentLocation.longitude)
-            val recommendedZoomLevel = recommendZoomLevel(currentLocation)
-            val cameraUpdate = CameraUpdateFactory.newLatLngZoom(
-                currentLatLng, recommendedZoomLevel
-            )
+            val currentLatLng = currentLocation.latLng
+            val currentZoomLevel = recommendZoomLevel(currentLocation.accuracy)
+            val cameraUpdate = CameraUpdateFactory.newLatLngZoom(currentLatLng, currentZoomLevel)
             cameraPositionState.animate(cameraUpdate)
         } else if (!isCurrentLocationDisplayed) {
-            val cameraPosition = CameraPositionState().position
-            val cameraUpdate = CameraUpdateFactory.newCameraPosition(cameraPosition)
+            val defaultCameraPosition = CameraPositionState().position
+            val cameraUpdate = CameraUpdateFactory.newCameraPosition(defaultCameraPosition)
             cameraPositionState.animate(cameraUpdate)
         }
     }
 }
 
-private fun recommendZoomLevel(location: Location): Float =
-    // based on how close the location's accuracy is to the maximum accuracy
+private fun recommendZoomLevel(locationAccuracy: Float): Float =
+    // based on how close the given accuracy is to the maximum accuracy
     // and the fact that the maximum accuracy should be accompanied by the maximum magnification
-    ZOOM_LEVEL_MAX - (log2(location.accuracy) - log2(LOCATION_ACCURACY_MAX))
+    ZOOM_LEVEL_MAX - (log2(locationAccuracy) - log2(LOCATION_ACCURACY_MAX))
 
 @Preview(showBackground = true)
 @Composable

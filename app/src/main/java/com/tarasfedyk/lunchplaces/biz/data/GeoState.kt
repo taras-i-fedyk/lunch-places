@@ -1,18 +1,15 @@
 package com.tarasfedyk.lunchplaces.biz.data
 
-import android.location.Location
 import android.os.Parcel
 import android.os.Parcelable
-import androidx.compose.runtime.Stable
 import com.tarasfedyk.lunchplaces.biz.util.readBool
 import com.tarasfedyk.lunchplaces.biz.util.writeBool
 import kotlinx.parcelize.Parceler
 import kotlinx.parcelize.Parcelize
 
-@Stable
 @Parcelize
 data class GeoState(
-    val currentLocationStatus: Status<Unit, Location>? = null,
+    val currentLocationStatus: Status<Unit, LocationSnapshot>? = null,
     val lunchPlacesStatus: Status<String, List<LunchPlace>>? = null
 ) : Parcelable {
 
@@ -71,7 +68,7 @@ data class GeoState(
             return GeoState(currentLocationStatus, lunchPlacesStatus)
         }
 
-        private fun readCurrentLocationStatus(parcel: Parcel): Status<Unit, Location>? {
+        private fun readCurrentLocationStatus(parcel: Parcel): Status<Unit, LocationSnapshot>? {
             val isCurrentLocationStatusNull = parcel.readBool()
             if (isCurrentLocationStatusNull) {
                 return null
@@ -82,8 +79,8 @@ data class GeoState(
                         Status.Pending(Unit)
                     }
                     StatusType.SUCCESS -> {
-                        val classLoader = Location::class.java.classLoader
-                        val result = parcel.readParcelable<Location>(classLoader) as Location
+                        val classLoader = LocationSnapshot::class.java.classLoader
+                        val result = parcel.readParcelable<LocationSnapshot>(classLoader)!!
                         Status.Success(Unit, result)
                     }
                     StatusType.FAILURE -> {
@@ -107,7 +104,9 @@ data class GeoState(
                     }
                     StatusType.SUCCESS -> {
                         val classLoader = LunchPlace::class.java.classLoader
-                        val result = parcel.readParcelableArray(classLoader)!!.toList() as List<LunchPlace>
+                        val result = parcel.readParcelableArray(classLoader)!!
+                            .map { it as LunchPlace }
+                            .toList()
                         Status.Success(arg, result)
                     }
                     StatusType.FAILURE -> {

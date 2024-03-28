@@ -12,6 +12,7 @@ import com.tarasfedyk.lunchplaces.biz.data.ErrorType
 import com.tarasfedyk.lunchplaces.biz.data.GeoState
 import com.tarasfedyk.lunchplaces.biz.data.Status
 import com.tarasfedyk.lunchplaces.biz.util.ReplaceableLauncher
+import com.tarasfedyk.lunchplaces.biz.util.toLocationSnapshot
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -54,11 +55,11 @@ class GeoViewModel @Inject constructor(
         try {
             updateGeoState { it.copy(currentLocationStatus = Status.Pending(Unit)) }
 
-            val cancellationTokenSource = CancellationTokenSource()
+            val tokenSource = CancellationTokenSource()
             val currentLocationTask = fusedLocationClient.getCurrentLocation(
-                Priority.PRIORITY_HIGH_ACCURACY, cancellationTokenSource.token
+                Priority.PRIORITY_HIGH_ACCURACY, tokenSource.token
             )
-            val currentLocation = currentLocationTask.await(cancellationTokenSource)
+            val currentLocation = currentLocationTask.await(tokenSource)?.toLocationSnapshot()
 
             val currentLocationStatus = if (currentLocation != null) {
                 Status.Success(Unit, currentLocation)
