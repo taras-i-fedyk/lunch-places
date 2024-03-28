@@ -19,7 +19,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import java.lang.RuntimeException
 import javax.inject.Inject
@@ -114,16 +113,16 @@ class GeoViewModel @Inject constructor(
     }
 
     fun refreshLunchPlaces() {
-        viewModelScope.launch {
+        lunchPlacesLauncher.launch {
             val lunchPlacesStatus = geoStateFlow.value.lunchPlacesStatus
             if (lunchPlacesStatus != null) {
-                searchLunchPlaces(lunchPlacesStatus.arg)
+                searchLunchPlacesImpl(lunchPlacesStatus.arg)
             }
         }
     }
 
     fun discardLunchPlaces() {
-        viewModelScope.launch {
+        lunchPlacesLauncher.launch {
             updateGeoState { it.copy(lunchPlacesStatus = null) }
         }
     }
