@@ -30,7 +30,7 @@ subprojects {
             if (project.findProperty("composeCompilerMetrics") == "true") {
                 freeCompilerArgs += listOf(
                     "-P",
-                    "plugin:androidx.compose.compiler.plugins.kotlin:metricsDestination=$$composeReportsPath"
+                    "plugin:androidx.compose.compiler.plugins.kotlin:metricsDestination=$composeReportsPath"
                 )
             }
         }
