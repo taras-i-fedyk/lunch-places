@@ -23,10 +23,9 @@ android {
             useSupportLibrary = true
         }
     }
-
     signingConfigs {
         getByName("debug") {
-            storeFile = file("../debug.keystore")
+            storeFile = File(rootDir, "debug.keystore")
         }
     }
 
@@ -42,6 +41,7 @@ android {
             )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
@@ -50,6 +50,7 @@ android {
         jvmTarget = "1.8"
     }
     buildFeatures {
+        buildConfig = true
         compose = true
     }
     composeOptions {
@@ -73,7 +74,8 @@ dependencies {
     kapt(libs.hilt.compiler)
     implementation(libs.androidx.hilt.navigation.compose)
 
-    // core functionality
+    // core
+    implementation(platform(libs.kotlin.bom))
     implementation(libs.androidx.core.ktx)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.material3)
@@ -87,9 +89,11 @@ dependencies {
     // permission handling
     implementation(libs.accompanist.permissions)
 
-    // location and maps
+    // location, places, and map
     implementation(libs.kotlinx.coroutines.play.services)
     implementation(libs.play.services.location)
+    implementation(libs.places)
+    implementation(libs.places.ktx)
     implementation(libs.maps.compose)
 
     // preview
