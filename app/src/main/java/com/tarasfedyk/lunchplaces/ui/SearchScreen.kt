@@ -170,7 +170,7 @@ private fun SearchResult(
     ) {
         items(count = lunchPlaces.size) { i ->
             Text(
-                text = lunchPlaces[i].id,
+                text = lunchPlaces[i].name,
                 modifier = Modifier.fillMaxWidth()
             )
         }

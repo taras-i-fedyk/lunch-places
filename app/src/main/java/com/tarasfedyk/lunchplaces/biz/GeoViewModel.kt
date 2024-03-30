@@ -1,18 +1,20 @@
 package com.tarasfedyk.lunchplaces.biz
 
 import android.annotation.SuppressLint
+import android.location.Location
 import androidx.annotation.MainThread
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.Priority
+import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.tasks.CancellationTokenSource
 import com.tarasfedyk.lunchplaces.biz.data.ErrorType
 import com.tarasfedyk.lunchplaces.biz.data.GeoState
+import com.tarasfedyk.lunchplaces.biz.data.LocationSnapshot
 import com.tarasfedyk.lunchplaces.biz.data.Status
 import com.tarasfedyk.lunchplaces.biz.util.ReplaceableLauncher
-import com.tarasfedyk.lunchplaces.biz.util.toLocationSnapshot
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -54,11 +56,12 @@ class GeoViewModel @Inject constructor(
         try {
             updateGeoState { it.copy(currentLocationStatus = Status.Pending(Unit)) }
 
-            val tokenSource = CancellationTokenSource()
+            val cancellationTokenSource = CancellationTokenSource()
             val currentLocationTask = fusedLocationClient.getCurrentLocation(
-                Priority.PRIORITY_HIGH_ACCURACY, tokenSource.token
+                Priority.PRIORITY_HIGH_ACCURACY, cancellationTokenSource.token
             )
-            val currentLocation = currentLocationTask.await(tokenSource)?.toLocationSnapshot()
+            val currentLocation = currentLocationTask.await(cancellationTokenSource)
+                ?.toLocationSnapshot()
 
             val currentLocationStatus = if (currentLocation != null) {
                 Status.Success(Unit, currentLocation)
@@ -80,35 +83,12 @@ class GeoViewModel @Inject constructor(
         }
     }
 
+    private fun Location.toLocationSnapshot() =
+        LocationSnapshot(LatLng(latitude, longitude), accuracy)
+
     fun searchLunchPlaces(query: String) {
         lunchPlacesLauncher.launch {
             searchLunchPlacesImpl(query)
-        }
-    }
-
-    private suspend fun searchLunchPlacesImpl(query: String) {
-        try {
-            updateGeoState { it.copy(lunchPlacesStatus = Status.Pending(query)) }
-
-            determineCurrentLocation()
-            val currentLocationTerminalStatus = geoStateFlow
-                .first { it.currentLocationStatus is Status.Terminal }
-                .currentLocationStatus
-
-            if (currentLocationTerminalStatus is Status.Success) {
-                val lunchPlaces = repo.searchLunchPlaces(query)
-
-                updateGeoState { it.copy(lunchPlacesStatus = Status.Success(query, lunchPlaces)) }
-            } else {
-                val errorType = (currentLocationTerminalStatus as Status.Failure).errorType
-                updateGeoState { it.copy(lunchPlacesStatus = Status.Failure(query, errorType)) }
-            }
-        } catch (e: Exception) {
-            if (e !is RuntimeException) {
-                updateGeoState { it.copy( lunchPlacesStatus = Status.Failure(query, ErrorType.UNKNOWN)) }
-            } else {
-                throw e
-            }
         }
     }
 
@@ -124,6 +104,33 @@ class GeoViewModel @Inject constructor(
     fun discardLunchPlaces() {
         lunchPlacesLauncher.launch {
             updateGeoState { it.copy(lunchPlacesStatus = null) }
+        }
+    }
+
+    private suspend fun searchLunchPlacesImpl(query: String) {
+        try {
+            updateGeoState { it.copy(lunchPlacesStatus = Status.Pending(query)) }
+
+            determineCurrentLocation()
+
+            val currentLocationTerminalStatus = geoStateFlow
+                .first { it.currentLocationStatus is Status.Terminal }
+                .currentLocationStatus
+            if (currentLocationTerminalStatus is Status.Success) {
+                val currentLatLng = currentLocationTerminalStatus.result.latLng
+                val lunchPlaces = repo.searchLunchPlaces(query, currentLatLng)
+
+                updateGeoState { it.copy(lunchPlacesStatus = Status.Success(query, lunchPlaces)) }
+            } else {
+                val errorType = (currentLocationTerminalStatus as Status.Failure).errorType
+                updateGeoState { it.copy(lunchPlacesStatus = Status.Failure(query, errorType)) }
+            }
+        } catch (e: Exception) {
+            if (e !is RuntimeException) {
+                updateGeoState { it.copy( lunchPlacesStatus = Status.Failure(query, ErrorType.UNKNOWN)) }
+            } else {
+                throw e
+            }
         }
     }
 
