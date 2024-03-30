@@ -14,9 +14,9 @@ import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.rememberCameraPositionState
-import com.tarasfedyk.lunchplaces.biz.data.GeoState
-import com.tarasfedyk.lunchplaces.biz.data.LocationSnapshot
-import com.tarasfedyk.lunchplaces.biz.data.Status
+import com.tarasfedyk.lunchplaces.biz.model.GeoState
+import com.tarasfedyk.lunchplaces.biz.model.LocationSnapshot
+import com.tarasfedyk.lunchplaces.biz.model.Status
 import kotlin.math.log2
 
 // the higher the magnification, the larger the value (in abstract units)
