@@ -1,33 +1,24 @@
 package com.tarasfedyk.lunchplaces.biz
 
-import android.annotation.SuppressLint
-import android.location.Location
 import androidx.annotation.MainThread
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.Priority
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.tasks.CancellationTokenSource
 import com.tarasfedyk.lunchplaces.biz.data.ErrorType
 import com.tarasfedyk.lunchplaces.biz.data.GeoState
-import com.tarasfedyk.lunchplaces.biz.data.LocationSnapshot
 import com.tarasfedyk.lunchplaces.biz.data.Status
 import com.tarasfedyk.lunchplaces.biz.util.ReplaceableLauncher
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.tasks.await
 import java.lang.RuntimeException
 import javax.inject.Inject
 
 @HiltViewModel
 class GeoViewModel @Inject constructor(
-    private val fusedLocationClient: FusedLocationProviderClient,
+    private val locationController: LocationController,
     private val repo: Repo,
     private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
@@ -50,18 +41,10 @@ class GeoViewModel @Inject constructor(
         }
     }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    @SuppressLint("MissingPermission")
     private suspend fun determineCurrentLocationImpl() {
         try {
             updateGeoState { it.copy(currentLocationStatus = Status.Pending(Unit)) }
-
-            val cancellationTokenSource = CancellationTokenSource()
-            val currentLocationTask = fusedLocationClient.getCurrentLocation(
-                Priority.PRIORITY_HIGH_ACCURACY, cancellationTokenSource.token
-            )
-            val currentLocation = currentLocationTask.await(cancellationTokenSource)
-                ?.toLocationSnapshot()
+            val currentLocation = locationController.determineCurrentLocation()
 
             val currentLocationStatus = if (currentLocation != null) {
                 Status.Success(Unit, currentLocation)
@@ -82,9 +65,6 @@ class GeoViewModel @Inject constructor(
             }
         }
     }
-
-    private fun Location.toLocationSnapshot() =
-        LocationSnapshot(LatLng(latitude, longitude), accuracy)
 
     fun searchLunchPlaces(query: String) {
         lunchPlacesLauncher.launch {
@@ -110,7 +90,6 @@ class GeoViewModel @Inject constructor(
     private suspend fun searchLunchPlacesImpl(query: String) {
         try {
             updateGeoState { it.copy(lunchPlacesStatus = Status.Pending(query)) }
-
             determineCurrentLocation()
 
             val currentLocationTerminalStatus = geoStateFlow

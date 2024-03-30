@@ -47,8 +47,7 @@ class RepoImpl @Inject constructor(
             .setCancellationToken(cancellationTokenSource.token)
             .build()
         val searchByTextTask = placesClient.searchByText(searchByTextRequest)
-        return searchByTextTask.await(cancellationTokenSource)
-            .places.toLunchPlaces()
+        return searchByTextTask.await(cancellationTokenSource).places.toLunchPlaces()
     }
 
     private fun List<Place>.toLunchPlaces(): List<LunchPlace> =
