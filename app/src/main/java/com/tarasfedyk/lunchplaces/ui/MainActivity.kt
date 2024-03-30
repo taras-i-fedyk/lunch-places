@@ -21,7 +21,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.tarasfedyk.lunchplaces.biz.GeoViewModel
+import com.tarasfedyk.lunchplaces.biz.GeoVM
 import com.tarasfedyk.lunchplaces.biz.data.GeoState
 import com.tarasfedyk.lunchplaces.biz.data.LunchPlace
 import com.tarasfedyk.lunchplaces.biz.data.Status
@@ -47,13 +47,13 @@ class MainActivity : ComponentActivity() {
 
     @Composable
     private fun MainContent(
-        geoViewModel: GeoViewModel = hiltViewModel()
+        geoVM: GeoVM = hiltViewModel()
     ) {
-        val geoState by geoViewModel.geoStateFlow.collectAsStateWithLifecycle()
-        val onDetermineCurrentLocation = geoViewModel::determineCurrentLocation
-        val onSearchLunchPlaces = geoViewModel::searchLunchPlaces
-        val onRefreshLunchPlaces = geoViewModel::refreshLunchPlaces
-        val onDiscardLunchPlaces = geoViewModel::discardLunchPlaces
+        val geoState by geoVM.geoStateFlow.collectAsStateWithLifecycle()
+        val onDetermineCurrentLocation = geoVM::determineCurrentLocation
+        val onSearchLunchPlaces = geoVM::searchLunchPlaces
+        val onRefreshLunchPlaces = geoVM::refreshLunchPlaces
+        val onDiscardLunchPlaces = geoVM::discardLunchPlaces
         MainContentImpl(
             geoState,
             onDetermineCurrentLocation,

@@ -17,7 +17,7 @@ import java.lang.RuntimeException
 import javax.inject.Inject
 
 @HiltViewModel
-class GeoViewModel @Inject constructor(
+class GeoVM @Inject constructor(
     private val locationController: LocationController,
     private val repo: Repo,
     private val savedStateHandle: SavedStateHandle
