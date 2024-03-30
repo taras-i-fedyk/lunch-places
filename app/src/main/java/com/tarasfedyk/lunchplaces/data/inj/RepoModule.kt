@@ -1,7 +1,7 @@
-package com.tarasfedyk.lunchplaces.store.inj
+package com.tarasfedyk.lunchplaces.data.inj
 
 import com.tarasfedyk.lunchplaces.biz.Repo
-import com.tarasfedyk.lunchplaces.store.RepoImpl
+import com.tarasfedyk.lunchplaces.data.RepoImpl
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn

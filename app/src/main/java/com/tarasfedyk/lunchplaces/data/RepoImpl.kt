@@ -1,4 +1,4 @@
-package com.tarasfedyk.lunchplaces.store
+package com.tarasfedyk.lunchplaces.data
 
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.tasks.CancellationTokenSource

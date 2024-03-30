@@ -1,4 +1,4 @@
-package com.tarasfedyk.lunchplaces.store.inj
+package com.tarasfedyk.lunchplaces.data.inj
 
 import android.content.Context
 import com.google.android.libraries.places.api.Places
