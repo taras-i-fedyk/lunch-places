@@ -20,7 +20,12 @@ class RepoImpl @Inject constructor(
 ) : Repo {
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    override suspend fun searchLunchPlaces(query: String, currentLatLng: LatLng): List<LunchPlace> {
+    override suspend fun searchLunchPlaces(
+        query: String,
+        currentLatLng: LatLng,
+        radius: Double,
+        shouldRankByDistance: Boolean
+    ): List<LunchPlace> {
         val placeFields = listOf(
             Place.Field.ID,
             Place.Field.NAME,
@@ -28,21 +33,19 @@ class RepoImpl @Inject constructor(
             Place.Field.LAT_LNG,
             Place.Field.ADDRESS
         )
-
         val placeType = PlaceTypes.RESTAURANT
-
-        // TODO: configure the radius on the Settings screen
-        val radius = 10000.0
         val circularBounds = CircularBounds.newInstance(currentLatLng, radius)
-
-        // TODO: configure the rank preference on the Settings screen
-        val rankPreference = SearchByTextRequest.RankPreference.RELEVANCE
-
+        val rankPreference = if (shouldRankByDistance) {
+            SearchByTextRequest.RankPreference.DISTANCE
+        } else {
+            SearchByTextRequest.RankPreference.RELEVANCE
+        }
         val cancellationTokenSource = CancellationTokenSource()
+
         val searchByTextRequest = SearchByTextRequest
             .builder(query, placeFields)
-            .setLocationBias(circularBounds)
             .setIncludedType(placeType)
+            .setLocationBias(circularBounds)
             .setRankPreference(rankPreference)
             .setCancellationToken(cancellationTokenSource.token)
             .build()

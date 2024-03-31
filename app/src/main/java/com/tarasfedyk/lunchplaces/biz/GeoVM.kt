@@ -44,6 +44,7 @@ class GeoVM @Inject constructor(
     private suspend fun determineCurrentLocationImpl() {
         try {
             updateGeoState { it.copy(currentLocationStatus = Status.Pending(Unit)) }
+
             val currentLocation = locationController.determineCurrentLocation()
 
             val currentLocationStatus = if (currentLocation != null) {
@@ -90,6 +91,7 @@ class GeoVM @Inject constructor(
     private suspend fun searchLunchPlacesImpl(query: String) {
         try {
             updateGeoState { it.copy(lunchPlacesStatus = Status.Pending(query)) }
+
             determineCurrentLocation()
 
             val currentLocationTerminalStatus = geoStateFlow
