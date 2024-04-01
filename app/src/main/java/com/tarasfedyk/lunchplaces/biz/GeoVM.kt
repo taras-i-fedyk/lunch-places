@@ -4,7 +4,7 @@ import androidx.annotation.MainThread
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.tarasfedyk.lunchplaces.biz.exc.NullLocationException
+import com.tarasfedyk.lunchplaces.biz.exception.NullLocationException
 import com.tarasfedyk.lunchplaces.biz.model.GeoState
 import com.tarasfedyk.lunchplaces.biz.model.Status
 import com.tarasfedyk.lunchplaces.biz.util.ReplaceableLauncher
