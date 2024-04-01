@@ -1,6 +1,6 @@
 package com.tarasfedyk.lunchplaces.data.inject
 
-import com.tarasfedyk.lunchplaces.biz.Repo
+import com.tarasfedyk.lunchplaces.logic.Repo
 import com.tarasfedyk.lunchplaces.data.RepoImpl
 import dagger.Binds
 import dagger.Module

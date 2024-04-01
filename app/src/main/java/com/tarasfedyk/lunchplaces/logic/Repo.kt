@@ -1,7 +1,7 @@
-package com.tarasfedyk.lunchplaces.biz
+package com.tarasfedyk.lunchplaces.logic
 
 import com.google.android.gms.maps.model.LatLng
-import com.tarasfedyk.lunchplaces.biz.model.LunchPlace
+import com.tarasfedyk.lunchplaces.logic.model.LunchPlace
 
 interface Repo {
     suspend fun searchLunchPlaces(

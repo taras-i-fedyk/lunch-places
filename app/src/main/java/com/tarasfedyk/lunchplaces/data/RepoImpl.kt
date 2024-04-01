@@ -7,8 +7,8 @@ import com.google.android.libraries.places.api.model.Place
 import com.google.android.libraries.places.api.model.PlaceTypes
 import com.google.android.libraries.places.api.net.PlacesClient
 import com.google.android.libraries.places.api.net.SearchByTextRequest
-import com.tarasfedyk.lunchplaces.biz.Repo
-import com.tarasfedyk.lunchplaces.biz.model.LunchPlace
+import com.tarasfedyk.lunchplaces.logic.Repo
+import com.tarasfedyk.lunchplaces.logic.model.LunchPlace
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject

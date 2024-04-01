@@ -21,10 +21,10 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.tarasfedyk.lunchplaces.biz.GeoVM
-import com.tarasfedyk.lunchplaces.biz.model.GeoState
-import com.tarasfedyk.lunchplaces.biz.model.LunchPlace
-import com.tarasfedyk.lunchplaces.biz.model.Status
+import com.tarasfedyk.lunchplaces.logic.GeoVM
+import com.tarasfedyk.lunchplaces.logic.model.GeoState
+import com.tarasfedyk.lunchplaces.logic.model.LunchPlace
+import com.tarasfedyk.lunchplaces.logic.model.Status
 import com.tarasfedyk.lunchplaces.ui.nav.SEARCH_ROUTE
 import com.tarasfedyk.lunchplaces.ui.nav.searchScreen
 import com.tarasfedyk.lunchplaces.ui.theme.AppTheme

@@ -1,4 +1,4 @@
-package com.tarasfedyk.lunchplaces.biz.model
+package com.tarasfedyk.lunchplaces.logic.model
 
 import android.net.Uri
 import android.os.Parcelable

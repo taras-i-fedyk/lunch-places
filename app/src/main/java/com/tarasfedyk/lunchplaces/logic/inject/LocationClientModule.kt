@@ -1,4 +1,4 @@
-package com.tarasfedyk.lunchplaces.biz.inject
+package com.tarasfedyk.lunchplaces.logic.inject
 
 import android.content.Context
 import com.google.android.gms.location.FusedLocationProviderClient
