@@ -1,4 +1,4 @@
-package com.tarasfedyk.lunchplaces.biz.inj
+package com.tarasfedyk.lunchplaces.biz.inject
 
 import com.tarasfedyk.lunchplaces.biz.LocationController
 import com.tarasfedyk.lunchplaces.biz.LocationControllerImpl

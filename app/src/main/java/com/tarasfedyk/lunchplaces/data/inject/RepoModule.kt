@@ -1,4 +1,4 @@
-package com.tarasfedyk.lunchplaces.data.inj
+package com.tarasfedyk.lunchplaces.data.inject
 
 import com.tarasfedyk.lunchplaces.biz.Repo
 import com.tarasfedyk.lunchplaces.data.RepoImpl
