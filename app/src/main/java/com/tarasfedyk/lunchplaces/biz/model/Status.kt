@@ -16,6 +16,6 @@ sealed class Status<Input, out Output> {
 
     data class Failure<Input>(
         override val arg: Input,
-        val errorType: ErrorType
+        val error: Exception
     ) : Terminal<Input, Nothing>()
 }
