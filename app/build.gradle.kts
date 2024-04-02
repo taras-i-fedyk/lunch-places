@@ -2,7 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.kapt)
-    alias(libs.plugins.hilt)
+    alias(libs.plugins.hilt.android)
     id(libs.secrets.get().group!!)
     id(libs.plugins.kotlin.parcelize.get().pluginId)
 }
@@ -70,8 +70,8 @@ secrets {
 
 dependencies {
     // dependency injection
-    implementation(libs.hilt)
-    kapt(libs.hilt.compiler)
+    implementation(libs.hilt.android)
+    kapt(libs.hilt.android.compiler)
     implementation(libs.androidx.hilt.navigation.compose)
 
     // core
