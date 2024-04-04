@@ -1,9 +1,9 @@
-package com.tarasfedyk.lunchplaces.logic.model
+package com.tarasfedyk.lunchplaces.biz.model
 
 import android.os.Parcel
 import android.os.Parcelable
-import com.tarasfedyk.lunchplaces.logic.util.readBool
-import com.tarasfedyk.lunchplaces.logic.util.writeBool
+import com.tarasfedyk.lunchplaces.biz.util.readBool
+import com.tarasfedyk.lunchplaces.biz.util.writeBool
 import kotlinx.parcelize.Parceler
 import kotlinx.parcelize.Parcelize
 

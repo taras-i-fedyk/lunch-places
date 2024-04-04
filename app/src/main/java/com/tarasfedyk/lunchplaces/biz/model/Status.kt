@@ -1,4 +1,4 @@
-package com.tarasfedyk.lunchplaces.logic.model
+package com.tarasfedyk.lunchplaces.biz.model
 
 sealed class Status<Input, out Output> {
     abstract val arg: Input

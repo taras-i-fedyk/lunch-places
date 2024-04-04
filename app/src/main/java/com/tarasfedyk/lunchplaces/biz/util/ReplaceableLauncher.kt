@@ -1,4 +1,4 @@
-package com.tarasfedyk.lunchplaces.logic.util
+package com.tarasfedyk.lunchplaces.biz.util
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job

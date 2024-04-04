@@ -1,4 +1,4 @@
-package com.tarasfedyk.lunchplaces.logic.util
+package com.tarasfedyk.lunchplaces.biz.util
 
 import android.os.Parcel
 

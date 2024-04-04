@@ -1,4 +1,4 @@
-package com.tarasfedyk.lunchplaces.logic
+package com.tarasfedyk.lunchplaces.biz
 
 import android.annotation.SuppressLint
 import android.location.Location
@@ -6,7 +6,7 @@ import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.Priority
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.tasks.CancellationTokenSource
-import com.tarasfedyk.lunchplaces.logic.model.LocationSnapshot
+import com.tarasfedyk.lunchplaces.biz.model.LocationSnapshot
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject

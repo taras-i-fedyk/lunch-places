@@ -1,7 +1,7 @@
-package com.tarasfedyk.lunchplaces.logic.inject
+package com.tarasfedyk.lunchplaces.biz.inject
 
-import com.tarasfedyk.lunchplaces.logic.LocationController
-import com.tarasfedyk.lunchplaces.logic.LocationControllerImpl
+import com.tarasfedyk.lunchplaces.biz.LocationController
+import com.tarasfedyk.lunchplaces.biz.LocationControllerImpl
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
