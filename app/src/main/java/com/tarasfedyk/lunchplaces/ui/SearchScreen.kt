@@ -31,8 +31,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.tarasfedyk.lunchplaces.R
-import com.tarasfedyk.lunchplaces.biz.model.LunchPlace
-import com.tarasfedyk.lunchplaces.biz.model.Status
+import com.tarasfedyk.lunchplaces.biz.data.LunchPlace
+import com.tarasfedyk.lunchplaces.biz.data.Status
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

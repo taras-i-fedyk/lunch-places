@@ -1,4 +1,4 @@
-package com.tarasfedyk.lunchplaces.biz.model
+package com.tarasfedyk.lunchplaces.biz.data
 
 import android.os.Parcelable
 import com.google.android.gms.maps.model.LatLng
