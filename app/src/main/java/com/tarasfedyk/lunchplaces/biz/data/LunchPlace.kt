@@ -8,11 +8,11 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 data class LunchPlace(
     val id: String,
-    val name: String = "",
-    val rating: Double? = null,
+    val name: String,
+    val rating: Double?,
     val latLng: LatLng,
-    val distance: Float = 0.0f,
-    val address: String? = null,
+    val distance: Float,
+    val address: String?,
     val isOpen: Boolean = false,
     val thumbnailUri: Uri? = null,
     val imageUri: Uri? = null
