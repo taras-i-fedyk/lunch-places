@@ -1,5 +1,6 @@
 package com.tarasfedyk.lunchplaces.store
 
+import android.location.Location
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.tasks.CancellationTokenSource
 import com.google.android.libraries.places.api.model.CircularBounds
@@ -9,8 +10,10 @@ import com.google.android.libraries.places.api.net.PlacesClient
 import com.google.android.libraries.places.api.net.SearchByTextRequest
 import com.tarasfedyk.lunchplaces.biz.Repo
 import com.tarasfedyk.lunchplaces.biz.data.LunchPlace
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -50,17 +53,28 @@ class RepoImpl @Inject constructor(
             .setCancellationToken(cancellationTokenSource.token)
             .build()
         val searchByTextTask = placesClient.searchByText(searchByTextRequest)
-        return searchByTextTask.await(cancellationTokenSource).places.toLunchPlaces()
+        return searchByTextTask.await(cancellationTokenSource)
+            .places.toLunchPlaces(currentLatLng)
     }
 
-    private fun List<Place>.toLunchPlaces(): List<LunchPlace> =
-        map { place ->
-            LunchPlace(
-                id = place.id!!,
-                name = place.name!!,
-                rating = place.rating,
-                latLng = place.latLng!!,
-                address = place.address
-            )
+    private suspend fun List<Place>.toLunchPlaces(currentLatLng: LatLng,): List<LunchPlace> =
+        withContext(Dispatchers.Default) {
+            map { place ->
+                val distanceResults = FloatArray(size = 3)
+                Location.distanceBetween(
+                    currentLatLng.latitude, currentLatLng.longitude,
+                    place.latLng!!.latitude, place.latLng!!.longitude,
+                    distanceResults
+                )
+
+                LunchPlace(
+                    id = place.id!!,
+                    name = place.name!!,
+                    rating = place.rating,
+                    latLng = place.latLng!!,
+                    distance = distanceResults[0],
+                    address = place.address
+                )
+            }
         }
 }
