@@ -13,7 +13,7 @@ data class LunchPlace(
     val latLng: LatLng,
     val distance: Float,
     val address: String?,
-    val isOpen: Boolean = false,
+    val isOpen: Boolean?,
     val thumbnailUri: Uri? = null,
     val imageUri: Uri? = null
 ) : Parcelable
