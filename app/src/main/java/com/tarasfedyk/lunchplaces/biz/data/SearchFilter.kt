@@ -6,6 +6,6 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 data class SearchFilter(
     val query: String,
-    val maxThumbnailWidth: Int? = null,
-    val maxPhotoWidth: Int? = null
+    val thumbnailSizeLimit: SizeLimit = SizeLimit(),
+    val photoSizeLimit: SizeLimit = SizeLimit()
 ) : Parcelable

@@ -14,6 +14,7 @@ import com.google.android.libraries.places.api.net.SearchByTextRequest
 import com.tarasfedyk.lunchplaces.biz.Repo
 import com.tarasfedyk.lunchplaces.biz.data.LunchPlace
 import com.tarasfedyk.lunchplaces.biz.data.SearchFilter
+import com.tarasfedyk.lunchplaces.biz.data.SizeLimit
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
@@ -67,29 +68,29 @@ class RepoImpl @Inject constructor(
             .build()
         val searchByTextTask = placesClient.searchByText(searchByTextRequest)
         return searchByTextTask.await(cancellationTokenSource).places
-            .toLunchPlaces(currentLatLng, searchFilter.maxThumbnailWidth, searchFilter.maxPhotoWidth)
+            .toLunchPlaces(currentLatLng, searchFilter.thumbnailSizeLimit, searchFilter.photoSizeLimit)
     }
 
     private suspend fun List<Place>.toLunchPlaces(
         currentLatLng: LatLng,
-        maxThumbnailWidth: Int?,
-        maxPhotoWidth: Int?
+        thumbnailSizeLimit: SizeLimit,
+        photoSizeLimit: SizeLimit
     ): List<LunchPlace> = coroutineScope {
         val lunchPlacesDeferred = map { place ->
-            async { place.toLunchPlace(currentLatLng, maxThumbnailWidth, maxPhotoWidth) }
+            async { place.toLunchPlace(currentLatLng, thumbnailSizeLimit, photoSizeLimit) }
         }
         lunchPlacesDeferred.awaitAll()
     }
 
     private suspend fun Place.toLunchPlace(
         currentLatLng: LatLng,
-        maxThumbnailWidth: Int?,
-        maxPhotoWidth: Int?
+        thumbnailSizeLimit: SizeLimit,
+        photoSizeLimit: SizeLimit
     ): LunchPlace = coroutineScope {
         val distanceDeferred = async { calculateDistance(currentLatLng) }
         val isOpenDeferred = async { determineIfOpen() }
-        val thumbnailUriDeferred = async { obtainPhotoUri(maxThumbnailWidth) }
-        val photoUriDeferred = async { obtainPhotoUri(maxPhotoWidth) }
+        val thumbnailUriDeferred = async { obtainPhotoUri(thumbnailSizeLimit) }
+        val photoUriDeferred = async { obtainPhotoUri(photoSizeLimit) }
         joinAll(distanceDeferred, isOpenDeferred, thumbnailUriDeferred, photoUriDeferred)
         val distance = distanceDeferred.await()
         val isOpen = isOpenDeferred.await()
@@ -134,14 +135,15 @@ class RepoImpl @Inject constructor(
 
     @OptIn(ExperimentalCoroutinesApi::class)
     private suspend fun Place.obtainPhotoUri(
-        maxPhotoWidth: Int?
+        photoSizeLimit: SizeLimit
     ): Uri? {
         val photoMetadata = photoMetadatas?.firstOrNull() ?: return null
 
         val cancellationTokenSource = CancellationTokenSource()
         val photoUriRequest = FetchResolvedPhotoUriRequest
             .builder(photoMetadata)
-            .setMaxWidth(maxPhotoWidth)
+            .setMaxWidth(photoSizeLimit.maxWidth)
+            .setMaxHeight(photoSizeLimit.maxHeight)
             .setCancellationToken(cancellationTokenSource.token)
             .build()
         return placesClient.fetchResolvedPhotoUri(photoUriRequest).await(cancellationTokenSource).uri
