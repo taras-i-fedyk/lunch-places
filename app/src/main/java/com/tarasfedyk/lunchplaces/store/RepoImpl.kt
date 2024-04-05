@@ -1,16 +1,19 @@
 package com.tarasfedyk.lunchplaces.store
 
 import android.location.Location
+import android.net.Uri
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.tasks.CancellationTokenSource
 import com.google.android.libraries.places.api.model.CircularBounds
 import com.google.android.libraries.places.api.model.Place
 import com.google.android.libraries.places.api.model.PlaceTypes
+import com.google.android.libraries.places.api.net.FetchResolvedPhotoUriRequest
 import com.google.android.libraries.places.api.net.IsOpenRequest
 import com.google.android.libraries.places.api.net.PlacesClient
 import com.google.android.libraries.places.api.net.SearchByTextRequest
 import com.tarasfedyk.lunchplaces.biz.Repo
 import com.tarasfedyk.lunchplaces.biz.data.LunchPlace
+import com.tarasfedyk.lunchplaces.biz.data.SearchFilter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
@@ -29,7 +32,7 @@ class RepoImpl @Inject constructor(
 
     @OptIn(ExperimentalCoroutinesApi::class)
     override suspend fun searchLunchPlaces(
-        query: String,
+        searchFilter: SearchFilter,
         currentLatLng: LatLng,
         radius: Double,
         shouldRankByDistance: Boolean
@@ -43,7 +46,8 @@ class RepoImpl @Inject constructor(
             Place.Field.BUSINESS_STATUS,
             Place.Field.CURRENT_OPENING_HOURS,
             Place.Field.OPENING_HOURS,
-            Place.Field.UTC_OFFSET
+            Place.Field.UTC_OFFSET,
+            Place.Field.PHOTO_METADATAS
         )
         val placeType = PlaceTypes.RESTAURANT
         val circularBounds = CircularBounds.newInstance(currentLatLng, radius)
@@ -55,34 +59,42 @@ class RepoImpl @Inject constructor(
 
         val cancellationTokenSource = CancellationTokenSource()
         val searchByTextRequest = SearchByTextRequest
-            .builder(query, placeFields)
+            .builder(searchFilter.query, placeFields)
             .setIncludedType(placeType)
             .setLocationBias(circularBounds)
             .setRankPreference(rankPreference)
             .setCancellationToken(cancellationTokenSource.token)
             .build()
         val searchByTextTask = placesClient.searchByText(searchByTextRequest)
-        return searchByTextTask.await(cancellationTokenSource)
-            .places.toLunchPlaces(currentLatLng)
+        return searchByTextTask.await(cancellationTokenSource).places
+            .toLunchPlaces(currentLatLng, searchFilter.maxThumbnailWidth, searchFilter.maxPhotoWidth)
     }
 
     private suspend fun List<Place>.toLunchPlaces(
-        currentLatLng: LatLng
+        currentLatLng: LatLng,
+        maxThumbnailWidth: Int?,
+        maxPhotoWidth: Int?
     ): List<LunchPlace> = coroutineScope {
         val lunchPlacesDeferred = map { place ->
-            async { place.toLunchPlace(currentLatLng) }
+            async { place.toLunchPlace(currentLatLng, maxThumbnailWidth, maxPhotoWidth) }
         }
         lunchPlacesDeferred.awaitAll()
     }
 
     private suspend fun Place.toLunchPlace(
-        currentLatLng: LatLng
+        currentLatLng: LatLng,
+        maxThumbnailWidth: Int?,
+        maxPhotoWidth: Int?
     ): LunchPlace = coroutineScope {
         val distanceDeferred = async { calculateDistance(currentLatLng) }
         val isOpenDeferred = async { determineIfOpen() }
-        joinAll(distanceDeferred, isOpenDeferred)
+        val thumbnailUriDeferred = async { obtainPhotoUri(maxThumbnailWidth) }
+        val photoUriDeferred = async { obtainPhotoUri(maxPhotoWidth) }
+        joinAll(distanceDeferred, isOpenDeferred, thumbnailUriDeferred, photoUriDeferred)
         val distance = distanceDeferred.await()
         val isOpen = isOpenDeferred.await()
+        val thumbnailUri = thumbnailUriDeferred.await()
+        val photoUri = photoUriDeferred.await()
 
         LunchPlace(
             id = id!!,
@@ -91,7 +103,9 @@ class RepoImpl @Inject constructor(
             latLng = latLng!!,
             distance = distance,
             address = address,
-            isOpen = isOpen
+            isOpen = isOpen,
+            thumbnailUri = thumbnailUri,
+            photoUri = photoUri
         )
     }
 
@@ -116,5 +130,20 @@ class RepoImpl @Inject constructor(
             .build()
         val isOpenTask = placesClient.isOpen(isOpenRequest)
         return isOpenTask.await(cancellationTokenSource).isOpen
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private suspend fun Place.obtainPhotoUri(
+        maxPhotoWidth: Int?
+    ): Uri? {
+        val photoMetadata = photoMetadatas?.firstOrNull() ?: return null
+
+        val cancellationTokenSource = CancellationTokenSource()
+        val photoUriRequest = FetchResolvedPhotoUriRequest
+            .builder(photoMetadata)
+            .setMaxWidth(maxPhotoWidth)
+            .setCancellationToken(cancellationTokenSource.token)
+            .build()
+        return placesClient.fetchResolvedPhotoUri(photoUriRequest).await(cancellationTokenSource).uri
     }
 }

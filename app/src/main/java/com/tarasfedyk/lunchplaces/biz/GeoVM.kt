@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tarasfedyk.lunchplaces.biz.exception.NullLocationException
 import com.tarasfedyk.lunchplaces.biz.data.GeoState
+import com.tarasfedyk.lunchplaces.biz.data.SearchFilter
 import com.tarasfedyk.lunchplaces.biz.data.Status
 import com.tarasfedyk.lunchplaces.biz.util.ReplaceableLauncher
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -62,9 +63,9 @@ class GeoVM @Inject constructor(
         }
     }
 
-    fun searchLunchPlaces(query: String) {
+    fun searchLunchPlaces(searchFilter: SearchFilter) {
         lunchPlacesLauncher.launch {
-            searchLunchPlacesImpl(query)
+            searchLunchPlacesImpl(searchFilter)
         }
     }
 
@@ -83,9 +84,9 @@ class GeoVM @Inject constructor(
         }
     }
 
-    private suspend fun searchLunchPlacesImpl(query: String) {
+    private suspend fun searchLunchPlacesImpl(searchFilter: SearchFilter) {
         try {
-            updateGeoState { it.copy(lunchPlacesStatus = Status.Pending(query)) }
+            updateGeoState { it.copy(lunchPlacesStatus = Status.Pending(searchFilter)) }
 
             determineCurrentLocation()
             val currentLocationTerminalStatus = geoStateFlow
@@ -96,12 +97,12 @@ class GeoVM @Inject constructor(
             }
 
             val currentLatLng = (currentLocationTerminalStatus as Status.Success).result.latLng
-            val lunchPlaces = repo.searchLunchPlaces(query, currentLatLng)
+            val lunchPlaces = repo.searchLunchPlaces(searchFilter, currentLatLng)
 
-            updateGeoState { it.copy(lunchPlacesStatus = Status.Success(query, lunchPlaces)) }
+            updateGeoState { it.copy(lunchPlacesStatus = Status.Success(searchFilter, lunchPlaces)) }
         } catch (e: Exception) {
             if (e !is RuntimeException || e is SecurityException) {
-                updateGeoState { it.copy( lunchPlacesStatus = Status.Failure(query, e)) }
+                updateGeoState { it.copy( lunchPlacesStatus = Status.Failure(searchFilter, e)) }
             } else {
                 throw e
             }

@@ -24,6 +24,7 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.tarasfedyk.lunchplaces.biz.GeoVM
 import com.tarasfedyk.lunchplaces.biz.data.GeoState
 import com.tarasfedyk.lunchplaces.biz.data.LunchPlace
+import com.tarasfedyk.lunchplaces.biz.data.SearchFilter
 import com.tarasfedyk.lunchplaces.biz.data.Status
 import com.tarasfedyk.lunchplaces.ui.nav.SEARCH_ROUTE
 import com.tarasfedyk.lunchplaces.ui.nav.searchScreen
@@ -67,7 +68,7 @@ class MainActivity : ComponentActivity() {
     private fun MainContentImpl(
         geoState: GeoState,
         onDetermineCurrentLocation: () -> Unit,
-        onSearchLunchPlaces: (String) -> Unit,
+        onSearchLunchPlaces: (SearchFilter) -> Unit,
         onRefreshLunchPlaces: () -> Unit,
         onDiscardLunchPlaces: () -> Unit
     ) {
@@ -112,8 +113,8 @@ class MainActivity : ComponentActivity() {
     @Composable
     private fun NavGraph(
         onSearchBarBottomYChanged: (Dp) -> Unit,
-        lunchPlacesStatus: Status<String, List<LunchPlace>>?,
-        onSearchLunchPlaces: (String) -> Unit,
+        lunchPlacesStatus: Status<SearchFilter, List<LunchPlace>>?,
+        onSearchLunchPlaces: (SearchFilter) -> Unit,
         onDiscardLunchPlaces: () -> Unit,
         navController: NavHostController = rememberNavController()
     ) {

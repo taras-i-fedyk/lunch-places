@@ -32,14 +32,15 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.tarasfedyk.lunchplaces.R
 import com.tarasfedyk.lunchplaces.biz.data.LunchPlace
+import com.tarasfedyk.lunchplaces.biz.data.SearchFilter
 import com.tarasfedyk.lunchplaces.biz.data.Status
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchScreen(
     onSearchBarBottomYChanged: (Dp) -> Unit,
-    lunchPlacesStatus: Status<String, List<LunchPlace>>?,
-    onSearchLunchPlaces: (String) -> Unit,
+    lunchPlacesStatus: Status<SearchFilter, List<LunchPlace>>?,
+    onSearchLunchPlaces: (SearchFilter) -> Unit,
     onDiscardLunchPlaces: () -> Unit
 ) {
     var isActive by rememberSaveable { mutableStateOf(false) }
@@ -66,7 +67,7 @@ fun SearchScreen(
         sentQuery = currentQuery
         if (sentQuery.isNotEmpty()) {
             focusManager.clearFocus()
-            onSearchLunchPlaces(sentQuery)
+            onSearchLunchPlaces(SearchFilter(sentQuery))
         } else {
             onGoBack()
         }
@@ -143,7 +144,7 @@ private fun ClearIconButton(onClicked: () -> Unit) {
 
 @Composable
 private fun SearchStatus(
-    lunchPlacesStatus: Status<String, List<LunchPlace>>?
+    lunchPlacesStatus: Status<SearchFilter, List<LunchPlace>>?
 ) {
     when (lunchPlacesStatus) {
         null -> {}

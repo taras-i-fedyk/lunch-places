@@ -10,7 +10,7 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 data class GeoState(
     val currentLocationStatus: Status<Unit, LocationSnapshot>? = null,
-    val lunchPlacesStatus: Status<String, List<LunchPlace>>? = null
+    val lunchPlacesStatus: Status<SearchFilter, List<LunchPlace>>? = null
 ) : Parcelable {
 
     private companion object : Parceler<GeoState> {
@@ -43,19 +43,20 @@ data class GeoState(
             val isLunchPlacesStatusNull = lunchPlacesStatus == null
             parcel.writeBool(isLunchPlacesStatusNull)
             if (lunchPlacesStatus != null) {
+                val writeArg = { parcel.writeParcelable(lunchPlacesStatus.arg, flags) }
                 when (lunchPlacesStatus) {
                     is Status.Pending -> {
                         parcel.writeSerializable(StatusType.PENDING)
-                        parcel.writeString(lunchPlacesStatus.arg)
+                        writeArg()
                     }
                     is Status.Success -> {
                         parcel.writeSerializable(StatusType.SUCCESS)
-                        parcel.writeString(lunchPlacesStatus.arg)
+                        writeArg()
                         parcel.writeParcelableArray(lunchPlacesStatus.result.toTypedArray(), flags)
                     }
                     is Status.Failure -> {
                         parcel.writeSerializable(StatusType.FAILURE)
-                        parcel.writeString(lunchPlacesStatus.arg)
+                        writeArg()
                         parcel.writeSerializable(lunchPlacesStatus.error)
                     }
                 }
@@ -91,22 +92,27 @@ data class GeoState(
             }
         }
 
-        private fun readLunchPlacesStatus(parcel: Parcel): Status<String, List<LunchPlace>>? {
+        private fun readLunchPlacesStatus(parcel: Parcel): Status<SearchFilter, List<LunchPlace>>? {
             val isLunchPlacesStatusNull = parcel.readBool()
             if (isLunchPlacesStatusNull) {
                 return null
             } else {
                 val statusType = parcel.readSerializable() as StatusType
-                val arg = parcel.readString() as String
+                val arg = run {
+                    val classLoader = SearchFilter::class.java.classLoader
+                    parcel.readParcelable<SearchFilter>(classLoader)!!
+                }
                 return when (statusType) {
                     StatusType.PENDING -> {
                         Status.Pending(arg)
                     }
                     StatusType.SUCCESS -> {
-                        val classLoader = LunchPlace::class.java.classLoader
-                        val result = parcel.readParcelableArray(classLoader)!!
-                            .map { it as LunchPlace }
-                            .toList()
+                        val result = run {
+                            val classLoader = LunchPlace::class.java.classLoader
+                            parcel.readParcelableArray(classLoader)!!
+                                .map { it as LunchPlace }
+                                .toList()
+                        }
                         Status.Success(arg, result)
                     }
                     StatusType.FAILURE -> {
