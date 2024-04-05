@@ -19,10 +19,10 @@ import com.tarasfedyk.lunchplaces.biz.data.LocationSnapshot
 import com.tarasfedyk.lunchplaces.biz.data.Status
 import kotlin.math.log2
 
-// the higher the magnification, the larger the value (in abstract units)
-private const val ZOOM_LEVEL_MAX: Float = 21f
-// the higher the accuracy, the smaller the value (as a radius in meters)
-private const val LOCATION_ACCURACY_MAX: Float = 4f
+// the higher the zoom level, the larger the value of this constant as the degree of magnification
+private const val MAX_ZOOM_LEVEL: Float = 21f
+// the higher the location accuracy, the smaller the value of this constant as a radius in meters
+private const val MAX_LOCATION_ACCURACY: Float = 4f
 
 @Composable
 fun MapScreen(
@@ -32,7 +32,7 @@ fun MapScreen(
     onDetermineCurrentLocation: () -> Unit
 ) {
     val mapProperties = MapProperties(
-        maxZoomPreference = ZOOM_LEVEL_MAX,
+        maxZoomPreference = MAX_ZOOM_LEVEL,
         isMyLocationEnabled = isCurrentLocationDisplayed
     )
     val cameraPositionState = rememberCameraPositionState()
@@ -68,9 +68,9 @@ fun MapScreen(
 }
 
 private fun recommendZoomLevel(locationAccuracy: Float): Float =
-    // based on how close the given accuracy is to the maximum accuracy
-    // and the fact that the maximum accuracy should be accompanied by the maximum magnification
-    ZOOM_LEVEL_MAX - (log2(locationAccuracy) - log2(LOCATION_ACCURACY_MAX))
+    // based on how close the given location accuracy is to the maximum location accuracy
+    // and assuming the maximum location accuracy should be accompanied by the maximum zoom level
+    MAX_ZOOM_LEVEL - (log2(locationAccuracy) - log2(MAX_LOCATION_ACCURACY))
 
 @Preview(showBackground = true)
 @Composable
