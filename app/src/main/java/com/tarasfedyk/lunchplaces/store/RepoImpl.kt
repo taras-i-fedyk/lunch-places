@@ -78,8 +78,8 @@ class RepoImpl @Inject constructor(
     private suspend fun Place.toLunchPlace(
         currentLatLng: LatLng
     ): LunchPlace = coroutineScope {
-        val distanceDeferred = async { distanceTo(currentLatLng) }
-        val isOpenDeferred = async { isOpenNow() }
+        val distanceDeferred = async { calculateDistance(currentLatLng) }
+        val isOpenDeferred = async { determineIfOpen() }
         joinAll(distanceDeferred, isOpenDeferred)
         val distance = distanceDeferred.await()
         val isOpen = isOpenDeferred.await()
@@ -95,7 +95,7 @@ class RepoImpl @Inject constructor(
         )
     }
 
-    private suspend fun Place.distanceTo(
+    private suspend fun Place.calculateDistance(
         currentLatLng: LatLng
     ): Float = withContext(Dispatchers.Default) {
         val distanceResults = FloatArray(size = 3)
@@ -108,7 +108,7 @@ class RepoImpl @Inject constructor(
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    private suspend fun Place.isOpenNow(): Boolean? {
+    private suspend fun Place.determineIfOpen(): Boolean? {
         val cancellationTokenSource = CancellationTokenSource()
         val isOpenRequest = IsOpenRequest
             .builder(this)
