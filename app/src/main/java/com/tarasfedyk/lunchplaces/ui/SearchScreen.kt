@@ -159,7 +159,7 @@ private fun SearchStatus(lunchPlacesStatus: Status<SearchFilter, List<LunchPlace
 @Composable
 private fun SearchProgress() {
     LinearProgressIndicator(
-        modifier = Modifier.fillMaxWidth().padding(all = 16.dp)
+        modifier = Modifier.fillMaxWidth().padding(all = 8.dp)
     )
 }
 
