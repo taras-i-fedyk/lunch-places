@@ -6,6 +6,7 @@ import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -14,6 +15,7 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
@@ -143,18 +145,11 @@ private fun ClearIconButton(onClicked: () -> Unit) {
 }
 
 @Composable
-private fun SearchStatus(
-    lunchPlacesStatus: Status<SearchFilter, List<LunchPlace>>?
-) {
+private fun SearchStatus(lunchPlacesStatus: Status<SearchFilter, List<LunchPlace>>?) {
     when (lunchPlacesStatus) {
         null -> {}
-        is Status.Pending -> {
-            // TODO: display a progress bar
-        }
-        is Status.Success -> {
-            val lunchPlaces = lunchPlacesStatus.result
-            SearchResult(lunchPlaces)
-        }
+        is Status.Pending -> SearchProgress()
+        is Status.Success -> SearchResult(lunchPlaces = lunchPlacesStatus.result)
         is Status.Failure -> {
             // TODO: display a snackbar about the search error
         }
@@ -162,9 +157,14 @@ private fun SearchStatus(
 }
 
 @Composable
-private fun SearchResult(
-    lunchPlaces: List<LunchPlace>
-) {
+private fun SearchProgress() {
+    LinearProgressIndicator(
+        modifier = Modifier.fillMaxWidth().padding(all = 16.dp)
+    )
+}
+
+@Composable
+private fun SearchResult(lunchPlaces: List<LunchPlace>) {
     LazyColumn(
         contentPadding = PaddingValues(all = 16.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
