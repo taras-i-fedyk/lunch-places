@@ -8,8 +8,6 @@ import com.google.accompanist.permissions.PermissionState
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 
-fun Map<String, Boolean>.areAllValuesFalse(): Boolean = values.none { it }
-
 @OptIn(ExperimentalPermissionsApi::class)
 fun MultiplePermissionsState.isPermissionGranted(permission: String): Boolean =
     permissions.any { it.permission == permission && it.status.isGranted }

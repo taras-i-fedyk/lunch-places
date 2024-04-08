@@ -29,7 +29,6 @@ import com.tarasfedyk.lunchplaces.biz.data.Status
 import com.tarasfedyk.lunchplaces.ui.nav.SEARCH_ROUTE
 import com.tarasfedyk.lunchplaces.ui.nav.searchScreen
 import com.tarasfedyk.lunchplaces.ui.theme.AppTheme
-import com.tarasfedyk.lunchplaces.ui.util.areAllValuesFalse
 import com.tarasfedyk.lunchplaces.ui.util.isPermissionGranted
 import com.tarasfedyk.lunchplaces.ui.util.rememberMultiplePermissionsStateWrapper
 import dagger.hilt.android.AndroidEntryPoint
@@ -137,33 +136,27 @@ class MainActivity : ComponentActivity() {
         onAllLocationPermissionsDenied: () -> Unit,
         onSomeLocationPermissionGranted: () -> Unit
     ) {
-        val onLocationsPermissionsResult: (Map<String, Boolean>) -> Unit =
-            { locationPermissionFlags ->
-                if (locationPermissionFlags.areAllValuesFalse()) {
-                    onAllLocationPermissionsDenied()
-                }
+        val onLocationsPermissionsResult: (Map<String, Boolean>) -> Unit = { locationPermissions ->
+            if (locationPermissions[ACCESS_COARSE_LOCATION] != true &&
+                locationPermissions[ACCESS_FINE_LOCATION] != true
+            ) {
+                onAllLocationPermissionsDenied()
+            } else if (
+                locationPermissions[ACCESS_COARSE_LOCATION] == true &&
+                locationPermissions[ACCESS_FINE_LOCATION] != true
+            ) {
+                onSomeLocationPermissionGranted()
             }
+        }
         // TODO: replace this with a direct call in a Preview-friendly way
         val locationPermissionsState = rememberMultiplePermissionsStateWrapper(
             permissions = listOf(ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION),
             onPermissionsResult = onLocationsPermissionsResult
         )
 
-        val isSolelyCoarseLocationPermissionGranted by remember {
-            derivedStateOf {
-                locationPermissionsState.isPermissionGranted(ACCESS_COARSE_LOCATION) &&
-                !locationPermissionsState.isPermissionGranted(ACCESS_FINE_LOCATION)
-            }
-        }
         val isFineLocationPermissionGranted by remember {
             derivedStateOf {
                 locationPermissionsState.isPermissionGranted(ACCESS_FINE_LOCATION)
-            }
-        }
-
-        LaunchedEffect(isSolelyCoarseLocationPermissionGranted) {
-            if (isSolelyCoarseLocationPermissionGranted) {
-                onSomeLocationPermissionGranted()
             }
         }
         LaunchedEffect(isFineLocationPermissionGranted) {
