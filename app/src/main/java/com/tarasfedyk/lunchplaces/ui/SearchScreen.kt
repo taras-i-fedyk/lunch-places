@@ -1,5 +1,6 @@
 package com.tarasfedyk.lunchplaces.ui
 
+import android.annotation.SuppressLint
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
@@ -16,8 +17,13 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -65,6 +71,7 @@ fun SearchScreen(
             onDiscardLunchPlaces()
         }
     }
+    val onClear = { currentQuery = "" }
     val onSearch = { _: String ->
         sentQuery = currentQuery
         if (sentQuery.isNotEmpty()) {
@@ -74,19 +81,16 @@ fun SearchScreen(
             onGoBack()
         }
     }
+    val onRetrySearch = { onSearch(sentQuery) }
 
     val searchIcon: @Composable () -> Unit = {
         SearchIcon()
     }
     val upNavIconButton: @Composable () -> Unit = {
-        UpNavIconButton {
-            onGoBack()
-        }
+        UpNavIconButton(onGoUp = onGoBack)
     }
-    val clearIconButton: @Composable () -> Unit = {
-        ClearIconButton {
-            currentQuery = ""
-        }
+    val clearanceIconButton: @Composable () -> Unit = {
+        ClearanceIconButton(onClear)
     }
 
     // TODO: adjust the horizontal padding in a smooth way
@@ -95,7 +99,7 @@ fun SearchScreen(
         shadowElevation = 6.dp,
         placeholder = { SearchHint() },
         leadingIcon = if (isActive) upNavIconButton else searchIcon,
-        trailingIcon = if (isFocused) clearIconButton else null,
+        trailingIcon = if (isFocused) clearanceIconButton else null,
         active = isActive,
         onActiveChange = { isActive = it },
         interactionSource = interactionSource,
@@ -104,7 +108,7 @@ fun SearchScreen(
         onSearch = onSearch
     ) {
         if (!isFocused) {
-            SearchStatus(lunchPlacesStatus)
+            SearchStatus(lunchPlacesStatus, onRetrySearch)
         }
         BackHandler(enabled = isActive) {
             onGoBack()
@@ -131,35 +135,38 @@ private fun SearchIcon() {
 }
 
 @Composable
-private fun UpNavIconButton(onClicked: () -> Unit) {
-    IconButton(onClick = onClicked) {
+private fun UpNavIconButton(onGoUp: () -> Unit) {
+    IconButton(onClick = onGoUp) {
         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
     }
 }
 
 @Composable
-private fun ClearIconButton(onClicked: () -> Unit) {
-    IconButton(onClick = onClicked) {
+private fun ClearanceIconButton(onClear: () -> Unit) {
+    IconButton(onClick = onClear) {
         Icon(Icons.Default.Clear, contentDescription = null)
     }
 }
 
 @Composable
-private fun SearchStatus(lunchPlacesStatus: Status<SearchFilter, List<LunchPlace>>?) {
+private fun SearchStatus(
+    lunchPlacesStatus: Status<SearchFilter, List<LunchPlace>>?,
+    onRetrySearch: () -> Unit
+) {
     when (lunchPlacesStatus) {
         null -> {}
         is Status.Pending -> SearchProgress()
         is Status.Success -> SearchResult(lunchPlaces = lunchPlacesStatus.result)
-        is Status.Failure -> {
-            // TODO: display a snackbar about the search error
-        }
+        is Status.Failure -> SearchError(onRetrySearch)
     }
 }
 
 @Composable
 private fun SearchProgress() {
     LinearProgressIndicator(
-        modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
+        modifier = Modifier
+            .padding(top = 8.dp)
+            .fillMaxWidth()
     )
 }
 
@@ -174,6 +181,34 @@ private fun SearchResult(lunchPlaces: List<LunchPlace>) {
                 text = lunchPlaces[i].name,
                 modifier = Modifier.fillMaxWidth()
             )
+        }
+    }
+}
+
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
+@Composable
+private fun SearchError(onRetrySearch: () -> Unit) {
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    val message = stringResource(R.string.search_error_message)
+    val retryActionLabel = stringResource(R.string.search_error_retry_action_label)
+
+    Scaffold(
+        content = {},
+        snackbarHost = {
+            SnackbarHost(hostState = snackbarHostState)
+        }
+    )
+
+    LaunchedEffect(snackbarHostState) {
+        val result = snackbarHostState.showSnackbar(
+            message,
+            retryActionLabel,
+            duration = SnackbarDuration.Indefinite
+        )
+        when (result) {
+            SnackbarResult.ActionPerformed -> onRetrySearch()
+            SnackbarResult.Dismissed -> {}
         }
     }
 }
