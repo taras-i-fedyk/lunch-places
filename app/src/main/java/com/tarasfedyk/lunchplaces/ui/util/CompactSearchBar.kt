@@ -26,7 +26,6 @@ fun CompactSearchBar(
     hint: @Composable () -> Unit,
     isActive: Boolean,
     onActivenessChanged: (Boolean) -> Unit,
-    interactionSource: MutableInteractionSource,
     query: String,
     onQueryChanged: (String) -> Unit,
     onGoBack: () -> Unit,
@@ -34,6 +33,7 @@ fun CompactSearchBar(
     onSearch: (String) -> Unit,
     modifier: Modifier = Modifier,
     onInputFieldBottomYChanged: (Dp) -> Unit = {},
+    interactionSource: MutableInteractionSource = MutableInteractionSource(),
     content: @Composable ColumnScope.() -> Unit
 ) {
     val isFocused by interactionSource.collectIsFocusedAsState()
