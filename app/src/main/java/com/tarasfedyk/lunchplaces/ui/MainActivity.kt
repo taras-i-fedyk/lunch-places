@@ -55,21 +55,21 @@ class MainActivity : ComponentActivity() {
         val onRefreshLunchPlaces = geoVM::refreshLunchPlaces
         val onDiscardLunchPlaces = geoVM::discardLunchPlaces
         MainContentImpl(
-            geoState,
             onDetermineCurrentLocation,
             onSearchLunchPlaces,
             onRefreshLunchPlaces,
-            onDiscardLunchPlaces
+            onDiscardLunchPlaces,
+            geoState
         )
     }
 
     @Composable
     private fun MainContentImpl(
-        geoState: GeoState,
         onDetermineCurrentLocation: () -> Unit,
         onSearchLunchPlaces: (SearchFilter) -> Unit,
         onRefreshLunchPlaces: () -> Unit,
-        onDiscardLunchPlaces: () -> Unit
+        onDiscardLunchPlaces: () -> Unit,
+        geoState: GeoState
     ) {
         var isCurrentLocationDisplayed by remember { mutableStateOf(false) }
 
@@ -77,8 +77,8 @@ class MainActivity : ComponentActivity() {
         MapScreen(
             mapContentTopPadding,
             isCurrentLocationDisplayed,
-            geoState,
-            onDetermineCurrentLocation
+            onDetermineCurrentLocation,
+            geoState
         )
 
         val onSearchBarBottomYChanged: (Dp) -> Unit = { searchBarBottomY ->
@@ -86,9 +86,9 @@ class MainActivity : ComponentActivity() {
         }
         NavGraph(
             onSearchBarBottomYChanged,
-            geoState.lunchPlacesStatus,
             onSearchLunchPlaces,
-            onDiscardLunchPlaces
+            onDiscardLunchPlaces,
+            geoState.lunchPlacesStatus
         )
 
         val onAllLocationPermissionsDenied = {
@@ -112,9 +112,9 @@ class MainActivity : ComponentActivity() {
     @Composable
     private fun NavGraph(
         onSearchBarBottomYChanged: (Dp) -> Unit,
-        lunchPlacesStatus: Status<SearchFilter, List<LunchPlace>>?,
         onSearchLunchPlaces: (SearchFilter) -> Unit,
         onDiscardLunchPlaces: () -> Unit,
+        lunchPlacesStatus: Status<SearchFilter, List<LunchPlace>>?,
         navController: NavHostController = rememberNavController()
     ) {
         NavHost(
@@ -123,9 +123,9 @@ class MainActivity : ComponentActivity() {
         ) {
             searchScreen(
                 onSearchBarBottomYChanged,
-                lunchPlacesStatus,
                 onSearchLunchPlaces,
-                onDiscardLunchPlaces
+                onDiscardLunchPlaces,
+                lunchPlacesStatus
             )
         }
     }
@@ -173,11 +173,11 @@ class MainActivity : ComponentActivity() {
     private fun MainPreview() {
         AppTheme {
             MainContentImpl(
-                geoState = GeoState(),
                 onDetermineCurrentLocation = {},
                 onSearchLunchPlaces = {},
                 onRefreshLunchPlaces = {},
-                onDiscardLunchPlaces = {}
+                onDiscardLunchPlaces = {},
+                geoState = GeoState()
             )
         }
     }

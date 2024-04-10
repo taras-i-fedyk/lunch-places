@@ -12,16 +12,16 @@ const val SEARCH_ROUTE = "search"
 
 fun NavGraphBuilder.searchScreen(
     onSearchBarBottomYChanged: (Dp) -> Unit,
-    lunchPlacesStatus: Status<SearchFilter, List<LunchPlace>>?,
     onSearchLunchPlaces: (SearchFilter) -> Unit,
-    onDiscardLunchPlaces: () -> Unit
+    onDiscardLunchPlaces: () -> Unit,
+    lunchPlacesStatus: Status<SearchFilter, List<LunchPlace>>?
 ) {
     composable(SEARCH_ROUTE) {
         SearchScreen(
             onSearchBarBottomYChanged,
-            lunchPlacesStatus,
             onSearchLunchPlaces,
-            onDiscardLunchPlaces
+            onDiscardLunchPlaces,
+            lunchPlacesStatus
         )
     }
 }

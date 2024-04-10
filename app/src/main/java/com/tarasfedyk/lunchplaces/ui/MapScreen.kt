@@ -28,8 +28,8 @@ private const val MAX_LOCATION_ACCURACY: Float = 4f
 fun MapScreen(
     mapContentTopPadding: Dp,
     isCurrentLocationDisplayed: Boolean,
-    geoState: GeoState,
-    onDetermineCurrentLocation: () -> Unit
+    onDetermineCurrentLocation: () -> Unit,
+    geoState: GeoState
 ) {
     val mapProperties = MapProperties(
         maxZoomPreference = MAX_ZOOM_LEVEL,
@@ -78,7 +78,7 @@ private fun MapPreview() {
     MapScreen(
         mapContentTopPadding = 0.dp,
         isCurrentLocationDisplayed = true,
-        geoState = GeoState(),
-        onDetermineCurrentLocation = {}
+        onDetermineCurrentLocation = {},
+        geoState = GeoState()
     )
 }
