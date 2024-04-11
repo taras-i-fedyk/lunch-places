@@ -80,7 +80,7 @@ fun SearchScreen(
     CompactSearchBar(
         modifier = Modifier.fillMaxWidth(),
         onInputFieldBottomYChanged = onSearchBarBottomYChanged,
-        hint = { Hint() },
+        hint = { SearchHint() },
         isActive = isActive,
         onActivenessChanged = { isActive = it },
         interactionSource = interactionSource,
@@ -97,7 +97,7 @@ fun SearchScreen(
 }
 
 @Composable
-private fun Hint() {
+private fun SearchHint() {
     Text(stringResource(R.string.search_hint))
 }
 
