@@ -1,14 +1,18 @@
 package com.tarasfedyk.lunchplaces.ui
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
@@ -25,6 +29,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -118,7 +123,7 @@ private fun SearchStatus(
 private fun SearchProgress() {
     LinearProgressIndicator(
         modifier = Modifier
-            .padding(top = 8.dp)
+            .padding(top = 4.dp)
             .fillMaxWidth()
     )
 }
@@ -126,16 +131,47 @@ private fun SearchProgress() {
 @Composable
 private fun SearchResult(lunchPlaces: List<LunchPlace>) {
     LazyColumn(
-        contentPadding = PaddingValues(all = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        contentPadding = PaddingValues(vertical = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-        items(count = lunchPlaces.size) { i ->
-            Text(
-                text = lunchPlaces[i].name,
-                modifier = Modifier.fillMaxWidth()
-            )
+        items(lunchPlaces) {
+            SearchResultItem(it)
         }
     }
+}
+
+@Composable
+private fun SearchResultItem(lunchPlace: LunchPlace) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable {}
+            .padding(horizontal = 8.dp)
+    ) {
+        LunchPlaceName(lunchPlace.name)
+        if (lunchPlace.isOpen == false) {
+            LunchPlaceUnavailability()
+        }
+    }
+}
+
+@Composable
+private fun LunchPlaceName(text: String) {
+    Text(
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
+        style = MaterialTheme.typography.bodyLarge,
+        text = text
+    )
+}
+
+@Composable
+private fun LunchPlaceUnavailability() {
+    Text(
+        style = MaterialTheme.typography.bodySmall,
+        text = stringResource(R.string.unavailability_label),
+        color = MaterialTheme.colorScheme.error
+    )
 }
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
