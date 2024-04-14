@@ -5,5 +5,7 @@
     <string name="search_error_message">Search failed</string>
     <string name="search_error_retry_action_label">Retry</string>
 
+    <string name="meters_distance_template">%d m</string>
+    <string name="kilometers_distance_template">%f km</string>
     <string name="unavailability_label">Closed</string>
 </resources>

@@ -38,6 +38,9 @@ import com.tarasfedyk.lunchplaces.biz.data.LunchPlace
 import com.tarasfedyk.lunchplaces.biz.data.SearchFilter
 import com.tarasfedyk.lunchplaces.biz.data.Status
 import com.tarasfedyk.lunchplaces.ui.util.CompactSearchBar
+import java.math.BigDecimal
+import java.math.RoundingMode
+import kotlin.math.roundToInt
 
 @Composable
 fun SearchScreen(
@@ -149,29 +152,57 @@ private fun SearchResultItem(lunchPlace: LunchPlace) {
             .padding(horizontal = 8.dp)
     ) {
         LunchPlaceName(lunchPlace.name)
-        if (lunchPlace.isOpen == false) {
-            LunchPlaceUnavailability()
-        }
+        LunchPlaceDistance(lunchPlace.distance)
+        LunchPlaceAvailability(lunchPlace.isOpen)
     }
 }
 
 @Composable
-private fun LunchPlaceName(text: String) {
+private fun LunchPlaceName(name: String) {
     Text(
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,
         style = MaterialTheme.typography.bodyLarge,
-        text = text
+        text = name
     )
 }
 
 @Composable
-private fun LunchPlaceUnavailability() {
+private fun LunchPlaceDistance(distance: Float) {
+    val distanceAccuracy = 5
+    val roundedDistance = (distance / distanceAccuracy).roundToInt() * distanceAccuracy
+
+    val kilometer = 1000
+
+    val distanceText = if (roundedDistance < kilometer) {
+        stringResource(R.string.meters_distance_template, roundedDistance)
+    } else {
+        val kilometersDistance = roundedDistance.toFloat() / kilometer
+        val roundedKilometersDistance = run {
+            val decimalPlaceCount = 1
+
+            val bigDecimal = BigDecimal(kilometersDistance.toDouble())
+            val roundedBigDecimal = bigDecimal.setScale(decimalPlaceCount, RoundingMode.HALF_UP)
+            roundedBigDecimal.toFloat()
+        }
+        stringResource(R.string.kilometers_distance_template, roundedKilometersDistance)
+    }
+
     Text(
         style = MaterialTheme.typography.bodySmall,
-        text = stringResource(R.string.unavailability_label),
-        color = MaterialTheme.colorScheme.error
+        text = distanceText
     )
+}
+
+@Composable
+private fun LunchPlaceAvailability(isOpen: Boolean?) {
+    if (isOpen == false) {
+        Text(
+            style = MaterialTheme.typography.bodySmall,
+            text = stringResource(R.string.unavailability_label),
+            color = MaterialTheme.colorScheme.error
+        )
+    }
 }
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
