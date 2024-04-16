@@ -1,6 +1,17 @@
 package com.tarasfedyk.lunchplaces.biz.util
 
 import android.os.Parcel
+import java.math.BigDecimal
+import java.math.RoundingMode
+
+fun Float.roundToDecimalPlaces(decimalPlaceCount: Int): Float =
+    toDouble().roundToDecimalPlaces(decimalPlaceCount).toFloat()
+
+fun Double.roundToDecimalPlaces(decimalPlaceCount: Int): Double {
+    val bigDecimal = BigDecimal(this)
+    val roundedBigDecimal = bigDecimal.setScale(decimalPlaceCount, RoundingMode.HALF_UP)
+    return roundedBigDecimal.toDouble()
+}
 
 fun Parcel.readBool(): Boolean {
     return readInt() != 0

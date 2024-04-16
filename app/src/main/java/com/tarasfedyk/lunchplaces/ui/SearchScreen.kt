@@ -7,6 +7,7 @@ import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -26,6 +27,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
@@ -37,9 +39,9 @@ import com.tarasfedyk.lunchplaces.R
 import com.tarasfedyk.lunchplaces.biz.data.LunchPlace
 import com.tarasfedyk.lunchplaces.biz.data.SearchFilter
 import com.tarasfedyk.lunchplaces.biz.data.Status
+import com.tarasfedyk.lunchplaces.biz.util.roundToDecimalPlaces
 import com.tarasfedyk.lunchplaces.ui.util.CompactSearchBar
-import java.math.BigDecimal
-import java.math.RoundingMode
+import com.tarasfedyk.lunchplaces.ui.util.SmallRatingIndicator
 import kotlin.math.roundToInt
 
 @Composable
@@ -152,6 +154,7 @@ private fun SearchResultItem(lunchPlace: LunchPlace) {
             .padding(horizontal = 8.dp)
     ) {
         LunchPlaceName(lunchPlace.name)
+        LunchPlaceRating(lunchPlace.rating)
         LunchPlaceDistance(lunchPlace.distance)
         LunchPlaceAvailability(lunchPlace.isOpen)
     }
@@ -162,9 +165,27 @@ private fun LunchPlaceName(name: String) {
     Text(
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,
-        style = MaterialTheme.typography.bodyLarge,
+        style = MaterialTheme.typography.titleMedium,
         text = name
     )
+}
+
+@Composable
+private fun LunchPlaceRating(rating: Double?) {
+    if (rating == null) return
+
+    val roundedRating = rating.roundToDecimalPlaces(decimalPlaceCount = 1)
+
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Text(
+            style = MaterialTheme.typography.bodyMedium,
+            text = roundedRating.toString(),
+        )
+        SmallRatingIndicator(
+            modifier = Modifier.padding(start = 2.dp, bottom = 2.dp),
+            rating = roundedRating.toFloat()
+        )
+    }
 }
 
 @Composable
@@ -178,31 +199,28 @@ private fun LunchPlaceDistance(distance: Float) {
         stringResource(R.string.meters_distance_template, roundedDistance)
     } else {
         val kilometersDistance = roundedDistance.toFloat() / kilometer
-        val roundedKilometersDistance = run {
-            val decimalPlaceCount = 1
+        val roundedKilometersDistance = kilometersDistance.roundToDecimalPlaces(
+            decimalPlaceCount = 1
+        )
 
-            val bigDecimal = BigDecimal(kilometersDistance.toDouble())
-            val roundedBigDecimal = bigDecimal.setScale(decimalPlaceCount, RoundingMode.HALF_UP)
-            roundedBigDecimal.toFloat()
-        }
         stringResource(R.string.kilometers_distance_template, roundedKilometersDistance)
     }
 
     Text(
-        style = MaterialTheme.typography.bodySmall,
+        style = MaterialTheme.typography.bodyMedium,
         text = distanceText
     )
 }
 
 @Composable
 private fun LunchPlaceAvailability(isOpen: Boolean?) {
-    if (isOpen == false) {
-        Text(
-            style = MaterialTheme.typography.bodySmall,
-            text = stringResource(R.string.unavailability_label),
-            color = MaterialTheme.colorScheme.error
-        )
-    }
+    if (isOpen != false) return
+
+    Text(
+        style = MaterialTheme.typography.bodyMedium,
+        text = stringResource(R.string.unavailability_label),
+        color = MaterialTheme.colorScheme.error
+    )
 }
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
