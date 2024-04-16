@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -135,10 +134,7 @@ private fun SearchProgress() {
 
 @Composable
 private fun SearchResult(lunchPlaces: List<LunchPlace>) {
-    LazyColumn(
-        contentPadding = PaddingValues(vertical = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(4.dp)
-    ) {
+    LazyColumn(contentPadding = PaddingValues(vertical = 8.dp)) {
         items(lunchPlaces) {
             SearchResultItem(it)
         }
@@ -151,7 +147,7 @@ private fun SearchResultItem(lunchPlace: LunchPlace) {
         modifier = Modifier
             .fillMaxWidth()
             .clickable {}
-            .padding(horizontal = 8.dp)
+            .padding(horizontal = 16.dp, vertical = 8.dp)
     ) {
         LunchPlaceName(lunchPlace.name)
         LunchPlaceRating(lunchPlace.rating)
