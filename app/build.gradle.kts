@@ -1,8 +1,8 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.kotlin.kapt)
-    alias(libs.plugins.hilt.android)
+    alias(libs.plugins.kapt)
+    alias(libs.plugins.hilt)
     id(libs.secrets.get().group!!)
     id(libs.plugins.kotlin.parcelize.get().pluginId)
 }
@@ -70,8 +70,8 @@ secrets {
 
 dependencies {
     // dependency injection
-    implementation(libs.hilt.android)
-    kapt(libs.hilt.android.compiler)
+    implementation(libs.hilt)
+    kapt(libs.hilt.compiler)
     implementation(libs.androidx.hilt.navigation.compose)
 
     // core
@@ -95,6 +95,11 @@ dependencies {
     implementation(libs.places)
     implementation(libs.places.ktx)
     implementation(libs.maps.compose)
+
+    // image loading
+    implementation(libs.glide)
+    kapt(libs.glide.compiler)
+    implementation(libs.glide.compose)
 
     // preview
     implementation(libs.androidx.compose.ui.tooling.preview)
