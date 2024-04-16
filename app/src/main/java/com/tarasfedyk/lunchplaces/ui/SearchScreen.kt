@@ -165,7 +165,7 @@ private fun LunchPlaceName(name: String) {
     Text(
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,
-        style = MaterialTheme.typography.titleMedium,
+        style = MaterialTheme.typography.bodyLarge,
         text = name
     )
 }
@@ -217,7 +217,7 @@ private fun LunchPlaceAvailability(isOpen: Boolean?) {
     if (isOpen != false) return
 
     Text(
-        style = MaterialTheme.typography.bodyMedium,
+        style = MaterialTheme.typography.labelSmall,
         text = stringResource(R.string.unavailability_label),
         color = MaterialTheme.colorScheme.error
     )
