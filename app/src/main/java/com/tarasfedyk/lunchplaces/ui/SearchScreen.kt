@@ -7,8 +7,10 @@ import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.LinearProgressIndicator
@@ -125,11 +127,7 @@ private fun SearchStatus(
 
 @Composable
 private fun SearchProgress() {
-    LinearProgressIndicator(
-        modifier = Modifier
-            .padding(top = 4.dp)
-            .fillMaxWidth()
-    )
+    LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
 }
 
 @Composable
@@ -151,8 +149,11 @@ private fun SearchResultItem(lunchPlace: LunchPlace) {
     ) {
         LunchPlaceName(lunchPlace.name)
         LunchPlaceRating(lunchPlace.rating)
-        LunchPlaceDistance(lunchPlace.distance)
-        LunchPlaceAvailability(lunchPlace.isOpen)
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            LunchPlaceDistance(lunchPlace.distance)
+            Spacer(modifier = Modifier.size(8.dp))
+            LunchPlaceAvailability(lunchPlace.isOpen)
+        }
     }
 }
 
@@ -213,7 +214,7 @@ private fun LunchPlaceAvailability(isOpen: Boolean?) {
     if (isOpen != false) return
 
     Text(
-        style = MaterialTheme.typography.labelSmall,
+        style = MaterialTheme.typography.bodyMedium,
         text = stringResource(R.string.unavailability_label),
         color = MaterialTheme.colorScheme.error
     )
