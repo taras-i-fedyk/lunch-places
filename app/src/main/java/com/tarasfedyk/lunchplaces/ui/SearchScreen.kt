@@ -1,6 +1,10 @@
 package com.tarasfedyk.lunchplaces.ui
 
 import android.annotation.SuppressLint
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffColorFilter
+import android.graphics.drawable.Drawable
+import android.net.Uri
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
@@ -14,6 +18,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
@@ -30,15 +35,26 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.bumptech.glide.integration.compose.CrossFade
+import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
+import com.bumptech.glide.integration.compose.GlideImage
+import com.bumptech.glide.integration.compose.placeholder
+import com.bumptech.glide.load.MultiTransformation
+import com.bumptech.glide.load.resource.bitmap.CenterCrop
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.tarasfedyk.lunchplaces.R
 import com.tarasfedyk.lunchplaces.biz.data.LunchPlace
 import com.tarasfedyk.lunchplaces.biz.data.SearchFilter
+import com.tarasfedyk.lunchplaces.biz.data.SizeLimit
 import com.tarasfedyk.lunchplaces.biz.data.Status
 import com.tarasfedyk.lunchplaces.biz.util.roundToDecimalPlaces
 import com.tarasfedyk.lunchplaces.ui.util.CompactSearchBar
@@ -61,6 +77,8 @@ fun SearchScreen(
     var currentQuery by rememberSaveable { mutableStateOf("") }
     var sentQuery by rememberSaveable { mutableStateOf("") }
 
+    val thumbnailSizeLimit = thumbnailSizeLimit()
+
     val onGoBack = {
         if (isFocused && sentQuery.isNotEmpty()) {
             currentQuery = sentQuery
@@ -79,7 +97,12 @@ fun SearchScreen(
         sentQuery = currentQuery
         if (sentQuery.isNotEmpty()) {
             focusManager.clearFocus()
-            onSearchLunchPlaces(SearchFilter(sentQuery))
+            onSearchLunchPlaces(
+                SearchFilter(
+                    query = sentQuery,
+                    thumbnailSizeLimit = thumbnailSizeLimit
+                )
+            )
         } else {
             onGoBack()
         }
@@ -108,6 +131,16 @@ fun SearchScreen(
 }
 
 @Composable
+private fun thumbnailSizeLimit(): SizeLimit {
+    val context = LocalContext.current
+    val thumbnailSize = context.resources.getDimensionPixelSize(R.dimen.thumbnail_size)
+    return SizeLimit(
+        maxWidth = thumbnailSize,
+        maxHeight = thumbnailSize
+    )
+}
+
+@Composable
 private fun SearchHint() {
     Text(stringResource(R.string.search_hint))
 }
@@ -132,7 +165,9 @@ private fun SearchProgress() {
 
 @Composable
 private fun SearchResult(lunchPlaces: List<LunchPlace>) {
-    LazyColumn(contentPadding = PaddingValues(vertical = 8.dp)) {
+    LazyColumn(
+        contentPadding = PaddingValues(vertical = 8.dp)
+    ) {
         items(lunchPlaces) {
             SearchResultItem(it)
         }
@@ -141,20 +176,64 @@ private fun SearchResult(lunchPlaces: List<LunchPlace>) {
 
 @Composable
 private fun SearchResultItem(lunchPlace: LunchPlace) {
-    Column(
+    Row(
         modifier = Modifier
             .fillMaxWidth()
             .clickable {}
-            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        LunchPlaceName(lunchPlace.name)
-        LunchPlaceRating(lunchPlace.rating)
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            LunchPlaceDistance(lunchPlace.distance)
-            Spacer(modifier = Modifier.size(8.dp))
-            LunchPlaceAvailability(lunchPlace.isOpen)
+        LunchPlaceThumbnail(lunchPlace.thumbnailUri)
+        Spacer(modifier = Modifier.size(16.dp))
+        Column {
+            LunchPlaceName(lunchPlace.name)
+            LunchPlaceRating(lunchPlace.rating)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                LunchPlaceDistance(lunchPlace.distance)
+                Spacer(modifier = Modifier.size(8.dp))
+                LunchPlaceAvailability(lunchPlace.isOpen)
+            }
         }
     }
+}
+
+@OptIn(ExperimentalGlideComposeApi::class)
+@Composable
+private fun LunchPlaceThumbnail(thumbnailUri: Uri?) {
+    val thumbnailPlaceholderDrawable = thumbnailPlaceholderDrawable()
+    val thumbnailCornerRadius = thumbnailCornerRadius()
+    GlideImage(
+        modifier = Modifier.size(dimensionResource(R.dimen.thumbnail_size)),
+        model = thumbnailUri,
+        loading = placeholder(thumbnailPlaceholderDrawable),
+        failure = placeholder(thumbnailPlaceholderDrawable),
+        transition = CrossFade,
+        contentDescription = stringResource(R.string.lunch_place_thumbnail_description)
+    ) {
+        it.transform(
+            MultiTransformation(
+                CenterCrop(),
+                RoundedCorners(thumbnailCornerRadius)
+            )
+        )
+    }
+}
+
+@Composable
+private fun thumbnailPlaceholderDrawable(): Drawable? {
+    val context = LocalContext.current
+    val rawThumbnailPlaceholderDrawable = context.getDrawable(R.drawable.ic_thumbnail_placeholder)
+    return rawThumbnailPlaceholderDrawable?.apply {
+        mutate()
+        val contentColor = LocalContentColor.current
+        colorFilter = PorterDuffColorFilter(contentColor.toArgb(), PorterDuff.Mode.SRC_IN)
+    }
+}
+
+@Composable
+private fun thumbnailCornerRadius(): Int {
+    val context = LocalContext.current
+    return context.resources.getDimensionPixelSize(R.dimen.thumbnail_corner_radius)
 }
 
 @Composable

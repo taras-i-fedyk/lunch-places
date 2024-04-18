@@ -1,9 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Lunch Places</string>
 
     <string name="search_hint">Search lunch places</string>
     <string name="search_error_message">Search failed</string>
     <string name="search_error_retry_action_label">Retry</string>
+
+    <string name="lunch_place_thumbnail_description">Lunch place thumbnail</string>
 
     <string name="meters_distance_template">%d m</string>
     <string name="kilometers_distance_template">%s km</string>

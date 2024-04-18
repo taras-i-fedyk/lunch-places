@@ -124,3 +124,7 @@ data class GeoState(
         }
     }
 }
+
+private enum class StatusType {
+    PENDING, SUCCESS, FAILURE
+}
