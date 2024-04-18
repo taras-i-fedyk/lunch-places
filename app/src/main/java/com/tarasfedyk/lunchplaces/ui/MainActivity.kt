@@ -95,13 +95,11 @@ class MainActivity : ComponentActivity() {
             isCurrentLocationDisplayed = false
             onDetermineCurrentLocation()
             onRefreshLunchPlaces()
-            // TODO: display a snackbar about no location access
         }
         val onSomeLocationPermissionGranted = {
             isCurrentLocationDisplayed = true
             onDetermineCurrentLocation()
             onRefreshLunchPlaces()
-            // TODO: hide the snackbar about no location access
         }
         LocationPermissionsRequest(
             onAllLocationPermissionsDenied,
