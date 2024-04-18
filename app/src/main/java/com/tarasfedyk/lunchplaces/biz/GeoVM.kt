@@ -10,9 +10,7 @@ import com.tarasfedyk.lunchplaces.biz.data.SearchFilter
 import com.tarasfedyk.lunchplaces.biz.data.Status
 import com.tarasfedyk.lunchplaces.biz.util.ReplaceableLauncher
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import java.lang.RuntimeException
 import javax.inject.Inject
@@ -27,14 +25,7 @@ class GeoVM @Inject constructor(
     private val currentLocationLauncher: ReplaceableLauncher = ReplaceableLauncher(viewModelScope)
     private val lunchPlacesLauncher: ReplaceableLauncher = ReplaceableLauncher(viewModelScope)
 
-    private val _geoStateFlow: MutableStateFlow<GeoState> = MutableStateFlow(GeoState())
-    val geoStateFlow: StateFlow<GeoState> = _geoStateFlow.asStateFlow()
-
-    init {
-        savedStateHandle.get<GeoState>(GEO_STATE_KEY)?.let { savedGeoState ->
-            _geoStateFlow.value = savedGeoState
-        }
-    }
+    val geoStateFlow: StateFlow<GeoState> = savedStateHandle.getStateFlow(GEO_STATE_KEY, GeoState())
 
     fun determineCurrentLocation() {
         currentLocationLauncher.launch {
@@ -111,9 +102,8 @@ class GeoVM @Inject constructor(
 
     @MainThread
     private fun updateGeoState(function: (GeoState) -> GeoState) {
-        val currentGeoState = _geoStateFlow.value
+        val currentGeoState = geoStateFlow.value
         val newGeoState = function(currentGeoState)
-        _geoStateFlow.value = newGeoState
         savedStateHandle[GEO_STATE_KEY] = newGeoState
     }
 
