@@ -33,6 +33,13 @@ class GeoVM @Inject constructor(
         }
     }
 
+    fun discardCurrentLocation() {
+        currentLocationLauncher.launch {
+            determineCurrentLocationImpl()
+            updateGeoState { it.copy(currentLocationStatus = null) }
+        }
+    }
+
     private suspend fun determineCurrentLocationImpl() {
         try {
             updateGeoState { it.copy(currentLocationStatus = Status.Pending(Unit)) }
@@ -57,15 +64,6 @@ class GeoVM @Inject constructor(
     fun searchLunchPlaces(searchFilter: SearchFilter) {
         lunchPlacesLauncher.launch {
             searchLunchPlacesImpl(searchFilter)
-        }
-    }
-
-    fun refreshLunchPlaces() {
-        lunchPlacesLauncher.launch {
-            val lunchPlacesStatus = geoStateFlow.value.lunchPlacesStatus
-            if (lunchPlacesStatus != null) {
-                searchLunchPlacesImpl(lunchPlacesStatus.arg)
-            }
         }
     }
 
