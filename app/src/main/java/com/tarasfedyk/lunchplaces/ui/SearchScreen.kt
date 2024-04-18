@@ -222,10 +222,10 @@ private fun LunchPlaceThumbnail(thumbnailUri: Uri?) {
 @Composable
 private fun thumbnailPlaceholderDrawable(): Drawable? {
     val context = LocalContext.current
+    val contentColor = LocalContentColor.current
     val rawThumbnailPlaceholderDrawable = context.getDrawable(R.drawable.ic_thumbnail_placeholder)
     return rawThumbnailPlaceholderDrawable?.apply {
         mutate()
-        val contentColor = LocalContentColor.current
         colorFilter = PorterDuffColorFilter(contentColor.toArgb(), PorterDuff.Mode.SRC_IN)
     }
 }
