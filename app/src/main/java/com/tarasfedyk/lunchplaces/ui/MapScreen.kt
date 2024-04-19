@@ -48,9 +48,11 @@ fun MapScreen(
         maxZoomPreference = MAX_ZOOM_LEVEL,
         isMyLocationEnabled = isCurrentLocationEnabled
     )
-    val onCurrentLocationButtonClicked = {
-        onDetermineCurrentLocation()
-        true
+    val onCurrentLocationButtonClicked = remember(onDetermineCurrentLocation) {
+        {
+            onDetermineCurrentLocation()
+            true
+        }
     }
     GoogleMap(
         modifier = Modifier.fillMaxSize(),
@@ -61,13 +63,17 @@ fun MapScreen(
         onMyLocationButtonClick = onCurrentLocationButtonClicked
     )
 
-    val onAllLocationPermissionsDenied = {
-        isCurrentLocationEnabled = false
-        onDiscardCurrentLocation()
+    val onAllLocationPermissionsDenied = remember {
+        {
+            isCurrentLocationEnabled = false
+            onDiscardCurrentLocation()
+        }
     }
-    val onSomeLocationPermissionGranted = {
-        isCurrentLocationEnabled = true
-        onDetermineCurrentLocation()
+    val onSomeLocationPermissionGranted = remember {
+        {
+            isCurrentLocationEnabled = true
+            onDetermineCurrentLocation()
+        }
     }
     LocationPermissionsRequest(
         onAllLocationPermissionsDenied,

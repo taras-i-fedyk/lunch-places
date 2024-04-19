@@ -13,9 +13,11 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -23,9 +25,9 @@ import androidx.compose.ui.unit.dp
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CompactSearchBar(
-    hint: @Composable () -> Unit,
     isActive: Boolean,
     onActivenessChanged: (Boolean) -> Unit,
+    hint: String,
     query: String,
     onQueryChanged: (String) -> Unit,
     onGoBack: () -> Unit,
@@ -38,21 +40,30 @@ fun CompactSearchBar(
 ) {
     val isFocused by interactionSource.collectIsFocusedAsState()
 
+    val placeholder: @Composable () -> Unit = remember(hint) {
+        {
+            Placeholder(hint)
+        }
+    }
     val searchIcon: @Composable () -> Unit = {
         SearchIcon()
     }
-    val upNavIconButton: @Composable () -> Unit = {
-        UpNavIconButton(onGoUp = onGoBack)
+    val upNavIconButton: @Composable () -> Unit = remember(onGoBack) {
+        {
+            UpNavIconButton(onGoUp = onGoBack)
+        }
     }
-    val clearanceIconButton: @Composable () -> Unit = {
-        ClearanceIconButton(onClear)
+    val clearanceIconButton: @Composable () -> Unit = remember(onClear) {
+        {
+            ClearanceIconButton(onClear)
+        }
     }
 
     // TODO: adjust the horizontal padding in a smooth way
     SearchBar(
         modifier = modifier,
         shadowElevation = 6.dp,
-        placeholder = hint,
+        placeholder = placeholder,
         leadingIcon = if (isActive) upNavIconButton else searchIcon,
         trailingIcon = if (isFocused) clearanceIconButton else null,
         active = isActive,
@@ -75,6 +86,11 @@ fun CompactSearchBar(
         val inputFieldBottomY = inputFieldTopPadding + inputFieldHeight
         onInputFieldBottomYChanged(inputFieldBottomY)
     }
+}
+
+@Composable
+private fun Placeholder(hint: String) {
+    Text(hint)
 }
 
 @Composable

@@ -69,6 +69,8 @@ fun SearchScreen(
     onDiscardLunchPlaces: () -> Unit,
     lunchPlacesStatus: Status<SearchFilter, List<LunchPlace>>?
 ) {
+    val thumbnailSizeLimit = thumbnailSizeLimit()
+
     var isActive by rememberSaveable { mutableStateOf(false) }
 
     val focusManager = LocalFocusManager.current
@@ -78,47 +80,53 @@ fun SearchScreen(
     var currentQuery by rememberSaveable { mutableStateOf("") }
     var sentQuery by rememberSaveable { mutableStateOf("") }
 
-    val thumbnailSizeLimit = thumbnailSizeLimit()
-
-    val onGoBack = {
-        if (isFocused && sentQuery.isNotEmpty()) {
-            currentQuery = sentQuery
-            focusManager.clearFocus()
-        } else {
-            sentQuery = ""
-            currentQuery = ""
-            isActive = false
-            onDiscardLunchPlaces()
+    val onGoBack = remember(focusManager, isFocused, sentQuery, onDiscardLunchPlaces) {
+        {
+            if (isFocused && sentQuery.isNotEmpty()) {
+                currentQuery = sentQuery
+                focusManager.clearFocus()
+            } else {
+                sentQuery = ""
+                currentQuery = ""
+                isActive = false
+                onDiscardLunchPlaces()
+            }
         }
     }
     val onClear = {
         currentQuery = ""
     }
-    val onSearch: (String) -> Unit = {
-        sentQuery = currentQuery
-        if (sentQuery.isNotEmpty()) {
-            focusManager.clearFocus()
-            onSearchLunchPlaces(
-                SearchFilter(
-                    query = sentQuery,
-                    thumbnailSizeLimit = thumbnailSizeLimit
+    val onSearch: (String) -> Unit = remember(
+        thumbnailSizeLimit, focusManager, currentQuery, sentQuery, onGoBack, onSearchLunchPlaces
+    ) {
+        {
+            sentQuery = currentQuery
+            if (sentQuery.isNotEmpty()) {
+                focusManager.clearFocus()
+                onSearchLunchPlaces(
+                    SearchFilter(
+                        query = sentQuery,
+                        thumbnailSizeLimit = thumbnailSizeLimit
+                    )
                 )
-            )
-        } else {
-            onGoBack()
+            } else {
+                onGoBack()
+            }
         }
     }
-    val onRetrySearch = {
-        onSearch(sentQuery)
+    val onRetrySearch = remember(sentQuery) {
+        {
+            onSearch(sentQuery)
+        }
     }
 
     CompactSearchBar(
         modifier = Modifier.fillMaxWidth(),
         onInputFieldBottomYChanged = onSearchBarBottomYChanged,
-        hint = { SearchHint() },
         isActive = isActive,
         onActivenessChanged = { isActive = it },
         interactionSource = interactionSource,
+        hint = stringResource(R.string.search_hint),
         query = currentQuery,
         onQueryChanged = { currentQuery = it },
         onGoBack = onGoBack,
@@ -139,11 +147,6 @@ private fun thumbnailSizeLimit(): SizeLimit {
         maxWidth = thumbnailSize,
         maxHeight = thumbnailSize
     )
-}
-
-@Composable
-private fun SearchHint() {
-    Text(stringResource(R.string.search_hint))
 }
 
 @Composable

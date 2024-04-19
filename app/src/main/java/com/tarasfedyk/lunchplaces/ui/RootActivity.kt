@@ -65,8 +65,10 @@ class RootActivity : ComponentActivity() {
         geoState: GeoState
     ) {
         var mapContentTopPadding by remember { mutableStateOf(0.dp) }
-        val onSearchBarBottomYChanged: (Dp) -> Unit = { searchBarBottomY ->
-            mapContentTopPadding = searchBarBottomY
+        val onSearchBarBottomYChanged: (Dp) -> Unit = remember {
+            { searchBarBottomY ->
+                mapContentTopPadding = searchBarBottomY
+            }
         }
 
         MapScreen(
