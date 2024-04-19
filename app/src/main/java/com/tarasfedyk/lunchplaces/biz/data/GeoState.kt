@@ -33,7 +33,7 @@ data class GeoState(
                     }
                     is Status.Failure -> {
                         parcel.writeSerializable(StatusType.FAILURE)
-                        parcel.writeSerializable(currentLocationStatus.error)
+                        parcel.writeSerializable(currentLocationStatus.errorType)
                     }
                 }
             }
@@ -57,7 +57,7 @@ data class GeoState(
                     is Status.Failure -> {
                         parcel.writeSerializable(StatusType.FAILURE)
                         writeArg()
-                        parcel.writeSerializable(lunchPlacesStatus.error)
+                        parcel.writeSerializable(lunchPlacesStatus.errorType)
                     }
                 }
             }
@@ -85,8 +85,8 @@ data class GeoState(
                         Status.Success(Unit, result)
                     }
                     StatusType.FAILURE -> {
-                        val error = parcel.readSerializable() as Exception
-                        Status.Failure(Unit, error)
+                        val errorType = parcel.readSerializable() as ErrorType
+                        Status.Failure(Unit, errorType)
                     }
                 }
             }
@@ -116,8 +116,8 @@ data class GeoState(
                         Status.Success(arg, result)
                     }
                     StatusType.FAILURE -> {
-                        val error = parcel.readSerializable() as Exception
-                        Status.Failure(arg, error)
+                        val errorType = parcel.readSerializable() as ErrorType
+                        Status.Failure(arg, errorType)
                     }
                 }
             }

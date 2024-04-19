@@ -4,7 +4,7 @@ import androidx.annotation.MainThread
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.tarasfedyk.lunchplaces.biz.exception.NullLocationException
+import com.tarasfedyk.lunchplaces.biz.data.ErrorType
 import com.tarasfedyk.lunchplaces.biz.data.GeoState
 import com.tarasfedyk.lunchplaces.biz.data.SearchFilter
 import com.tarasfedyk.lunchplaces.biz.data.Status
@@ -53,12 +53,17 @@ class GeoVM @Inject constructor(
             val currentLocationStatus = if (currentLocation != null) {
                 Status.Success(Unit, currentLocation)
             } else {
-                Status.Failure(Unit, NullLocationException())
+                Status.Failure(Unit, ErrorType.CURRENT_LOCATION)
             }
             updateGeoState { it.copy(currentLocationStatus = currentLocationStatus) }
         } catch (e: Exception) {
             if (e !is RuntimeException || e is SecurityException) {
-                updateGeoState { it.copy(currentLocationStatus = Status.Failure(Unit, e)) }
+                val errorType = if (e is SecurityException) {
+                    ErrorType.LOCATION_ACCESS
+                } else {
+                    ErrorType.CURRENT_LOCATION
+                }
+                updateGeoState { it.copy(currentLocationStatus = Status.Failure(Unit, errorType)) }
             } else {
                 throw e
             }
@@ -85,17 +90,19 @@ class GeoVM @Inject constructor(
             val currentLocationTerminalStatus = geoStateFlow
                 .first { it.currentLocationStatus is Status.Terminal }
                 .currentLocationStatus
-            if (currentLocationTerminalStatus is Status.Failure) {
-                throw currentLocationTerminalStatus.error
+
+            if (currentLocationTerminalStatus is Status.Success) {
+                val currentLatLng = currentLocationTerminalStatus.result.latLng
+                val lunchPlaces = repo.searchLunchPlaces(searchFilter, currentLatLng)
+
+                updateGeoState { it.copy(lunchPlacesStatus = Status.Success(searchFilter, lunchPlaces)) }
+            } else {
+                val errorType = (currentLocationTerminalStatus as Status.Failure).errorType
+                updateGeoState { it.copy(lunchPlacesStatus = Status.Failure(searchFilter, errorType)) }
             }
-
-            val currentLatLng = (currentLocationTerminalStatus as Status.Success).result.latLng
-            val lunchPlaces = repo.searchLunchPlaces(searchFilter, currentLatLng)
-
-            updateGeoState { it.copy(lunchPlacesStatus = Status.Success(searchFilter, lunchPlaces)) }
         } catch (e: Exception) {
-            if (e !is RuntimeException || e is SecurityException) {
-                updateGeoState { it.copy( lunchPlacesStatus = Status.Failure(searchFilter, e)) }
+            if (e !is RuntimeException) {
+                updateGeoState { it.copy(lunchPlacesStatus = Status.Failure(searchFilter, ErrorType.LUNCH_PLACES)) }
             } else {
                 throw e
             }
