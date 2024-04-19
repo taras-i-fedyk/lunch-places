@@ -40,16 +40,23 @@ class RootActivity : ComponentActivity() {
 
     @Composable
     private fun RootContent(
+        rootVM: RootVM = hiltViewModel(),
         geoVM: GeoVM = hiltViewModel()
     ) {
+        val isSearchActive by rootVM.searchActivenessFlow.collectAsStateWithLifecycle()
+        val onSetSearchActiveness = rootVM::setSearchActiveness
+
         val geoState by geoVM.geoStateFlow.collectAsStateWithLifecycle()
         val onDetermineCurrentLocation = geoVM::determineCurrentLocation
         val onDiscardCurrentLocation = geoVM::discardCurrentLocation
         val onSearchLunchPlaces = geoVM::searchLunchPlaces
         val onDiscardLunchPlaces = geoVM::discardLunchPlaces
+
         RootContentImpl(
             onDetermineCurrentLocation,
             onDiscardCurrentLocation,
+            isSearchActive,
+            onSetSearchActiveness,
             onSearchLunchPlaces,
             onDiscardLunchPlaces,
             geoState
@@ -60,6 +67,8 @@ class RootActivity : ComponentActivity() {
     private fun RootContentImpl(
         onDetermineCurrentLocation: () -> Unit,
         onDiscardCurrentLocation: () -> Unit,
+        isSearchActive: Boolean,
+        onSetSearchActiveness: (Boolean) -> Unit,
         onSearchLunchPlaces: (SearchFilter) -> Unit,
         onDiscardLunchPlaces: () -> Unit,
         geoState: GeoState
@@ -73,12 +82,15 @@ class RootActivity : ComponentActivity() {
 
         MapScreen(
             mapContentTopPadding,
+            isSearchActive,
             onDetermineCurrentLocation,
             onDiscardCurrentLocation,
             geoState.currentLocationStatus
         )
         NavGraph(
             onSearchBarBottomYChanged,
+            isSearchActive,
+            onSetSearchActiveness,
             onSearchLunchPlaces,
             onDiscardLunchPlaces,
             geoState.lunchPlacesStatus
@@ -88,6 +100,8 @@ class RootActivity : ComponentActivity() {
     @Composable
     private fun NavGraph(
         onSearchBarBottomYChanged: (Dp) -> Unit,
+        isSearchActive: Boolean,
+        onSetSearchActiveness: (Boolean) -> Unit,
         onSearchLunchPlaces: (SearchFilter) -> Unit,
         onDiscardLunchPlaces: () -> Unit,
         lunchPlacesStatus: Status<SearchFilter, List<LunchPlace>>?,
@@ -99,6 +113,8 @@ class RootActivity : ComponentActivity() {
         ) {
             searchScreen(
                 onSearchBarBottomYChanged,
+                isSearchActive,
+                onSetSearchActiveness,
                 onSearchLunchPlaces,
                 onDiscardLunchPlaces,
                 lunchPlacesStatus
@@ -113,6 +129,8 @@ class RootActivity : ComponentActivity() {
             RootContentImpl(
                 onDetermineCurrentLocation = {},
                 onDiscardCurrentLocation = {},
+                isSearchActive = false,
+                onSetSearchActiveness = {},
                 onSearchLunchPlaces = {},
                 onDiscardLunchPlaces = {},
                 geoState = GeoState()

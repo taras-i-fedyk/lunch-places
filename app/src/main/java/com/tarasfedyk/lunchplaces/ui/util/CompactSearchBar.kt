@@ -30,8 +30,8 @@ fun CompactSearchBar(
     hint: String,
     query: String,
     onQueryChanged: (String) -> Unit,
+    onClearQuery: () -> Unit,
     onGoBack: () -> Unit,
-    onClear: () -> Unit,
     onSearch: (String) -> Unit,
     modifier: Modifier = Modifier,
     onInputFieldBottomYChanged: (Dp) -> Unit = {},
@@ -45,27 +45,28 @@ fun CompactSearchBar(
             Placeholder(hint)
         }
     }
-    val searchIcon: @Composable () -> Unit = {
-        SearchIcon()
+    val searchIcon: @Composable () -> Unit = remember {
+        {
+            SearchIcon()
+        }
     }
     val upNavIconButton: @Composable () -> Unit = remember(onGoBack) {
         {
             UpNavIconButton(onGoUp = onGoBack)
         }
     }
-    val clearanceIconButton: @Composable () -> Unit = remember(onClear) {
+    val queryClearanceIconButton: @Composable () -> Unit = remember(onClearQuery) {
         {
-            ClearanceIconButton(onClear)
+            QueryClearanceIconButton(onClearQuery)
         }
     }
 
-    // TODO: adjust the horizontal padding in a smooth way
     SearchBar(
         modifier = modifier,
         shadowElevation = 6.dp,
         placeholder = placeholder,
         leadingIcon = if (isActive) upNavIconButton else searchIcon,
-        trailingIcon = if (isFocused) clearanceIconButton else null,
+        trailingIcon = if (isFocused) queryClearanceIconButton else null,
         active = isActive,
         onActiveChange = onActivenessChanged,
         interactionSource = interactionSource,
@@ -106,8 +107,8 @@ private fun UpNavIconButton(onGoUp: () -> Unit) {
 }
 
 @Composable
-private fun ClearanceIconButton(onClear: () -> Unit) {
-    IconButton(onClick = onClear) {
+private fun QueryClearanceIconButton(onClearQuery: () -> Unit) {
+    IconButton(onClick = onClearQuery) {
         Icon(Icons.Default.Clear, contentDescription = null)
     }
 }

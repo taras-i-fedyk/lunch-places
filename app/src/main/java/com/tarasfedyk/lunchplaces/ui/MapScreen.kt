@@ -35,6 +35,7 @@ private const val MAX_LOCATION_ACCURACY: Float = 4f
 @Composable
 fun MapScreen(
     mapContentTopPadding: Dp,
+    isSearchActive: Boolean,
     onDetermineCurrentLocation: () -> Unit,
     onDiscardCurrentLocation: () -> Unit,
     currentLocationStatus: Status<Unit, LocationSnapshot>?
@@ -63,22 +64,24 @@ fun MapScreen(
         onMyLocationButtonClick = onCurrentLocationButtonClicked
     )
 
-    val onAllLocationPermissionsDenied = remember {
-        {
-            isCurrentLocationEnabled = false
-            onDiscardCurrentLocation()
+    if (!isSearchActive) {
+        val onAllLocationPermissionsDenied = remember(onDiscardCurrentLocation) {
+            {
+                isCurrentLocationEnabled = false
+                onDiscardCurrentLocation()
+            }
         }
-    }
-    val onSomeLocationPermissionGranted = remember {
-        {
-            isCurrentLocationEnabled = true
-            onDetermineCurrentLocation()
+        val onSomeLocationPermissionGranted = remember(onDetermineCurrentLocation) {
+            {
+                isCurrentLocationEnabled = true
+                onDetermineCurrentLocation()
+            }
         }
+        LocationPermissionsRequest(
+            onAllLocationPermissionsDenied,
+            onSomeLocationPermissionGranted
+        )
     }
-    LocationPermissionsRequest(
-        onAllLocationPermissionsDenied,
-        onSomeLocationPermissionGranted
-    )
 
     LaunchedEffect(isCurrentLocationEnabled, currentLocationStatus) {
         if (
@@ -97,11 +100,6 @@ fun MapScreen(
         }
     }
 }
-
-private fun recommendZoomLevel(locationAccuracy: Float): Float =
-    // based on how close the given location accuracy is to the maximum location accuracy
-    // and assuming the maximum location accuracy should be accompanied by the maximum zoom level
-    MAX_ZOOM_LEVEL - (log2(locationAccuracy) - log2(MAX_LOCATION_ACCURACY))
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
@@ -142,11 +140,17 @@ private fun LocationPermissionsRequest(
     }
 }
 
+private fun recommendZoomLevel(locationAccuracy: Float): Float =
+    // based on how close the given location accuracy is to the maximum location accuracy
+    // and assuming the maximum location accuracy should be accompanied by the maximum zoom level
+    MAX_ZOOM_LEVEL - (log2(locationAccuracy) - log2(MAX_LOCATION_ACCURACY))
+
 @Preview(showBackground = true)
 @Composable
 private fun MapPreview() {
     MapScreen(
         mapContentTopPadding = 0.dp,
+        isSearchActive = false,
         onDetermineCurrentLocation = {},
         onDiscardCurrentLocation = {},
         currentLocationStatus = null

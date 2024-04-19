@@ -65,47 +65,61 @@ import kotlin.math.roundToInt
 @Composable
 fun SearchScreen(
     onSearchBarBottomYChanged: (Dp) -> Unit,
+    isSearchActive: Boolean,
+    onSetSearchActiveness: (Boolean) -> Unit,
     onSearchLunchPlaces: (SearchFilter) -> Unit,
     onDiscardLunchPlaces: () -> Unit,
     lunchPlacesStatus: Status<SearchFilter, List<LunchPlace>>?
 ) {
-    val thumbnailSizeLimit = thumbnailSizeLimit()
-
-    var isActive by rememberSaveable { mutableStateOf(false) }
-
     val focusManager = LocalFocusManager.current
-    val interactionSource = remember { MutableInteractionSource() }
-    val isFocused by interactionSource.collectIsFocusedAsState()
+    val searchBarInteractionSource = remember { MutableInteractionSource() }
+    val isSearchBarFocused by searchBarInteractionSource.collectIsFocusedAsState()
 
     var currentQuery by rememberSaveable { mutableStateOf("") }
     var sentQuery by rememberSaveable { mutableStateOf("") }
 
-    val onGoBack = remember(focusManager, isFocused, sentQuery, onDiscardLunchPlaces) {
+    val thumbnailSizeLimit = thumbnailSizeLimit()
+
+    val onSetCurrentQuery: (String) -> Unit = remember {
         {
-            if (isFocused && sentQuery.isNotEmpty()) {
-                currentQuery = sentQuery
+            currentQuery = it
+        }
+    }
+    val onClearCurrentQuery = remember(onSetCurrentQuery) {
+        {
+            onSetCurrentQuery("")
+        }
+    }
+
+    val onGoBack = remember(
+        focusManager,
+        isSearchBarFocused,
+        onSetCurrentQuery,
+        onClearCurrentQuery,
+        sentQuery,
+        onDiscardLunchPlaces
+    ) {
+        {
+            if (isSearchBarFocused && sentQuery.isNotEmpty()) {
+                onSetCurrentQuery(sentQuery)
                 focusManager.clearFocus()
             } else {
                 sentQuery = ""
-                currentQuery = ""
-                isActive = false
+                onClearCurrentQuery()
+                onSetSearchActiveness(false)
                 onDiscardLunchPlaces()
             }
         }
     }
-    val onClear = {
-        currentQuery = ""
-    }
-    val onSearch: (String) -> Unit = remember(
-        thumbnailSizeLimit, focusManager, currentQuery, sentQuery, onGoBack, onSearchLunchPlaces
-    ) {
-        {
-            sentQuery = currentQuery
-            if (sentQuery.isNotEmpty()) {
+
+    val onSearch: (String) -> Unit = remember(focusManager, onGoBack, onSearchLunchPlaces) {
+        { query ->
+            sentQuery = query
+            if (query.isNotEmpty()) {
                 focusManager.clearFocus()
                 onSearchLunchPlaces(
                     SearchFilter(
-                        query = sentQuery,
+                        query,
                         thumbnailSizeLimit = thumbnailSizeLimit
                     )
                 )
@@ -114,26 +128,27 @@ fun SearchScreen(
             }
         }
     }
-    val onRetrySearch = remember(sentQuery) {
+    val onRetrySearch = remember(onSearch, sentQuery) {
         {
             onSearch(sentQuery)
         }
     }
 
+    // TODO: adjust the horizontal padding in a smooth way
     CompactSearchBar(
         modifier = Modifier.fillMaxWidth(),
         onInputFieldBottomYChanged = onSearchBarBottomYChanged,
-        isActive = isActive,
-        onActivenessChanged = { isActive = it },
-        interactionSource = interactionSource,
+        isActive = isSearchActive,
+        onActivenessChanged = onSetSearchActiveness,
+        interactionSource = searchBarInteractionSource,
         hint = stringResource(R.string.search_hint),
         query = currentQuery,
-        onQueryChanged = { currentQuery = it },
+        onQueryChanged = onSetCurrentQuery,
+        onClearQuery = onClearCurrentQuery,
         onGoBack = onGoBack,
-        onClear = onClear,
         onSearch = onSearch
     ) {
-        if (!isFocused) {
+        if (!isSearchBarFocused) {
             SearchStatus(lunchPlacesStatus, onRetrySearch)
         }
     }
@@ -337,6 +352,8 @@ private fun SearchError(onRetrySearch: () -> Unit) {
 private fun SearchPreview() {
     SearchScreen(
         onSearchBarBottomYChanged = {},
+        isSearchActive = false,
+        onSetSearchActiveness = {},
         onSearchLunchPlaces = {},
         onDiscardLunchPlaces = {},
         lunchPlacesStatus = null

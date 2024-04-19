@@ -26,7 +26,10 @@ class GeoVM @Inject constructor(
     private val currentLocationLauncher: ReplaceableLauncher = ReplaceableLauncher(viewModelScope)
     private val lunchPlacesLauncher: ReplaceableLauncher = ReplaceableLauncher(viewModelScope)
 
-    val geoStateFlow: StateFlow<GeoState> = savedStateHandle.getStateFlow(GEO_STATE_KEY, GeoState())
+    val geoStateFlow: StateFlow<GeoState> = savedStateHandle.getStateFlow(
+        Keys.GEO_STATE,
+        initialValue = GeoState()
+    )
 
     fun determineCurrentLocation() {
         currentLocationLauncher.launch {
@@ -103,14 +106,14 @@ class GeoVM @Inject constructor(
     private suspend fun updateGeoState(function: (GeoState) -> GeoState) {
         val currentGeoState = geoStateFlow.value
         val newGeoState = function(currentGeoState)
-        savedStateHandle[GEO_STATE_KEY] = newGeoState
+        savedStateHandle[Keys.GEO_STATE] = newGeoState
 
-        // we're doing this to ensure that the observers can react to each individual update
+        // we're doing this to ensure that the observers can react to each update
         // without an old update being silently overwritten by a new one in certain edge cases
         yield()
     }
 
-    companion object {
-        private const val GEO_STATE_KEY: String = "geo_state"
+    private object Keys {
+        const val GEO_STATE: String = "geo_state"
     }
 }
