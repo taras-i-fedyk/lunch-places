@@ -12,6 +12,7 @@ import com.tarasfedyk.lunchplaces.biz.util.ReplaceableLauncher
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.yield
 import java.lang.RuntimeException
 import javax.inject.Inject
 
@@ -99,10 +100,14 @@ class GeoVM @Inject constructor(
     }
 
     @MainThread
-    private fun updateGeoState(function: (GeoState) -> GeoState) {
+    private suspend fun updateGeoState(function: (GeoState) -> GeoState) {
         val currentGeoState = geoStateFlow.value
         val newGeoState = function(currentGeoState)
         savedStateHandle[GEO_STATE_KEY] = newGeoState
+
+        // we're doing this to ensure that the observers can react to each individual update
+        // without an old update being silently overwritten by a new one in certain edge cases
+        yield()
     }
 
     companion object {

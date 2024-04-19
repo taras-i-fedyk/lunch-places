@@ -31,6 +31,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -302,26 +303,27 @@ private fun LunchPlaceAvailability(isOpen: Boolean?) {
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 private fun SearchError(onRetrySearch: () -> Unit) {
+    val currentOnRetrySearch by rememberUpdatedState(onRetrySearch)
     val snackbarHostState = remember { SnackbarHostState() }
 
     val message = stringResource(R.string.search_error_message)
     val retryActionLabel = stringResource(R.string.search_error_retry_action_label)
 
     Scaffold(
-        content = {},
         snackbarHost = {
             SnackbarHost(hostState = snackbarHostState)
-        }
+        },
+        content = {}
     )
 
-    LaunchedEffect(snackbarHostState) {
+    LaunchedEffect(Unit) {
         val result = snackbarHostState.showSnackbar(
             message,
             actionLabel = retryActionLabel,
             duration = SnackbarDuration.Indefinite
         )
         when (result) {
-            SnackbarResult.ActionPerformed -> onRetrySearch()
+            SnackbarResult.ActionPerformed -> currentOnRetrySearch()
             SnackbarResult.Dismissed -> {}
         }
     }
