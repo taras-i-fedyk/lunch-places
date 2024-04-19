@@ -43,12 +43,6 @@ fun MapScreen(
     var isCurrentLocationEnabled by remember { mutableStateOf(false) }
     val cameraPositionState = rememberCameraPositionState()
 
-    val mapContentPadding = PaddingValues(top = mapContentTopPadding)
-    val mapUiSettings = MapUiSettings(zoomControlsEnabled = false)
-    val mapProperties = MapProperties(
-        maxZoomPreference = MAX_ZOOM_LEVEL,
-        isMyLocationEnabled = isCurrentLocationEnabled
-    )
     val onCurrentLocationButtonClicked = remember(onDetermineCurrentLocation) {
         {
             onDetermineCurrentLocation()
@@ -57,9 +51,12 @@ fun MapScreen(
     }
     GoogleMap(
         modifier = Modifier.fillMaxSize(),
-        contentPadding = mapContentPadding,
-        uiSettings = mapUiSettings,
-        properties = mapProperties,
+        contentPadding = PaddingValues(top = mapContentTopPadding),
+        uiSettings = MapUiSettings(zoomControlsEnabled = false),
+        properties = MapProperties(
+            maxZoomPreference = MAX_ZOOM_LEVEL,
+            isMyLocationEnabled = isCurrentLocationEnabled
+        ),
         cameraPositionState = cameraPositionState,
         onMyLocationButtonClick = onCurrentLocationButtonClicked
     )
@@ -77,7 +74,7 @@ fun MapScreen(
                 onDetermineCurrentLocation()
             }
         }
-        LocationPermissionsRequest(
+        LocationPermissionsTracker(
             onAllLocationPermissionsDenied,
             onSomeLocationPermissionGranted
         )
@@ -103,7 +100,7 @@ fun MapScreen(
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-private fun LocationPermissionsRequest(
+private fun LocationPermissionsTracker(
     onAllLocationPermissionsDenied: () -> Unit,
     onSomeLocationPermissionGranted: () -> Unit
 ) {
