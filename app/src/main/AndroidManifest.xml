@@ -23,7 +23,7 @@
             android:value="${MAPS_API_KEY}" />
 
         <activity
-            android:name=".ui.MainActivity"
+            android:name=".ui.RootActivity"
             android:exported="true"
             android:theme="@style/AppTheme">
             <intent-filter>

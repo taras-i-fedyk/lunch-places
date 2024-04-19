@@ -27,19 +27,19 @@ import com.tarasfedyk.lunchplaces.ui.theme.AppTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class MainActivity : ComponentActivity() {
+class RootActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             AppTheme {
-                MainContent()
+                RootContent()
             }
         }
     }
 
     @Composable
-    private fun MainContent(
+    private fun RootContent(
         geoVM: GeoVM = hiltViewModel()
     ) {
         val geoState by geoVM.geoStateFlow.collectAsStateWithLifecycle()
@@ -47,7 +47,7 @@ class MainActivity : ComponentActivity() {
         val onDiscardCurrentLocation = geoVM::discardCurrentLocation
         val onSearchLunchPlaces = geoVM::searchLunchPlaces
         val onDiscardLunchPlaces = geoVM::discardLunchPlaces
-        MainContentImpl(
+        RootContentImpl(
             onDetermineCurrentLocation,
             onDiscardCurrentLocation,
             onSearchLunchPlaces,
@@ -57,7 +57,7 @@ class MainActivity : ComponentActivity() {
     }
 
     @Composable
-    private fun MainContentImpl(
+    private fun RootContentImpl(
         onDetermineCurrentLocation: () -> Unit,
         onDiscardCurrentLocation: () -> Unit,
         onSearchLunchPlaces: (SearchFilter) -> Unit,
@@ -106,9 +106,9 @@ class MainActivity : ComponentActivity() {
 
     @Preview(showBackground = true)
     @Composable
-    private fun MainPreview() {
+    private fun RootPreview() {
         AppTheme {
-            MainContentImpl(
+            RootContentImpl(
                 onDetermineCurrentLocation = {},
                 onDiscardCurrentLocation = {},
                 onSearchLunchPlaces = {},
