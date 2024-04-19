@@ -27,7 +27,7 @@ class GeoVM @Inject constructor(
     private val lunchPlacesLauncher: ReplaceableLauncher = ReplaceableLauncher(viewModelScope)
 
     val geoStateFlow: StateFlow<GeoState> = savedStateHandle.getStateFlow(
-        Keys.GEO_STATE,
+        key = Keys.GEO_STATE,
         initialValue = GeoState()
     )
 
@@ -39,7 +39,6 @@ class GeoVM @Inject constructor(
 
     fun discardCurrentLocation() {
         currentLocationLauncher.launch {
-            determineCurrentLocationImpl()
             updateGeoState { it.copy(currentLocationStatus = null) }
         }
     }
