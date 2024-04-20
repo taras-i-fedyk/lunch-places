@@ -21,9 +21,11 @@ import com.tarasfedyk.lunchplaces.biz.data.GeoState
 import com.tarasfedyk.lunchplaces.biz.data.LunchPlace
 import com.tarasfedyk.lunchplaces.biz.data.SearchFilter
 import com.tarasfedyk.lunchplaces.biz.data.Status
+import com.tarasfedyk.lunchplaces.ui.data.LocationAccessLevel
 import com.tarasfedyk.lunchplaces.ui.nav.SEARCH_ROUTE
 import com.tarasfedyk.lunchplaces.ui.nav.searchScreen
 import com.tarasfedyk.lunchplaces.ui.theme.AppTheme
+import com.tarasfedyk.lunchplaces.ui.util.LocationPermissionsTracker
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -40,68 +42,81 @@ class RootActivity : ComponentActivity() {
 
     @Composable
     private fun RootContent(
-        rootVM: RootVM = hiltViewModel(),
         geoVM: GeoVM = hiltViewModel()
     ) {
-        val isSearchActive by rootVM.searchActivenessFlow.collectAsStateWithLifecycle()
-        val onSetSearchActiveness = rootVM::setSearchActiveness
-
+        val locationAccessLevel by geoVM.locationAccessLevelFlow.collectAsStateWithLifecycle()
         val geoState by geoVM.geoStateFlow.collectAsStateWithLifecycle()
+
+        val onSetLocationAccessLevel = geoVM::setLocationAccessLevel
         val onDetermineCurrentLocation = geoVM::determineCurrentLocation
-        val onDiscardCurrentLocation = geoVM::discardCurrentLocation
         val onSearchLunchPlaces = geoVM::searchLunchPlaces
         val onDiscardLunchPlaces = geoVM::discardLunchPlaces
 
         RootContentImpl(
-            onDetermineCurrentLocation,
-            onDiscardCurrentLocation,
-            isSearchActive,
-            onSetSearchActiveness,
-            onSearchLunchPlaces,
-            onDiscardLunchPlaces,
-            geoState
+            locationAccessLevel = locationAccessLevel,
+            onSetLocationAccessLevel = onSetLocationAccessLevel,
+            onDetermineCurrentLocation = onDetermineCurrentLocation,
+            onSearchLunchPlaces = onSearchLunchPlaces,
+            onDiscardLunchPlaces = onDiscardLunchPlaces,
+            geoState = geoState
         )
     }
 
     @Composable
     private fun RootContentImpl(
+        locationAccessLevel: LocationAccessLevel,
+        onSetLocationAccessLevel: (LocationAccessLevel) -> Unit,
         onDetermineCurrentLocation: () -> Unit,
-        onDiscardCurrentLocation: () -> Unit,
-        isSearchActive: Boolean,
-        onSetSearchActiveness: (Boolean) -> Unit,
         onSearchLunchPlaces: (SearchFilter) -> Unit,
         onDiscardLunchPlaces: () -> Unit,
         geoState: GeoState
     ) {
         var mapContentTopPadding by remember { mutableStateOf(0.dp) }
+        val isCurrentLocationEnabled = locationAccessLevel != LocationAccessLevel.NONE
+        MapScreen(
+            mapContentTopPadding,
+            isCurrentLocationEnabled,
+            onDetermineCurrentLocation,
+            geoState.currentLocationStatus
+        )
+
         val onSearchBarBottomYChanged: (Dp) -> Unit = remember {
             { searchBarBottomY ->
                 mapContentTopPadding = searchBarBottomY
             }
         }
-
-        MapScreen(
-            mapContentTopPadding,
-            isSearchActive,
-            onDetermineCurrentLocation,
-            onDiscardCurrentLocation,
-            geoState.currentLocationStatus
-        )
         NavGraph(
             onSearchBarBottomYChanged,
-            isSearchActive,
-            onSetSearchActiveness,
             onSearchLunchPlaces,
             onDiscardLunchPlaces,
             geoState.lunchPlacesStatus
+        )
+
+        val onAllLocationPermissionsDenied = remember(onSetLocationAccessLevel) {
+            {
+                onSetLocationAccessLevel(LocationAccessLevel.NONE)
+            }
+        }
+        val onSolelyCoarseLocationPermissionGranted = remember(onSetLocationAccessLevel) {
+            {
+                onSetLocationAccessLevel(LocationAccessLevel.COARSE_ONLY)
+            }
+        }
+        val onFineLocationPermissionGranted = remember(onSetLocationAccessLevel) {
+            {
+                onSetLocationAccessLevel(LocationAccessLevel.FINE)
+            }
+        }
+        LocationPermissionsTracker(
+            onAllLocationPermissionsDenied = onAllLocationPermissionsDenied,
+            onSolelyCoarseLocationPermissionGranted = onSolelyCoarseLocationPermissionGranted,
+            onFineLocationPermissionGranted = onFineLocationPermissionGranted
         )
     }
 
     @Composable
     private fun NavGraph(
         onSearchBarBottomYChanged: (Dp) -> Unit,
-        isSearchActive: Boolean,
-        onSetSearchActiveness: (Boolean) -> Unit,
         onSearchLunchPlaces: (SearchFilter) -> Unit,
         onDiscardLunchPlaces: () -> Unit,
         lunchPlacesStatus: Status<SearchFilter, List<LunchPlace>>?,
@@ -113,8 +128,6 @@ class RootActivity : ComponentActivity() {
         ) {
             searchScreen(
                 onSearchBarBottomYChanged,
-                isSearchActive,
-                onSetSearchActiveness,
                 onSearchLunchPlaces,
                 onDiscardLunchPlaces,
                 lunchPlacesStatus
@@ -127,10 +140,9 @@ class RootActivity : ComponentActivity() {
     private fun RootPreview() {
         AppTheme {
             RootContentImpl(
+                locationAccessLevel = LocationAccessLevel.NONE,
+                onSetLocationAccessLevel = {},
                 onDetermineCurrentLocation = {},
-                onDiscardCurrentLocation = {},
-                isSearchActive = false,
-                onSetSearchActiveness = {},
                 onSearchLunchPlaces = {},
                 onDiscardLunchPlaces = {},
                 geoState = GeoState()

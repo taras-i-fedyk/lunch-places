@@ -9,37 +9,54 @@ import com.tarasfedyk.lunchplaces.biz.data.GeoState
 import com.tarasfedyk.lunchplaces.biz.data.SearchFilter
 import com.tarasfedyk.lunchplaces.biz.data.Status
 import com.tarasfedyk.lunchplaces.biz.util.ReplaceableLauncher
+import com.tarasfedyk.lunchplaces.ui.data.LocationAccessLevel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.yield
 import java.lang.RuntimeException
 import javax.inject.Inject
 
 @HiltViewModel
 class GeoVM @Inject constructor(
+    private val savedStateHandle: SavedStateHandle,
     private val locationController: LocationController,
-    private val repo: Repo,
-    private val savedStateHandle: SavedStateHandle
+    private val repo: Repo
 ) : ViewModel() {
 
     private val currentLocationLauncher: ReplaceableLauncher = ReplaceableLauncher(viewModelScope)
     private val lunchPlacesLauncher: ReplaceableLauncher = ReplaceableLauncher(viewModelScope)
+
+    private val _locationAccessLevelFlow: MutableStateFlow<LocationAccessLevel> =
+        MutableStateFlow(LocationAccessLevel.NONE)
+    val locationAccessLevelFlow: StateFlow<LocationAccessLevel> =
+        _locationAccessLevelFlow.asStateFlow()
 
     val geoStateFlow: StateFlow<GeoState> = savedStateHandle.getStateFlow(
         key = Keys.GEO_STATE,
         initialValue = GeoState()
     )
 
-    fun determineCurrentLocation() {
-        currentLocationLauncher.launch {
-            determineCurrentLocationImpl()
+    init {
+        viewModelScope.launch {
+            locationAccessLevelFlow.collect { locationAccessLevel ->
+                if (locationAccessLevel != LocationAccessLevel.NONE) {
+                    determineCurrentLocation()
+                }
+            }
         }
     }
 
-    fun discardCurrentLocation() {
+    fun setLocationAccessLevel(locationAccessLevel: LocationAccessLevel) {
+        _locationAccessLevelFlow.value = locationAccessLevel
+    }
+
+    fun determineCurrentLocation() {
         currentLocationLauncher.launch {
-            updateGeoState { it.copy(currentLocationStatus = null) }
+            determineCurrentLocationImpl()
         }
     }
 

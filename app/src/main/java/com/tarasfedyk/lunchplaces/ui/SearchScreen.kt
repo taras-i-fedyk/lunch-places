@@ -65,12 +65,12 @@ import kotlin.math.roundToInt
 @Composable
 fun SearchScreen(
     onSearchBarBottomYChanged: (Dp) -> Unit,
-    isSearchActive: Boolean,
-    onSetSearchActiveness: (Boolean) -> Unit,
     onSearchLunchPlaces: (SearchFilter) -> Unit,
     onDiscardLunchPlaces: () -> Unit,
     lunchPlacesStatus: Status<SearchFilter, List<LunchPlace>>?
 ) {
+    var isSearchActive by rememberSaveable { mutableStateOf(false) }
+
     val focusManager = LocalFocusManager.current
     val searchBarInteractionSource = remember { MutableInteractionSource() }
     val isSearchBarFocused by searchBarInteractionSource.collectIsFocusedAsState()
@@ -79,6 +79,12 @@ fun SearchScreen(
     var sentQuery by rememberSaveable { mutableStateOf("") }
 
     val thumbnailSizeLimit = thumbnailSizeLimit()
+
+    val onSetSearchActiveness: (Boolean) -> Unit = remember {
+        {
+            isSearchActive = it
+        }
+    }
 
     val onSetCurrentQuery: (String) -> Unit = remember {
         {
@@ -106,7 +112,7 @@ fun SearchScreen(
             } else {
                 sentQuery = ""
                 onClearCurrentQuery()
-                onSetSearchActiveness(false)
+                isSearchActive = false
                 onDiscardLunchPlaces()
             }
         }
@@ -321,7 +327,7 @@ private fun LunchPlaceAvailability(isOpen: Boolean?) {
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 private fun SearchError(onRetrySearch: () -> Unit) {
-    val currentOnRetrySearch by rememberUpdatedState(onRetrySearch)
+    val onRetrySearchCurrent by rememberUpdatedState(onRetrySearch)
     val snackbarHostState = remember { SnackbarHostState() }
 
     val message = stringResource(R.string.search_error_message)
@@ -341,7 +347,7 @@ private fun SearchError(onRetrySearch: () -> Unit) {
             duration = SnackbarDuration.Indefinite
         )
         when (result) {
-            SnackbarResult.ActionPerformed -> currentOnRetrySearch()
+            SnackbarResult.ActionPerformed -> onRetrySearchCurrent()
             SnackbarResult.Dismissed -> {}
         }
     }
@@ -352,8 +358,6 @@ private fun SearchError(onRetrySearch: () -> Unit) {
 private fun SearchPreview() {
     SearchScreen(
         onSearchBarBottomYChanged = {},
-        isSearchActive = false,
-        onSetSearchActiveness = {},
         onSearchLunchPlaces = {},
         onDiscardLunchPlaces = {},
         lunchPlacesStatus = null
