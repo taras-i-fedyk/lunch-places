@@ -18,7 +18,6 @@ fun LocationPermissionsTracker(
     onSolelyCoarseLocationPermissionGranted: () -> Unit,
     onFineLocationPermissionGranted: () -> Unit
 ) {
-    // TODO: replace this with a direct call of the library function in a Preview-friendly way
     val locationPermissionsState = safelyRememberMultiplePermissionsState(
         permissions = listOf(ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION)
     )

@@ -32,7 +32,7 @@ fun CompactSearchBar(
     onQueryChanged: (String) -> Unit,
     onClearQuery: () -> Unit,
     onGoBack: () -> Unit,
-    onSearch: (String) -> Unit,
+    onTrySearch: (String) -> Unit,
     modifier: Modifier = Modifier,
     onInputFieldBottomYChanged: (Dp) -> Unit = {},
     interactionSource: MutableInteractionSource = MutableInteractionSource(),
@@ -41,24 +41,16 @@ fun CompactSearchBar(
     val isFocused by interactionSource.collectIsFocusedAsState()
 
     val placeholder: @Composable () -> Unit = remember(hint) {
-        {
-            Placeholder(hint)
-        }
+        { Placeholder(hint) }
     }
     val searchIcon: @Composable () -> Unit = remember {
-        {
-            SearchIcon()
-        }
+        { SearchIcon() }
     }
     val upNavIconButton: @Composable () -> Unit = remember(onGoBack) {
-        {
-            UpNavIconButton(onGoUp = onGoBack)
-        }
+        { UpNavIconButton(onGoUp = onGoBack) }
     }
     val queryClearanceIconButton: @Composable () -> Unit = remember(onClearQuery) {
-        {
-            QueryClearanceIconButton(onClearQuery)
-        }
+        { QueryClearanceIconButton(onClearQuery) }
     }
 
     SearchBar(
@@ -72,7 +64,7 @@ fun CompactSearchBar(
         interactionSource = interactionSource,
         query = query,
         onQueryChange = onQueryChanged,
-        onSearch = onSearch
+        onSearch = onTrySearch
     ) {
         content()
         BackHandler(enabled = isActive) {

@@ -9,7 +9,7 @@ import com.tarasfedyk.lunchplaces.biz.data.GeoState
 import com.tarasfedyk.lunchplaces.biz.data.SearchFilter
 import com.tarasfedyk.lunchplaces.biz.data.Status
 import com.tarasfedyk.lunchplaces.biz.util.ReplaceableLauncher
-import com.tarasfedyk.lunchplaces.ui.data.LocationAccessLevel
+import com.tarasfedyk.lunchplaces.biz.data.LocationAccessLevel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -42,9 +42,18 @@ class GeoVM @Inject constructor(
 
     init {
         viewModelScope.launch {
-            locationAccessLevelFlow.collect { locationAccessLevel ->
-                if (locationAccessLevel != LocationAccessLevel.NONE) {
-                    determineCurrentLocation()
+            launch {
+                locationAccessLevelFlow.collect { locationAccessLevel ->
+                    if (locationAccessLevel != LocationAccessLevel.NONE) {
+                        determineCurrentLocation()
+                    }
+                }
+            }
+            launch {
+                geoStateFlow.first().let { savedGeoState ->
+                    if (savedGeoState.lunchPlacesStatus is Status.Pending) {
+                        refreshLunchPlaces()
+                    }
                 }
             }
         }
@@ -92,6 +101,14 @@ class GeoVM @Inject constructor(
         }
     }
 
+    private fun refreshLunchPlaces() {
+        lunchPlacesLauncher.launch {
+            geoStateFlow.first().lunchPlacesStatus?.let { lunchPlacesStatus ->
+                searchLunchPlacesImpl(lunchPlacesStatus.arg)
+            }
+        }
+    }
+
     fun discardLunchPlaces() {
         lunchPlacesLauncher.launch {
             updateGeoState { it.copy(lunchPlacesStatus = null) }
@@ -127,7 +144,7 @@ class GeoVM @Inject constructor(
 
     @MainThread
     private suspend fun updateGeoState(function: (GeoState) -> GeoState) {
-        val currentGeoState = geoStateFlow.value
+        val currentGeoState = geoStateFlow.first()
         val newGeoState = function(currentGeoState)
         savedStateHandle[Keys.GEO_STATE] = newGeoState
 

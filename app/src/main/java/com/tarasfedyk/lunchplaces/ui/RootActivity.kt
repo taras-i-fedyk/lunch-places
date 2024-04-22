@@ -21,7 +21,7 @@ import com.tarasfedyk.lunchplaces.biz.data.GeoState
 import com.tarasfedyk.lunchplaces.biz.data.LunchPlace
 import com.tarasfedyk.lunchplaces.biz.data.SearchFilter
 import com.tarasfedyk.lunchplaces.biz.data.Status
-import com.tarasfedyk.lunchplaces.ui.data.LocationAccessLevel
+import com.tarasfedyk.lunchplaces.biz.data.LocationAccessLevel
 import com.tarasfedyk.lunchplaces.ui.nav.SEARCH_ROUTE
 import com.tarasfedyk.lunchplaces.ui.nav.searchScreen
 import com.tarasfedyk.lunchplaces.ui.theme.AppTheme
