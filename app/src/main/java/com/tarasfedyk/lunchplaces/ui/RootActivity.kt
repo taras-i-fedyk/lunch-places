@@ -81,9 +81,7 @@ class RootActivity : ComponentActivity() {
         )
 
         val onSearchBarBottomYChanged: (Dp) -> Unit = remember {
-            { searchBarBottomY ->
-                mapContentTopPadding = searchBarBottomY
-            }
+            { searchBarBottomY -> mapContentTopPadding = searchBarBottomY }
         }
         NavGraph(
             onSearchBarBottomYChanged,
@@ -93,19 +91,13 @@ class RootActivity : ComponentActivity() {
         )
 
         val onAllLocationPermissionsDenied = remember(onSetLocationAccessLevel) {
-            {
-                onSetLocationAccessLevel(LocationAccessLevel.NONE)
-            }
+            { onSetLocationAccessLevel(LocationAccessLevel.NONE) }
         }
         val onSolelyCoarseLocationPermissionGranted = remember(onSetLocationAccessLevel) {
-            {
-                onSetLocationAccessLevel(LocationAccessLevel.COARSE_ONLY)
-            }
+            { onSetLocationAccessLevel(LocationAccessLevel.COARSE_ONLY) }
         }
         val onFineLocationPermissionGranted = remember(onSetLocationAccessLevel) {
-            {
-                onSetLocationAccessLevel(LocationAccessLevel.FINE)
-            }
+            { onSetLocationAccessLevel(LocationAccessLevel.FINE) }
         }
         LocationPermissionsTracker(
             onAllLocationPermissionsDenied = onAllLocationPermissionsDenied,
