@@ -1,5 +1,5 @@
 package com.tarasfedyk.lunchplaces.biz.data
 
-enum class LocationAccessLevel {
+enum class LocationPermissionsLevel {
     NONE, COARSE_ONLY, FINE
 }

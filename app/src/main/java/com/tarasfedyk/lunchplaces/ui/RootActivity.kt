@@ -21,7 +21,7 @@ import com.tarasfedyk.lunchplaces.biz.data.GeoState
 import com.tarasfedyk.lunchplaces.biz.data.LunchPlace
 import com.tarasfedyk.lunchplaces.biz.data.SearchFilter
 import com.tarasfedyk.lunchplaces.biz.data.Status
-import com.tarasfedyk.lunchplaces.biz.data.LocationAccessLevel
+import com.tarasfedyk.lunchplaces.biz.data.LocationPermissionsLevel
 import com.tarasfedyk.lunchplaces.ui.nav.SEARCH_ROUTE
 import com.tarasfedyk.lunchplaces.ui.nav.searchScreen
 import com.tarasfedyk.lunchplaces.ui.theme.AppTheme
@@ -44,17 +44,17 @@ class RootActivity : ComponentActivity() {
     private fun RootContent(
         geoVM: GeoVM = hiltViewModel()
     ) {
-        val locationAccessLevel by geoVM.locationAccessLevelFlow.collectAsStateWithLifecycle()
+        val locationPermissionsLevel by geoVM.locationPermissionsLevelFlow.collectAsStateWithLifecycle()
         val geoState by geoVM.geoStateFlow.collectAsStateWithLifecycle()
 
-        val onSetLocationAccessLevel = geoVM::setLocationAccessLevel
+        val onSetLocationPermissionsLevel = geoVM::setLocationPermissionsLevel
         val onDetermineCurrentLocation = geoVM::determineCurrentLocation
         val onSearchLunchPlaces = geoVM::searchLunchPlaces
         val onDiscardLunchPlaces = geoVM::discardLunchPlaces
 
         RootContentImpl(
-            locationAccessLevel = locationAccessLevel,
-            onSetLocationAccessLevel = onSetLocationAccessLevel,
+            locationPermissionsLevel = locationPermissionsLevel,
+            onSetLocationPermissionsLevel = onSetLocationPermissionsLevel,
             onDetermineCurrentLocation = onDetermineCurrentLocation,
             onSearchLunchPlaces = onSearchLunchPlaces,
             onDiscardLunchPlaces = onDiscardLunchPlaces,
@@ -64,15 +64,17 @@ class RootActivity : ComponentActivity() {
 
     @Composable
     private fun RootContentImpl(
-        locationAccessLevel: LocationAccessLevel,
-        onSetLocationAccessLevel: (LocationAccessLevel) -> Unit,
+        locationPermissionsLevel: LocationPermissionsLevel?,
+        onSetLocationPermissionsLevel: (LocationPermissionsLevel) -> Unit,
         onDetermineCurrentLocation: () -> Unit,
         onSearchLunchPlaces: (SearchFilter) -> Unit,
         onDiscardLunchPlaces: () -> Unit,
         geoState: GeoState
     ) {
         var mapContentTopPadding by remember { mutableStateOf(0.dp) }
-        val isCurrentLocationEnabled = locationAccessLevel != LocationAccessLevel.NONE
+        val isCurrentLocationEnabled =
+            locationPermissionsLevel == LocationPermissionsLevel.COARSE_ONLY ||
+            locationPermissionsLevel == LocationPermissionsLevel.FINE
         MapScreen(
             mapContentTopPadding,
             isCurrentLocationEnabled,
@@ -90,14 +92,14 @@ class RootActivity : ComponentActivity() {
             geoState.lunchPlacesStatus
         )
 
-        val onAllLocationPermissionsDenied = remember(onSetLocationAccessLevel) {
-            { onSetLocationAccessLevel(LocationAccessLevel.NONE) }
+        val onAllLocationPermissionsDenied = remember(onSetLocationPermissionsLevel) {
+            { onSetLocationPermissionsLevel(LocationPermissionsLevel.NONE) }
         }
-        val onSolelyCoarseLocationPermissionGranted = remember(onSetLocationAccessLevel) {
-            { onSetLocationAccessLevel(LocationAccessLevel.COARSE_ONLY) }
+        val onSolelyCoarseLocationPermissionGranted = remember(onSetLocationPermissionsLevel) {
+            { onSetLocationPermissionsLevel(LocationPermissionsLevel.COARSE_ONLY) }
         }
-        val onFineLocationPermissionGranted = remember(onSetLocationAccessLevel) {
-            { onSetLocationAccessLevel(LocationAccessLevel.FINE) }
+        val onFineLocationPermissionGranted = remember(onSetLocationPermissionsLevel) {
+            { onSetLocationPermissionsLevel(LocationPermissionsLevel.FINE) }
         }
         LocationPermissionsTracker(
             onAllLocationPermissionsDenied = onAllLocationPermissionsDenied,
@@ -132,8 +134,8 @@ class RootActivity : ComponentActivity() {
     private fun RootPreview() {
         AppTheme {
             RootContentImpl(
-                locationAccessLevel = LocationAccessLevel.NONE,
-                onSetLocationAccessLevel = {},
+                locationPermissionsLevel = LocationPermissionsLevel.NONE,
+                onSetLocationPermissionsLevel = {},
                 onDetermineCurrentLocation = {},
                 onSearchLunchPlaces = {},
                 onDiscardLunchPlaces = {},

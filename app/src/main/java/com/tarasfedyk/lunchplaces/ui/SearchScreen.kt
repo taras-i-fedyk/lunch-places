@@ -33,7 +33,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -58,6 +57,7 @@ import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.MultiplePermissionsState
 import com.tarasfedyk.lunchplaces.R
+import com.tarasfedyk.lunchplaces.biz.data.ErrorType
 import com.tarasfedyk.lunchplaces.biz.data.LunchPlace
 import com.tarasfedyk.lunchplaces.biz.data.SearchFilter
 import com.tarasfedyk.lunchplaces.biz.data.SizeLimit
@@ -245,7 +245,7 @@ private fun SearchStatus(
         null -> {}
         is Status.Pending -> SearchProgress()
         is Status.Success -> SearchResult(lunchPlaces = lunchPlacesStatus.result)
-        is Status.Failure -> SearchError(onRetrySearch)
+        is Status.Failure -> SearchError(lunchPlacesStatus.errorType, onRetrySearch)
     }
 }
 
@@ -392,11 +392,15 @@ private fun LunchPlaceAvailability(isOpen: Boolean?) {
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-private fun SearchError(onRetrySearch: () -> Unit) {
+private fun SearchError(errorType: ErrorType, onRetrySearch: () -> Unit) {
     val snackbarHostState = remember { SnackbarHostState() }
-    val errorMessage = stringResource(R.string.search_error_message)
+    val errorMessage = when (errorType) {
+        ErrorType.LOCATION_PERMISSIONS -> stringResource(R.string.search_permissions_error_message)
+        ErrorType.CURRENT_LOCATION -> stringResource(R.string.search_location_error_message)
+        ErrorType.INTERNET_CONNECTION -> stringResource(R.string.search_connection_error_message)
+        ErrorType.UNKNOWN -> stringResource(R.string.search_error_message)
+    }
     val retryActionLabel = stringResource(R.string.retry_action_label)
-    val onRetrySearchCurrently by rememberUpdatedState(onRetrySearch)
 
     Scaffold(
         snackbarHost = {
@@ -412,7 +416,7 @@ private fun SearchError(onRetrySearch: () -> Unit) {
             duration = SnackbarDuration.Indefinite
         )
         when (result) {
-            SnackbarResult.ActionPerformed -> onRetrySearchCurrently()
+            SnackbarResult.ActionPerformed -> onRetrySearch()
             SnackbarResult.Dismissed -> {}
         }
     }

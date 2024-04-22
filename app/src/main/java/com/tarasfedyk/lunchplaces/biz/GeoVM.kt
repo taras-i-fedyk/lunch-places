@@ -4,12 +4,14 @@ import androidx.annotation.MainThread
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.android.gms.common.api.ApiException
+import com.google.android.gms.common.api.CommonStatusCodes
 import com.tarasfedyk.lunchplaces.biz.data.ErrorType
 import com.tarasfedyk.lunchplaces.biz.data.GeoState
 import com.tarasfedyk.lunchplaces.biz.data.SearchFilter
 import com.tarasfedyk.lunchplaces.biz.data.Status
 import com.tarasfedyk.lunchplaces.biz.util.ReplaceableLauncher
-import com.tarasfedyk.lunchplaces.biz.data.LocationAccessLevel
+import com.tarasfedyk.lunchplaces.biz.data.LocationPermissionsLevel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -30,10 +32,10 @@ class GeoVM @Inject constructor(
     private val currentLocationLauncher: ReplaceableLauncher = ReplaceableLauncher(viewModelScope)
     private val lunchPlacesLauncher: ReplaceableLauncher = ReplaceableLauncher(viewModelScope)
 
-    private val _locationAccessLevelFlow: MutableStateFlow<LocationAccessLevel> =
-        MutableStateFlow(LocationAccessLevel.NONE)
-    val locationAccessLevelFlow: StateFlow<LocationAccessLevel> =
-        _locationAccessLevelFlow.asStateFlow()
+    private val _locationPermissionsLevelFlow: MutableStateFlow<LocationPermissionsLevel?> =
+        MutableStateFlow(null)
+    val locationPermissionsLevelFlow: StateFlow<LocationPermissionsLevel?> =
+        _locationPermissionsLevelFlow.asStateFlow()
 
     val geoStateFlow: StateFlow<GeoState> = savedStateHandle.getStateFlow(
         key = Keys.GEO_STATE,
@@ -43,8 +45,11 @@ class GeoVM @Inject constructor(
     init {
         viewModelScope.launch {
             launch {
-                locationAccessLevelFlow.collect { locationAccessLevel ->
-                    if (locationAccessLevel != LocationAccessLevel.NONE) {
+                locationPermissionsLevelFlow.collect { locationPermissionsLevel ->
+                    if (
+                        locationPermissionsLevel == LocationPermissionsLevel.COARSE_ONLY ||
+                        locationPermissionsLevel == LocationPermissionsLevel.FINE
+                    ) {
                         determineCurrentLocation()
                     }
                 }
@@ -59,8 +64,8 @@ class GeoVM @Inject constructor(
         }
     }
 
-    fun setLocationAccessLevel(locationAccessLevel: LocationAccessLevel) {
-        _locationAccessLevelFlow.value = locationAccessLevel
+    fun setLocationPermissionsLevel(locationPermissionsLevel: LocationPermissionsLevel) {
+        _locationPermissionsLevelFlow.value = locationPermissionsLevel
     }
 
     fun determineCurrentLocation() {
@@ -84,7 +89,7 @@ class GeoVM @Inject constructor(
         } catch (e: Exception) {
             if (e !is RuntimeException || e is SecurityException) {
                 val errorType = if (e is SecurityException) {
-                    ErrorType.LOCATION_ACCESS
+                    ErrorType.LOCATION_PERMISSIONS
                 } else {
                     ErrorType.CURRENT_LOCATION
                 }
@@ -135,7 +140,12 @@ class GeoVM @Inject constructor(
             }
         } catch (e: Exception) {
             if (e !is RuntimeException) {
-                updateGeoState { it.copy(lunchPlacesStatus = Status.Failure(searchFilter, ErrorType.LUNCH_PLACES)) }
+                val errorType = if (e is ApiException && e.statusCode == CommonStatusCodes.NETWORK_ERROR) {
+                    ErrorType.INTERNET_CONNECTION
+                } else {
+                    ErrorType.UNKNOWN
+                }
+                updateGeoState { it.copy(lunchPlacesStatus = Status.Failure(searchFilter, errorType)) }
             } else {
                 throw e
             }
