@@ -28,7 +28,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.MultiplePermissionsState
@@ -46,7 +45,6 @@ import com.tarasfedyk.lunchplaces.ui.util.safelyRememberMultiplePermissionsState
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun SearchScreen(
-    onSearchBarBottomYChanged: (Dp) -> Unit,
     onSearchLunchPlaces: (SearchInput) -> Unit,
     onDiscardLunchPlaces: () -> Unit,
     lunchPlacesStatus: Status<SearchFilter, List<LunchPlace>>?
@@ -124,7 +122,6 @@ fun SearchScreen(
     // TODO: adjust the horizontal padding in a smooth way
     CompactSearchBar(
         modifier = Modifier.fillMaxWidth(),
-        onInputFieldBottomYChanged = onSearchBarBottomYChanged,
         isActive = isSearchBarActive,
         onActivenessChanged = onSetSearchBarActiveness,
         interactionSource = searchBarInteractionSource,
@@ -277,7 +274,6 @@ private fun SearchError(errorType: ErrorType, onRetrySearch: () -> Unit) {
 @Composable
 private fun SearchPreview() {
     SearchScreen(
-        onSearchBarBottomYChanged = {},
         onSearchLunchPlaces = {},
         onDiscardLunchPlaces = {},
         lunchPlacesStatus = null

@@ -7,6 +7,7 @@
     <string name="kilometers_distance_template">%s km</string>
     <string name="unavailability_label">Closed</string>
 
+    <string name="current_location_button_description">Current location button</string>
     <string name="search_icon_description">Search icon</string>
     <string name="up_navigation_button_description">Up navigation button</string>
     <string name="query_clearance_button_description">Query clearance button</string>

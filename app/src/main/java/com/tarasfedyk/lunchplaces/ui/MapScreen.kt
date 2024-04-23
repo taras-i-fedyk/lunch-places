@@ -1,20 +1,23 @@
 package com.tarasfedyk.lunchplaces.ui
 
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.maps.android.compose.CameraPositionState
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.rememberCameraPositionState
+import com.tarasfedyk.lunchplaces.R
 import com.tarasfedyk.lunchplaces.biz.data.LocationSnapshot
 import com.tarasfedyk.lunchplaces.biz.data.Status
 import kotlin.math.log2
@@ -26,30 +29,34 @@ private const val MAX_LOCATION_ACCURACY: Float = 4f
 
 @Composable
 fun MapScreen(
-    mapContentTopPadding: Dp,
     isCurrentLocationEnabled: Boolean,
     onDetermineCurrentLocation: () -> Unit,
     currentLocationStatus: Status<Unit, LocationSnapshot>?
 ) {
     val cameraPositionState = rememberCameraPositionState()
 
-    val onCurrentLocationButtonClicked = remember(onDetermineCurrentLocation) {
-        {
-            onDetermineCurrentLocation()
-            true
+    Scaffold(
+        floatingActionButton = {
+            if (isCurrentLocationEnabled) {
+                CurrentLocationButton(onDetermineCurrentLocation)
+            }
         }
+    ) { paddingValues ->
+        GoogleMap(
+            modifier = Modifier
+                .padding(paddingValues)
+                .fillMaxSize(),
+            uiSettings = MapUiSettings(
+                myLocationButtonEnabled = false,
+                zoomControlsEnabled = false
+            ),
+            properties = MapProperties(
+                maxZoomPreference = MAX_ZOOM_LEVEL,
+                isMyLocationEnabled = isCurrentLocationEnabled
+            ),
+            cameraPositionState = cameraPositionState
+        )
     }
-    GoogleMap(
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(top = mapContentTopPadding),
-        uiSettings = MapUiSettings(zoomControlsEnabled = false),
-        properties = MapProperties(
-            maxZoomPreference = MAX_ZOOM_LEVEL,
-            isMyLocationEnabled = isCurrentLocationEnabled
-        ),
-        cameraPositionState = cameraPositionState,
-        onMyLocationButtonClick = onCurrentLocationButtonClicked
-    )
 
     LaunchedEffect(isCurrentLocationEnabled, currentLocationStatus) {
         if (
@@ -69,6 +76,16 @@ fun MapScreen(
     }
 }
 
+@Composable
+private fun CurrentLocationButton(onDetermineCurrentLocation: () -> Unit) {
+    FloatingActionButton(onClick = onDetermineCurrentLocation) {
+        Icon(
+            painter = painterResource(R.drawable.ic_current_location),
+            contentDescription = stringResource(R.string.current_location_button_description)
+        )
+    }
+}
+
 private fun recommendZoomLevel(locationAccuracy: Float): Float =
     // based on how close the given location accuracy is to the maximum location accuracy
     // and assuming the maximum location accuracy should be accompanied by the maximum zoom level
@@ -78,7 +95,6 @@ private fun recommendZoomLevel(locationAccuracy: Float): Float =
 @Composable
 private fun MapPreview() {
     MapScreen(
-        mapContentTopPadding = 0.dp,
         isCurrentLocationEnabled = false,
         onDetermineCurrentLocation = {},
         currentLocationStatus = null

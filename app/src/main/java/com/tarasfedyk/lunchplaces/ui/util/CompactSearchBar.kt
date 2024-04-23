@@ -12,14 +12,11 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.SearchBar
-import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.tarasfedyk.lunchplaces.R
 
@@ -35,7 +32,6 @@ fun CompactSearchBar(
     onGoBack: () -> Unit,
     onTrySearch: (String) -> Unit,
     modifier: Modifier = Modifier,
-    onInputFieldBottomYChanged: (Dp) -> Unit = {},
     interactionSource: MutableInteractionSource = MutableInteractionSource(),
     content: @Composable ColumnScope.() -> Unit
 ) {
@@ -68,14 +64,6 @@ fun CompactSearchBar(
         BackHandler(enabled = isActive) {
             onGoBack()
         }
-    }
-
-    // TODO: replace this with a solution not based on hard-coding any values
-    LaunchedEffect(Unit) {
-        val inputFieldTopPadding = 8.dp
-        val inputFieldHeight = SearchBarDefaults.InputFieldHeight
-        val inputFieldBottomY = inputFieldTopPadding + inputFieldHeight
-        onInputFieldBottomYChanged(inputFieldBottomY)
     }
 }
 

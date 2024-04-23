@@ -5,12 +5,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
@@ -72,22 +68,16 @@ class RootActivity : ComponentActivity() {
         onDiscardLunchPlaces: () -> Unit,
         geoState: GeoState
     ) {
-        var mapContentTopPadding by remember { mutableStateOf(0.dp) }
         val isCurrentLocationEnabled =
             locationPermissionsLevel == LocationPermissionsLevel.COARSE_ONLY ||
             locationPermissionsLevel == LocationPermissionsLevel.FINE
         MapScreen(
-            mapContentTopPadding,
             isCurrentLocationEnabled,
             onDetermineCurrentLocation,
             geoState.currentLocationStatus
         )
 
-        val onSearchBarBottomYChanged: (Dp) -> Unit = remember {
-            { searchBarBottomY -> mapContentTopPadding = searchBarBottomY }
-        }
         NavGraph(
-            onSearchBarBottomYChanged,
             onSearchLunchPlaces,
             onDiscardLunchPlaces,
             geoState.lunchPlacesStatus
@@ -111,7 +101,6 @@ class RootActivity : ComponentActivity() {
 
     @Composable
     private fun NavGraph(
-        onSearchBarBottomYChanged: (Dp) -> Unit,
         onSearchLunchPlaces: (SearchInput) -> Unit,
         onDiscardLunchPlaces: () -> Unit,
         lunchPlacesStatus: Status<SearchFilter, List<LunchPlace>>?,
@@ -122,7 +111,6 @@ class RootActivity : ComponentActivity() {
             startDestination = SEARCH_ROUTE
         ) {
             searchScreen(
-                onSearchBarBottomYChanged,
                 onSearchLunchPlaces,
                 onDiscardLunchPlaces,
                 lunchPlacesStatus
