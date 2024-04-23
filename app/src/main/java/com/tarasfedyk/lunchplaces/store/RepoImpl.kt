@@ -32,12 +32,7 @@ class RepoImpl @Inject constructor(
 ) : Repo {
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    override suspend fun searchLunchPlaces(
-        searchFilter: SearchFilter,
-        currentLatLng: LatLng,
-        radius: Double,
-        shouldRankByDistance: Boolean
-    ): List<LunchPlace> {
+    override suspend fun searchLunchPlaces(searchFilter: SearchFilter): List<LunchPlace> {
         val placeFields = listOf(
             Place.Field.ID,
             Place.Field.NAME,
@@ -51,8 +46,10 @@ class RepoImpl @Inject constructor(
             Place.Field.PHOTO_METADATAS
         )
         val placeType = PlaceTypes.RESTAURANT
-        val circularBounds = CircularBounds.newInstance(currentLatLng, radius)
-        val rankPreference = if (shouldRankByDistance) {
+        val circularBounds = CircularBounds.newInstance(
+            searchFilter.currentLatLng, searchFilter.radius
+        )
+        val rankPreference = if (searchFilter.shouldRankByDistance) {
             SearchByTextRequest.RankPreference.DISTANCE
         } else {
             SearchByTextRequest.RankPreference.RELEVANCE
@@ -60,7 +57,7 @@ class RepoImpl @Inject constructor(
 
         val cancellationTokenSource = CancellationTokenSource()
         val searchByTextRequest = SearchByTextRequest
-            .builder(searchFilter.query, placeFields)
+            .builder(searchFilter.input.query, placeFields)
             .setIncludedType(placeType)
             .setLocationBias(circularBounds)
             .setRankPreference(rankPreference)
@@ -68,7 +65,11 @@ class RepoImpl @Inject constructor(
             .build()
         val searchByTextTask = placesClient.searchByText(searchByTextRequest)
         return searchByTextTask.await(cancellationTokenSource).places
-            .toLunchPlaces(currentLatLng, searchFilter.thumbnailSizeLimit, searchFilter.photoSizeLimit)
+            .toLunchPlaces(
+                searchFilter.currentLatLng,
+                searchFilter.input.thumbnailSizeLimit,
+                searchFilter.input.photoSizeLimit
+            )
     }
 
     private suspend fun List<Place>.toLunchPlaces(

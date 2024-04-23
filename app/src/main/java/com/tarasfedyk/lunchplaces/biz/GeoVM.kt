@@ -12,6 +12,7 @@ import com.tarasfedyk.lunchplaces.biz.data.SearchFilter
 import com.tarasfedyk.lunchplaces.biz.data.Status
 import com.tarasfedyk.lunchplaces.biz.util.ReplaceableLauncher
 import com.tarasfedyk.lunchplaces.biz.data.LocationPermissionsLevel
+import com.tarasfedyk.lunchplaces.biz.data.SearchInput
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -32,9 +33,9 @@ class GeoVM @Inject constructor(
     private val currentLocationLauncher: ReplaceableLauncher = ReplaceableLauncher(viewModelScope)
     private val lunchPlacesLauncher: ReplaceableLauncher = ReplaceableLauncher(viewModelScope)
 
-    private val _locationPermissionsLevelFlow: MutableStateFlow<LocationPermissionsLevel?> =
-        MutableStateFlow(null)
-    val locationPermissionsLevelFlow: StateFlow<LocationPermissionsLevel?> =
+    private val _locationPermissionsLevelFlow: MutableStateFlow<LocationPermissionsLevel> =
+        MutableStateFlow(LocationPermissionsLevel.NONE)
+    val locationPermissionsLevelFlow: StateFlow<LocationPermissionsLevel> =
         _locationPermissionsLevelFlow.asStateFlow()
 
     val geoStateFlow: StateFlow<GeoState> = savedStateHandle.getStateFlow(
@@ -45,13 +46,8 @@ class GeoVM @Inject constructor(
     init {
         viewModelScope.launch {
             launch {
-                locationPermissionsLevelFlow.collect { locationPermissionsLevel ->
-                    if (
-                        locationPermissionsLevel == LocationPermissionsLevel.COARSE_ONLY ||
-                        locationPermissionsLevel == LocationPermissionsLevel.FINE
-                    ) {
-                        determineCurrentLocation()
-                    }
+                locationPermissionsLevelFlow.collect {
+                    determineCurrentLocation()
                 }
             }
             launch {
@@ -100,16 +96,16 @@ class GeoVM @Inject constructor(
         }
     }
 
-    fun searchLunchPlaces(searchFilter: SearchFilter) {
+    fun searchLunchPlaces(searchInput: SearchInput) {
         lunchPlacesLauncher.launch {
-            searchLunchPlacesImpl(searchFilter)
+            searchLunchPlacesImpl(searchInput)
         }
     }
 
     private fun refreshLunchPlaces() {
         lunchPlacesLauncher.launch {
             geoStateFlow.first().lunchPlacesStatus?.let { lunchPlacesStatus ->
-                searchLunchPlacesImpl(lunchPlacesStatus.arg)
+                searchLunchPlacesImpl(searchInput = lunchPlacesStatus.arg.input)
             }
         }
     }
@@ -120,7 +116,8 @@ class GeoVM @Inject constructor(
         }
     }
 
-    private suspend fun searchLunchPlacesImpl(searchFilter: SearchFilter) {
+    private suspend fun searchLunchPlacesImpl(searchInput: SearchInput) {
+        var searchFilter = SearchFilter(input = searchInput)
         try {
             updateGeoState { it.copy(lunchPlacesStatus = Status.Pending(searchFilter)) }
 
@@ -131,7 +128,8 @@ class GeoVM @Inject constructor(
 
             if (currentLocationTerminalStatus is Status.Success) {
                 val currentLatLng = currentLocationTerminalStatus.result.latLng
-                val lunchPlaces = repo.searchLunchPlaces(searchFilter, currentLatLng)
+                searchFilter = searchFilter.copy(currentLatLng = currentLatLng)
+                val lunchPlaces = repo.searchLunchPlaces(searchFilter)
 
                 updateGeoState { it.copy(lunchPlacesStatus = Status.Success(searchFilter, lunchPlaces)) }
             } else {

@@ -60,6 +60,7 @@ import com.tarasfedyk.lunchplaces.R
 import com.tarasfedyk.lunchplaces.biz.data.ErrorType
 import com.tarasfedyk.lunchplaces.biz.data.LunchPlace
 import com.tarasfedyk.lunchplaces.biz.data.SearchFilter
+import com.tarasfedyk.lunchplaces.biz.data.SearchInput
 import com.tarasfedyk.lunchplaces.biz.data.SizeLimit
 import com.tarasfedyk.lunchplaces.biz.data.Status
 import com.tarasfedyk.lunchplaces.biz.util.roundToDecimalPlaces
@@ -73,7 +74,7 @@ import kotlin.math.roundToInt
 @Composable
 fun SearchScreen(
     onSearchBarBottomYChanged: (Dp) -> Unit,
-    onSearchLunchPlaces: (SearchFilter) -> Unit,
+    onSearchLunchPlaces: (SearchInput) -> Unit,
     onDiscardLunchPlaces: () -> Unit,
     lunchPlacesStatus: Status<SearchFilter, List<LunchPlace>>?
 ) {
@@ -201,10 +202,10 @@ private fun thumbnailSizeLimit(): SizeLimit {
 private fun searchLunchPlacesCurrently(
     sentQuery: String,
     thumbnailSizeLimit: SizeLimit,
-    onSearchLunchPlaces: (SearchFilter) -> Unit
+    onSearchLunchPlaces: (SearchInput) -> Unit
 ) {
     onSearchLunchPlaces(
-        SearchFilter(
+        SearchInput(
             query = sentQuery,
             thumbnailSizeLimit = thumbnailSizeLimit
         )
@@ -219,7 +220,7 @@ private fun trySearch(
     onGoBack: () -> Unit,
     thumbnailSizeLimit: SizeLimit,
     locationPermissionsState: MultiplePermissionsState,
-    onSearchLunchPlaces: (SearchFilter) -> Unit
+    onSearchLunchPlaces: (SearchInput) -> Unit
 ) {
     onSetSentQuery(currentQuery)
     if (currentQuery.isNotEmpty()) {
@@ -228,7 +229,9 @@ private fun trySearch(
             locationPermissionsState.launchMultiplePermissionRequest()
         } else {
             searchLunchPlacesCurrently(
-                sentQuery = currentQuery, thumbnailSizeLimit, onSearchLunchPlaces
+                sentQuery = currentQuery,
+                thumbnailSizeLimit,
+                onSearchLunchPlaces
             )
         }
     } else {

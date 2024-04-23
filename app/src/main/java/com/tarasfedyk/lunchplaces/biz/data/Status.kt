@@ -1,21 +1,21 @@
 package com.tarasfedyk.lunchplaces.biz.data
 
-sealed class Status<Input, out Output> {
-    abstract val arg: Input
+sealed class Status<Arg, out Result> {
+    abstract val arg: Arg
 
-    data class Pending<Input>(
-        override val arg: Input
-    ) : Status<Input, Nothing>()
+    data class Pending<Arg>(
+        override val arg: Arg
+    ) : Status<Arg, Nothing>()
 
-    sealed class Terminal<Input, Output> : Status<Input, Output>()
+    sealed class Terminal<Arg, Result> : Status<Arg, Result>()
 
-    data class Success<Input, Output>(
-        override val arg: Input,
-        val result: Output
-    ) : Terminal<Input, Output>()
+    data class Success<Arg, Result>(
+        override val arg: Arg,
+        val result: Result
+    ) : Terminal<Arg, Result>()
 
-    data class Failure<Input>(
-        override val arg: Input,
+    data class Failure<Arg>(
+        override val arg: Arg,
         val errorType: ErrorType
-    ) : Terminal<Input, Nothing>()
+    ) : Terminal<Arg, Nothing>()
 }

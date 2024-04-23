@@ -22,6 +22,7 @@ import com.tarasfedyk.lunchplaces.biz.data.LunchPlace
 import com.tarasfedyk.lunchplaces.biz.data.SearchFilter
 import com.tarasfedyk.lunchplaces.biz.data.Status
 import com.tarasfedyk.lunchplaces.biz.data.LocationPermissionsLevel
+import com.tarasfedyk.lunchplaces.biz.data.SearchInput
 import com.tarasfedyk.lunchplaces.ui.nav.SEARCH_ROUTE
 import com.tarasfedyk.lunchplaces.ui.nav.searchScreen
 import com.tarasfedyk.lunchplaces.ui.theme.AppTheme
@@ -64,17 +65,15 @@ class RootActivity : ComponentActivity() {
 
     @Composable
     private fun RootContentImpl(
-        locationPermissionsLevel: LocationPermissionsLevel?,
+        locationPermissionsLevel: LocationPermissionsLevel,
         onSetLocationPermissionsLevel: (LocationPermissionsLevel) -> Unit,
         onDetermineCurrentLocation: () -> Unit,
-        onSearchLunchPlaces: (SearchFilter) -> Unit,
+        onSearchLunchPlaces: (SearchInput) -> Unit,
         onDiscardLunchPlaces: () -> Unit,
         geoState: GeoState
     ) {
         var mapContentTopPadding by remember { mutableStateOf(0.dp) }
-        val isCurrentLocationEnabled =
-            locationPermissionsLevel == LocationPermissionsLevel.COARSE_ONLY ||
-            locationPermissionsLevel == LocationPermissionsLevel.FINE
+        val isCurrentLocationEnabled = locationPermissionsLevel != LocationPermissionsLevel.NONE
         MapScreen(
             mapContentTopPadding,
             isCurrentLocationEnabled,
@@ -111,7 +110,7 @@ class RootActivity : ComponentActivity() {
     @Composable
     private fun NavGraph(
         onSearchBarBottomYChanged: (Dp) -> Unit,
-        onSearchLunchPlaces: (SearchFilter) -> Unit,
+        onSearchLunchPlaces: (SearchInput) -> Unit,
         onDiscardLunchPlaces: () -> Unit,
         lunchPlacesStatus: Status<SearchFilter, List<LunchPlace>>?,
         navController: NavHostController = rememberNavController()
