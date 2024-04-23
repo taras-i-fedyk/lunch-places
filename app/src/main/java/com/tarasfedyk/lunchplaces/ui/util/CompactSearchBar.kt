@@ -5,7 +5,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -17,10 +17,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.tarasfedyk.lunchplaces.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -40,25 +41,22 @@ fun CompactSearchBar(
 ) {
     val isFocused by interactionSource.collectIsFocusedAsState()
 
-    val placeholder: @Composable () -> Unit = remember(hint) {
-        { Placeholder(hint) }
-    }
-    val searchIcon: @Composable () -> Unit = remember {
-        { SearchIcon() }
-    }
-    val upNavIconButton: @Composable () -> Unit = remember(onGoBack) {
-        { UpNavIconButton(onGoUp = onGoBack) }
-    }
-    val queryClearanceIconButton: @Composable () -> Unit = remember(onClearQuery) {
-        { QueryClearanceIconButton(onClearQuery) }
-    }
-
     SearchBar(
         modifier = modifier,
         shadowElevation = 6.dp,
-        placeholder = placeholder,
-        leadingIcon = if (isActive) upNavIconButton else searchIcon,
-        trailingIcon = if (isFocused) queryClearanceIconButton else null,
+        placeholder = { Placeholder(hint) },
+        leadingIcon = {
+            if (isActive) {
+                UpNavigationButton(onGoUp = onGoBack)
+            } else {
+                SearchIcon()
+            }
+        },
+        trailingIcon = {
+            if (isFocused && query.isNotEmpty()) {
+                QueryClearanceButton(onClearQuery)
+            }
+        },
         active = isActive,
         onActiveChange = onActivenessChanged,
         interactionSource = interactionSource,
@@ -88,19 +86,28 @@ private fun Placeholder(hint: String) {
 
 @Composable
 private fun SearchIcon() {
-    Icon(Icons.Default.Search, contentDescription = null)
+    Icon(
+        imageVector = Icons.Default.Search,
+        contentDescription = stringResource(R.string.search_icon_description)
+    )
 }
 
 @Composable
-private fun UpNavIconButton(onGoUp: () -> Unit) {
+private fun UpNavigationButton(onGoUp: () -> Unit) {
     IconButton(onClick = onGoUp) {
-        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
+        Icon(
+            imageVector = Icons.Default.ArrowBack,
+            contentDescription = stringResource(R.string.up_navigation_button_description)
+        )
     }
 }
 
 @Composable
-private fun QueryClearanceIconButton(onClearQuery: () -> Unit) {
+private fun QueryClearanceButton(onClearQuery: () -> Unit) {
     IconButton(onClick = onClearQuery) {
-        Icon(Icons.Default.Clear, contentDescription = null)
+        Icon(
+            imageVector = Icons.Default.Clear,
+            contentDescription = stringResource(R.string.query_clearance_button_description)
+        )
     }
 }
