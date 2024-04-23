@@ -17,6 +17,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.yield
@@ -33,9 +34,9 @@ class GeoVM @Inject constructor(
     private val currentLocationLauncher: ReplaceableLauncher = ReplaceableLauncher(viewModelScope)
     private val lunchPlacesLauncher: ReplaceableLauncher = ReplaceableLauncher(viewModelScope)
 
-    private val _locationPermissionsLevelFlow: MutableStateFlow<LocationPermissionsLevel> =
-        MutableStateFlow(LocationPermissionsLevel.NONE)
-    val locationPermissionsLevelFlow: StateFlow<LocationPermissionsLevel> =
+    private val _locationPermissionsLevelFlow: MutableStateFlow<LocationPermissionsLevel?> =
+        MutableStateFlow(value = null)
+    val locationPermissionsLevelFlow: StateFlow<LocationPermissionsLevel?> =
         _locationPermissionsLevelFlow.asStateFlow()
 
     val geoStateFlow: StateFlow<GeoState> = savedStateHandle.getStateFlow(
@@ -46,7 +47,7 @@ class GeoVM @Inject constructor(
     init {
         viewModelScope.launch {
             launch {
-                locationPermissionsLevelFlow.collect {
+                locationPermissionsLevelFlow.filterNotNull().collect {
                     determineCurrentLocation()
                 }
             }

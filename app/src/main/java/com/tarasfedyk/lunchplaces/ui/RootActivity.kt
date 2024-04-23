@@ -65,7 +65,7 @@ class RootActivity : ComponentActivity() {
 
     @Composable
     private fun RootContentImpl(
-        locationPermissionsLevel: LocationPermissionsLevel,
+        locationPermissionsLevel: LocationPermissionsLevel?,
         onSetLocationPermissionsLevel: (LocationPermissionsLevel) -> Unit,
         onDetermineCurrentLocation: () -> Unit,
         onSearchLunchPlaces: (SearchInput) -> Unit,
@@ -73,7 +73,9 @@ class RootActivity : ComponentActivity() {
         geoState: GeoState
     ) {
         var mapContentTopPadding by remember { mutableStateOf(0.dp) }
-        val isCurrentLocationEnabled = locationPermissionsLevel != LocationPermissionsLevel.NONE
+        val isCurrentLocationEnabled =
+            locationPermissionsLevel == LocationPermissionsLevel.COARSE_ONLY ||
+            locationPermissionsLevel == LocationPermissionsLevel.FINE
         MapScreen(
             mapContentTopPadding,
             isCurrentLocationEnabled,
@@ -116,7 +118,7 @@ class RootActivity : ComponentActivity() {
         navController: NavHostController = rememberNavController()
     ) {
         NavHost(
-            navController,
+            navController = navController,
             startDestination = SEARCH_ROUTE
         ) {
             searchScreen(

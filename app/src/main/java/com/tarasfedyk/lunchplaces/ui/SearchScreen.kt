@@ -203,8 +203,8 @@ private fun trySearch(
         } else {
             searchLunchPlacesCurrently(
                 sentQuery = currentQuery,
-                thumbnailSizeLimit,
-                onSearchLunchPlaces
+                thumbnailSizeLimit = thumbnailSizeLimit,
+                onSearchLunchPlaces = onSearchLunchPlaces
             )
         }
     } else {
