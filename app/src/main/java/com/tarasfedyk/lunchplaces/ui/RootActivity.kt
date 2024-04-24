@@ -19,7 +19,6 @@ import com.tarasfedyk.lunchplaces.biz.data.SearchFilter
 import com.tarasfedyk.lunchplaces.biz.data.Status
 import com.tarasfedyk.lunchplaces.biz.data.LocationPermissionsLevel
 import com.tarasfedyk.lunchplaces.biz.data.SearchInput
-import com.tarasfedyk.lunchplaces.biz.data.isCoarseOrFine
 import com.tarasfedyk.lunchplaces.ui.nav.SEARCH_ROUTE
 import com.tarasfedyk.lunchplaces.ui.nav.searchScreen
 import com.tarasfedyk.lunchplaces.ui.theme.AppTheme
@@ -69,9 +68,8 @@ class RootActivity : ComponentActivity() {
         onDiscardLunchPlaces: () -> Unit,
         geoState: GeoState
     ) {
-        val isCurrentLocationEnabled = locationPermissionsLevel.isCoarseOrFine
         MapScreen(
-            isCurrentLocationEnabled,
+            locationPermissionsLevel,
             onDetermineCurrentLocation,
             geoState.currentLocationStatus
         )

@@ -22,8 +22,10 @@ import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.tarasfedyk.lunchplaces.R
 import com.tarasfedyk.lunchplaces.biz.data.ErrorType
+import com.tarasfedyk.lunchplaces.biz.data.LocationPermissionsLevel
 import com.tarasfedyk.lunchplaces.biz.data.LocationSnapshot
 import com.tarasfedyk.lunchplaces.biz.data.Status
+import com.tarasfedyk.lunchplaces.biz.data.isCoarseOrFine
 import kotlin.math.log2
 
 // the higher the zoom level, the larger the value of this constant as the degree of magnification
@@ -33,10 +35,12 @@ private const val MAX_LOCATION_ACCURACY: Float = 4f
 
 @Composable
 fun MapScreen(
-    isCurrentLocationEnabled: Boolean,
+    locationPermissionsLevel: LocationPermissionsLevel?,
     onDetermineCurrentLocation: () -> Unit,
     currentLocationStatus: Status<Unit, LocationSnapshot>?
 ) {
+    val isCurrentLocationEnabled = locationPermissionsLevel.isCoarseOrFine
+
     val cameraPositionState = rememberCameraPositionState()
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -138,7 +142,7 @@ private fun recommendZoomLevel(locationAccuracy: Float): Float =
 @Composable
 private fun MapPreview() {
     MapScreen(
-        isCurrentLocationEnabled = false,
+        locationPermissionsLevel = null,
         onDetermineCurrentLocation = {},
         currentLocationStatus = null
     )
