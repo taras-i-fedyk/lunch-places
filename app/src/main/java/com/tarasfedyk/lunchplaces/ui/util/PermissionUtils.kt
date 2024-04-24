@@ -18,6 +18,7 @@ fun LocationPermissionsTracker(
     onSolelyCoarseLocationPermissionGranted: () -> Unit,
     onFineLocationPermissionGranted: () -> Unit
 ) {
+    // TODO: when it becomes possible, call a Preview-friendly library function instead
     val locationPermissionsState = safelyRememberMultiplePermissionsState(
         permissions = listOf(ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION)
     )
@@ -52,7 +53,7 @@ fun LocationPermissionsTracker(
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun safelyRememberMultiplePermissionsState(
+private fun safelyRememberMultiplePermissionsState(
     permissions: List<String>,
     onPermissionsResult: (Map<String, Boolean>) -> Unit = {},
 ): MultiplePermissionsState =
@@ -69,5 +70,5 @@ fun safelyRememberMultiplePermissionsState(
     }
 
 @OptIn(ExperimentalPermissionsApi::class)
-fun MultiplePermissionsState.isPermissionGranted(permission: String): Boolean =
+private fun MultiplePermissionsState.isPermissionGranted(permission: String): Boolean =
     permissions.any { it.permission == permission && it.status.isGranted }

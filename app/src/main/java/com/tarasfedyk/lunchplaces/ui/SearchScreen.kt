@@ -1,7 +1,5 @@
 package com.tarasfedyk.lunchplaces.ui
 
-import android.Manifest.permission.ACCESS_COARSE_LOCATION
-import android.Manifest.permission.ACCESS_FINE_LOCATION
 import android.annotation.SuppressLint
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
@@ -29,8 +27,6 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.MultiplePermissionsState
 import com.tarasfedyk.lunchplaces.R
 import com.tarasfedyk.lunchplaces.biz.data.ErrorType
 import com.tarasfedyk.lunchplaces.biz.data.LunchPlace
@@ -38,11 +34,10 @@ import com.tarasfedyk.lunchplaces.biz.data.SearchFilter
 import com.tarasfedyk.lunchplaces.biz.data.SearchInput
 import com.tarasfedyk.lunchplaces.biz.data.SizeLimit
 import com.tarasfedyk.lunchplaces.biz.data.Status
+import com.tarasfedyk.lunchplaces.biz.util.circularInc
 import com.tarasfedyk.lunchplaces.ui.util.CompactSearchBar
-import com.tarasfedyk.lunchplaces.ui.util.isPermissionGranted
-import com.tarasfedyk.lunchplaces.ui.util.safelyRememberMultiplePermissionsState
+import com.tarasfedyk.lunchplaces.ui.util.goToAppSettings
 
-@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun SearchScreen(
     onSearchLunchPlaces: (SearchInput) -> Unit,
@@ -59,8 +54,10 @@ fun SearchScreen(
     var currentQuery by rememberSaveable { mutableStateOf("") }
     val onSetCurrentQuery: (String) -> Unit = remember { { currentQuery = it } }
     val onClearCurrentQuery = remember(onSetCurrentQuery) { { onSetCurrentQuery("") } }
-    var sentQuery by rememberSaveable { mutableStateOf("") }
-    val onSetSentQuery: (String) -> Unit = remember { { sentQuery = it } }
+    var appliedQuery by rememberSaveable { mutableStateOf("") }
+    val onSetAppliedQuery: (String) -> Unit = remember { { appliedQuery = it } }
+
+    val thumbnailSizeLimit = thumbnailSizeLimit()
 
     val onGoBack = remember(
         onSetSearchBarActiveness,
@@ -68,8 +65,8 @@ fun SearchScreen(
         isSearchBarFocused,
         onSetCurrentQuery,
         onClearCurrentQuery,
-        sentQuery,
-        onSetSentQuery,
+        appliedQuery,
+        onSetAppliedQuery,
         onDiscardLunchPlaces
     ) {
         {
@@ -79,47 +76,35 @@ fun SearchScreen(
                 isSearchBarFocused = isSearchBarFocused,
                 onSetCurrentQuery = onSetCurrentQuery,
                 onClearCurrentQuery = onClearCurrentQuery,
-                sentQuery = sentQuery,
-                onSetSentQuery = onSetSentQuery,
+                appliedQuery = appliedQuery,
+                onSetAppliedQuery = onSetAppliedQuery,
                 onDiscardLunchPlaces = onDiscardLunchPlaces
             )
         }
     }
 
-    val thumbnailSizeLimit = thumbnailSizeLimit()
-    val onLocationPermissionsResult: (Map<String, Boolean>) -> Unit = remember(
-        sentQuery, thumbnailSizeLimit, onSearchLunchPlaces
-    ) {
-        { searchLunchPlacesCurrently(sentQuery, thumbnailSizeLimit, onSearchLunchPlaces) }
-    }
-    val locationPermissionsState = safelyRememberMultiplePermissionsState(
-        permissions = listOf(ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION),
-        onPermissionsResult = onLocationPermissionsResult
-    )
     val onTrySearch: (String) -> Unit = remember(
         focusManager,
         currentQuery,
-        onSetSentQuery,
+        onSetAppliedQuery,
         onGoBack,
         thumbnailSizeLimit,
-        locationPermissionsState,
         onSearchLunchPlaces
     ) {
         {
             trySearch(
                 focusManager,
                 currentQuery,
-                onSetSentQuery,
+                onSetAppliedQuery,
                 onGoBack,
                 thumbnailSizeLimit,
-                locationPermissionsState,
                 onSearchLunchPlaces
             )
         }
     }
-    val onRetrySearch = remember(onTrySearch, sentQuery) { { onTrySearch(sentQuery) } }
+    val onRetrySearch = remember(onTrySearch, appliedQuery) { { onTrySearch(appliedQuery) } }
 
-    // TODO: adjust the horizontal padding in a smooth way
+    // TODO: when it becomes possible, set the horizontal padding of an inactive search bar
     CompactSearchBar(
         modifier = Modifier.fillMaxWidth(),
         isActive = isSearchBarActive,
@@ -138,27 +123,6 @@ fun SearchScreen(
     }
 }
 
-private fun goBack(
-    onSetSearchBarActiveness: (Boolean) -> Unit,
-    focusManager: FocusManager,
-    isSearchBarFocused: Boolean,
-    onSetCurrentQuery: (String) -> Unit,
-    onClearCurrentQuery: () -> Unit,
-    sentQuery: String,
-    onSetSentQuery: (String) -> Unit,
-    onDiscardLunchPlaces: () -> Unit
-) {
-    if (isSearchBarFocused && sentQuery.isNotEmpty()) {
-        onSetCurrentQuery(sentQuery)
-        focusManager.clearFocus()
-    } else {
-        onSetSentQuery("")
-        onClearCurrentQuery()
-        onSetSearchBarActiveness(false)
-        onDiscardLunchPlaces()
-    }
-}
-
 @Composable
 private fun thumbnailSizeLimit(): SizeLimit {
     val context = LocalContext.current
@@ -169,41 +133,44 @@ private fun thumbnailSizeLimit(): SizeLimit {
     )
 }
 
-private fun searchLunchPlacesCurrently(
-    sentQuery: String,
-    thumbnailSizeLimit: SizeLimit,
-    onSearchLunchPlaces: (SearchInput) -> Unit
+private fun goBack(
+    onSetSearchBarActiveness: (Boolean) -> Unit,
+    focusManager: FocusManager,
+    isSearchBarFocused: Boolean,
+    onSetCurrentQuery: (String) -> Unit,
+    onClearCurrentQuery: () -> Unit,
+    appliedQuery: String,
+    onSetAppliedQuery: (String) -> Unit,
+    onDiscardLunchPlaces: () -> Unit
 ) {
-    onSearchLunchPlaces(
-        SearchInput(
-            query = sentQuery,
-            thumbnailSizeLimit = thumbnailSizeLimit
-        )
-    )
+    if (isSearchBarFocused && appliedQuery.isNotEmpty()) {
+        onSetCurrentQuery(appliedQuery)
+        focusManager.clearFocus()
+    } else {
+        onSetAppliedQuery("")
+        onClearCurrentQuery()
+        onSetSearchBarActiveness(false)
+        onDiscardLunchPlaces()
+    }
 }
 
-@OptIn(ExperimentalPermissionsApi::class)
 private fun trySearch(
     focusManager: FocusManager,
     currentQuery: String,
-    onSetSentQuery: (String) -> Unit,
+    onSetAppliedQuery: (String) -> Unit,
     onGoBack: () -> Unit,
     thumbnailSizeLimit: SizeLimit,
-    locationPermissionsState: MultiplePermissionsState,
     onSearchLunchPlaces: (SearchInput) -> Unit
 ) {
-    onSetSentQuery(currentQuery)
+    onSetAppliedQuery(currentQuery)
     if (currentQuery.isNotEmpty()) {
         focusManager.clearFocus()
-        if (!locationPermissionsState.isPermissionGranted(ACCESS_FINE_LOCATION)) {
-            locationPermissionsState.launchMultiplePermissionRequest()
-        } else {
-            searchLunchPlacesCurrently(
-                sentQuery = currentQuery,
-                thumbnailSizeLimit = thumbnailSizeLimit,
-                onSearchLunchPlaces = onSearchLunchPlaces
+        onSearchLunchPlaces(
+            SearchInput(
+                query = currentQuery,
+                thumbnailSizeLimit = thumbnailSizeLimit
             )
-        }
+        )
     } else {
         onGoBack()
     }
@@ -241,14 +208,20 @@ private fun SearchResult(lunchPlaces: List<LunchPlace>) {
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 private fun SearchError(errorType: ErrorType, onRetrySearch: () -> Unit) {
+    val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
+    var snackbarAppearanceId by remember { mutableStateOf(UByte.MIN_VALUE) }
     val errorMessage = when (errorType) {
         ErrorType.LOCATION_PERMISSIONS -> stringResource(R.string.search_permissions_error_message)
         ErrorType.CURRENT_LOCATION -> stringResource(R.string.search_location_error_message)
         ErrorType.INTERNET_CONNECTION -> stringResource(R.string.search_connection_error_message)
         ErrorType.UNKNOWN -> stringResource(R.string.search_error_message)
     }
-    val retryActionLabel = stringResource(R.string.retry_action_label)
+    val actionLabel = if (errorType == ErrorType.LOCATION_PERMISSIONS) {
+        stringResource(R.string.resolve_action_label)
+    } else {
+        stringResource(R.string.retry_action_label)
+    }
 
     Scaffold(
         snackbarHost = {
@@ -257,14 +230,21 @@ private fun SearchError(errorType: ErrorType, onRetrySearch: () -> Unit) {
         content = {}
     )
 
-    LaunchedEffect(Unit) {
-        val result = snackbarHostState.showSnackbar(
+    LaunchedEffect(snackbarAppearanceId) {
+        val snackbarResult = snackbarHostState.showSnackbar(
             message = errorMessage,
-            actionLabel = retryActionLabel,
+            actionLabel = actionLabel,
             duration = SnackbarDuration.Indefinite
         )
-        when (result) {
-            SnackbarResult.ActionPerformed -> onRetrySearch()
+        when (snackbarResult) {
+            SnackbarResult.ActionPerformed -> {
+                if (errorType == ErrorType.LOCATION_PERMISSIONS) {
+                    snackbarAppearanceId = snackbarAppearanceId.circularInc()
+                    context.goToAppSettings()
+                } else {
+                    onRetrySearch()
+                }
+            }
             SnackbarResult.Dismissed -> {}
         }
     }

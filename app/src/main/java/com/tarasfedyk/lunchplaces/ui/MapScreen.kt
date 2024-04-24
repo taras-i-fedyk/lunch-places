@@ -59,18 +59,15 @@ fun MapScreen(
     }
 
     LaunchedEffect(isCurrentLocationEnabled, currentLocationStatus) {
-        if (
-            isCurrentLocationEnabled &&
-            currentLocationStatus is Status.Success<*, LocationSnapshot>
-        ) {
+        if (!isCurrentLocationEnabled) {
+            val defaultCameraPosition = CameraPositionState().position
+            val cameraUpdate = CameraUpdateFactory.newCameraPosition(defaultCameraPosition)
+            cameraPositionState.animate(cameraUpdate)
+        } else if (currentLocationStatus is Status.Success<*, LocationSnapshot>) {
             val currentLocation = currentLocationStatus.result
             val currentLatLng = currentLocation.latLng
             val currentZoomLevel = recommendZoomLevel(currentLocation.accuracy)
             val cameraUpdate = CameraUpdateFactory.newLatLngZoom(currentLatLng, currentZoomLevel)
-            cameraPositionState.animate(cameraUpdate)
-        } else if (!isCurrentLocationEnabled) {
-            val defaultCameraPosition = CameraPositionState().position
-            val cameraUpdate = CameraUpdateFactory.newCameraPosition(defaultCameraPosition)
             cameraPositionState.animate(cameraUpdate)
         }
     }

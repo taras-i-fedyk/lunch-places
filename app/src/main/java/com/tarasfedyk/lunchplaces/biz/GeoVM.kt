@@ -13,6 +13,8 @@ import com.tarasfedyk.lunchplaces.biz.data.Status
 import com.tarasfedyk.lunchplaces.biz.util.ReplaceableLauncher
 import com.tarasfedyk.lunchplaces.biz.data.LocationPermissionsLevel
 import com.tarasfedyk.lunchplaces.biz.data.SearchInput
+import com.tarasfedyk.lunchplaces.biz.data.isCoarseOrFine
+import com.tarasfedyk.lunchplaces.biz.data.isFailureDueToLocationPermissions
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -47,15 +49,21 @@ class GeoVM @Inject constructor(
     init {
         viewModelScope.launch {
             launch {
-                locationPermissionsLevelFlow.filterNotNull().collect {
+                locationPermissionsLevelFlow.filterNotNull().collect { locationPermissionsLevel ->
                     determineCurrentLocation()
+
+                    if (locationPermissionsLevel.isCoarseOrFine) {
+                        val lunchPlacesStatus = geoStateFlow.first().lunchPlacesStatus
+                        if (lunchPlacesStatus.isFailureDueToLocationPermissions) {
+                            refreshLunchPlaces()
+                        }
+                    }
                 }
             }
             launch {
-                geoStateFlow.first().let { savedGeoState ->
-                    if (savedGeoState.lunchPlacesStatus is Status.Pending) {
-                        refreshLunchPlaces()
-                    }
+                val lunchPlacesStatus = geoStateFlow.first().lunchPlacesStatus
+                if (lunchPlacesStatus is Status.Pending) {
+                    refreshLunchPlaces()
                 }
             }
         }

@@ -4,6 +4,13 @@ import android.os.Parcel
 import java.math.BigDecimal
 import java.math.RoundingMode
 
+fun UByte.circularInc(): UByte =
+    if (this < UByte.MAX_VALUE) {
+        this.inc()
+    } else {
+        UByte.MIN_VALUE
+    }
+
 fun Float.roundToDecimalPlaces(decimalPlaceCount: Int): Float =
     toDouble().roundToDecimalPlaces(decimalPlaceCount).toFloat()
 
