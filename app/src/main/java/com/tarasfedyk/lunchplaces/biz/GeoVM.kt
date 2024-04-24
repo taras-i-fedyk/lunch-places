@@ -33,14 +33,13 @@ class GeoVM @Inject constructor(
     private val repo: Repo
 ) : ViewModel() {
 
-    private val currentLocationLauncher: ReplaceableLauncher = ReplaceableLauncher(viewModelScope)
-    private val lunchPlacesLauncher: ReplaceableLauncher = ReplaceableLauncher(viewModelScope)
-
     private val _locationPermissionsLevelFlow: MutableStateFlow<LocationPermissionsLevel?> =
         MutableStateFlow(value = null)
     val locationPermissionsLevelFlow: StateFlow<LocationPermissionsLevel?> =
         _locationPermissionsLevelFlow.asStateFlow()
 
+    private val currentLocationLauncher: ReplaceableLauncher = ReplaceableLauncher(viewModelScope)
+    private val lunchPlacesLauncher: ReplaceableLauncher = ReplaceableLauncher(viewModelScope)
     val geoStateFlow: StateFlow<GeoState> = savedStateHandle.getStateFlow(
         key = Keys.GEO_STATE,
         initialValue = GeoState()
@@ -48,21 +47,15 @@ class GeoVM @Inject constructor(
 
     init {
         viewModelScope.launch {
-            launch {
-                locationPermissionsLevelFlow.filterNotNull().collect { locationPermissionsLevel ->
-                    determineCurrentLocation()
+            locationPermissionsLevelFlow.filterNotNull().collect { locationPermissionsLevel ->
+                safelyDetermineCurrentLocation()
 
-                    if (locationPermissionsLevel.isCoarseOrFine) {
-                        val lunchPlacesStatus = geoStateFlow.first().lunchPlacesStatus
-                        if (lunchPlacesStatus.isFailureDueToLocationPermissions) {
-                            refreshLunchPlaces()
-                        }
-                    }
-                }
-            }
-            launch {
                 val lunchPlacesStatus = geoStateFlow.first().lunchPlacesStatus
-                if (lunchPlacesStatus is Status.Pending) {
+                if (
+                    lunchPlacesStatus is Status.Pending ||
+                    (lunchPlacesStatus.isFailureDueToLocationPermissions &&
+                    locationPermissionsLevel.isCoarseOrFine)
+                ) {
                     refreshLunchPlaces()
                 }
             }
@@ -71,6 +64,11 @@ class GeoVM @Inject constructor(
 
     fun setLocationPermissionsLevel(locationPermissionsLevel: LocationPermissionsLevel) {
         _locationPermissionsLevelFlow.value = locationPermissionsLevel
+    }
+
+    private suspend fun safelyDetermineCurrentLocation() {
+        determineCurrentLocation()
+        yield()
     }
 
     fun determineCurrentLocation() {
@@ -130,7 +128,7 @@ class GeoVM @Inject constructor(
         try {
             updateGeoState { it.copy(lunchPlacesStatus = Status.Pending(searchFilter)) }
 
-            determineCurrentLocation()
+            safelyDetermineCurrentLocation()
             val currentLocationTerminalStatus = geoStateFlow
                 .first { it.currentLocationStatus is Status.Terminal }
                 .currentLocationStatus
@@ -164,9 +162,6 @@ class GeoVM @Inject constructor(
         val currentGeoState = geoStateFlow.first()
         val newGeoState = function(currentGeoState)
         savedStateHandle[Keys.GEO_STATE] = newGeoState
-
-        // we're doing this to ensure that the observers can react to each update
-        // without an old update being silently overwritten by a new one in certain edge cases
         yield()
     }
 
