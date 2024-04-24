@@ -105,15 +105,8 @@ class RootActivity : ComponentActivity() {
         lunchPlacesStatus: Status<SearchFilter, List<LunchPlace>>?,
         navController: NavHostController = rememberNavController()
     ) {
-        NavHost(
-            navController = navController,
-            startDestination = SEARCH_ROUTE
-        ) {
-            searchScreen(
-                onSearchLunchPlaces,
-                onDiscardLunchPlaces,
-                lunchPlacesStatus
-            )
+        NavHost(navController = navController, startDestination = SEARCH_ROUTE) {
+            searchScreen(onSearchLunchPlaces, onDiscardLunchPlaces, lunchPlacesStatus)
         }
     }
 

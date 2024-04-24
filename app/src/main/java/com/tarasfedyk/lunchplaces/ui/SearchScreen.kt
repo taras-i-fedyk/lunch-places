@@ -9,12 +9,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -34,9 +31,7 @@ import com.tarasfedyk.lunchplaces.biz.data.SearchFilter
 import com.tarasfedyk.lunchplaces.biz.data.SearchInput
 import com.tarasfedyk.lunchplaces.biz.data.SizeLimit
 import com.tarasfedyk.lunchplaces.biz.data.Status
-import com.tarasfedyk.lunchplaces.biz.util.circularInc
 import com.tarasfedyk.lunchplaces.ui.util.CompactSearchBar
-import com.tarasfedyk.lunchplaces.ui.util.goToAppSettings
 
 @Composable
 fun SearchScreen(
@@ -127,10 +122,7 @@ fun SearchScreen(
 private fun thumbnailSizeLimit(): SizeLimit {
     val context = LocalContext.current
     val thumbnailSize = context.resources.getDimensionPixelSize(R.dimen.thumbnail_size)
-    return SizeLimit(
-        maxWidth = thumbnailSize,
-        maxHeight = thumbnailSize
-    )
+    return SizeLimit(maxWidth = thumbnailSize, maxHeight = thumbnailSize)
 }
 
 private fun goBack(
@@ -208,45 +200,27 @@ private fun SearchResult(lunchPlaces: List<LunchPlace>) {
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 private fun SearchError(errorType: ErrorType, onRetrySearch: () -> Unit) {
-    val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
-    var snackbarAppearanceId by remember { mutableStateOf(UByte.MIN_VALUE) }
+
+    val isAppSettingsError = errorType == ErrorType.LOCATION_PERMISSIONS
     val errorMessage = when (errorType) {
-        ErrorType.LOCATION_PERMISSIONS -> stringResource(R.string.search_permissions_error_message)
+        ErrorType.LOCATION_PERMISSIONS -> stringResource(R.string.search_location_permissions_error_message)
         ErrorType.CURRENT_LOCATION -> stringResource(R.string.search_location_error_message)
         ErrorType.INTERNET_CONNECTION -> stringResource(R.string.search_connection_error_message)
-        ErrorType.UNKNOWN -> stringResource(R.string.search_error_message)
-    }
-    val actionLabel = if (errorType == ErrorType.LOCATION_PERMISSIONS) {
-        stringResource(R.string.resolve_action_label)
-    } else {
-        stringResource(R.string.retry_action_label)
+        else -> stringResource(R.string.search_error_message)
     }
 
     Scaffold(
         snackbarHost = {
             SnackbarHost(hostState = snackbarHostState)
-        },
-        content = {}
-    )
-
-    LaunchedEffect(snackbarAppearanceId) {
-        val snackbarResult = snackbarHostState.showSnackbar(
-            message = errorMessage,
-            actionLabel = actionLabel,
-            duration = SnackbarDuration.Indefinite
-        )
-        when (snackbarResult) {
-            SnackbarResult.ActionPerformed -> {
-                if (errorType == ErrorType.LOCATION_PERMISSIONS) {
-                    snackbarAppearanceId = snackbarAppearanceId.circularInc()
-                    context.goToAppSettings()
-                } else {
-                    onRetrySearch()
-                }
-            }
-            SnackbarResult.Dismissed -> {}
         }
+    ) {
+        PermanentError(
+            snackbarHostState = snackbarHostState,
+            isAppSettingsError = isAppSettingsError,
+            errorMessage = errorMessage,
+            onRetry = onRetrySearch
+        )
     }
 }
 

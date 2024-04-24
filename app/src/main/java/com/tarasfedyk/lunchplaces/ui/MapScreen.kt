@@ -5,8 +5,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -18,6 +21,7 @@ import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.tarasfedyk.lunchplaces.R
+import com.tarasfedyk.lunchplaces.biz.data.ErrorType
 import com.tarasfedyk.lunchplaces.biz.data.LocationSnapshot
 import com.tarasfedyk.lunchplaces.biz.data.Status
 import kotlin.math.log2
@@ -34,8 +38,12 @@ fun MapScreen(
     currentLocationStatus: Status<Unit, LocationSnapshot>?
 ) {
     val cameraPositionState = rememberCameraPositionState()
+    val snackbarHostState = remember { SnackbarHostState() }
 
     Scaffold(
+        snackbarHost = {
+            SnackbarHost(hostState = snackbarHostState)
+        },
         floatingActionButton = {
             if (isCurrentLocationEnabled) {
                 CurrentLocationButton(onDetermineCurrentLocation)
@@ -56,8 +64,25 @@ fun MapScreen(
             ),
             cameraPositionState = cameraPositionState
         )
-    }
 
+        CameraPositionAnimation(
+            cameraPositionState, isCurrentLocationEnabled, currentLocationStatus
+        )
+
+        if (currentLocationStatus is Status.Failure) {
+            MapError(
+                snackbarHostState, currentLocationStatus.errorType, onDetermineCurrentLocation
+            )
+        }
+    }
+}
+
+@Composable
+private fun CameraPositionAnimation(
+    cameraPositionState: CameraPositionState,
+    isCurrentLocationEnabled: Boolean,
+    currentLocationStatus: Status<Unit, LocationSnapshot>?
+) {
     LaunchedEffect(isCurrentLocationEnabled, currentLocationStatus) {
         if (!isCurrentLocationEnabled) {
             val defaultCameraPosition = CameraPositionState().position
@@ -81,6 +106,27 @@ private fun CurrentLocationButton(onDetermineCurrentLocation: () -> Unit) {
             contentDescription = stringResource(R.string.current_location_button_description)
         )
     }
+}
+
+@Composable
+private fun MapError(
+    snackbarHostState: SnackbarHostState,
+    errorType: ErrorType,
+    onDetermineCurrentLocation: () -> Unit
+) {
+    val isAppSettingsError = errorType == ErrorType.LOCATION_PERMISSIONS
+    val errorMessage = if (errorType == ErrorType.LOCATION_PERMISSIONS) {
+        stringResource(R.string.map_permissions_error_message)
+    } else {
+        stringResource(R.string.map_error_message)
+    }
+
+    PermanentError(
+        snackbarHostState = snackbarHostState,
+        isAppSettingsError = isAppSettingsError,
+        errorMessage = errorMessage,
+        onRetry = onDetermineCurrentLocation
+    )
 }
 
 private fun recommendZoomLevel(locationAccuracy: Float): Float =

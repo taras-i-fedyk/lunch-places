@@ -43,14 +43,14 @@ fun CompactSearchBar(
         placeholder = { Placeholder(hint) },
         leadingIcon = {
             if (isActive) {
-                UpNavigationButton(onGoUp = onGoBack)
+                BackNavigationIcon(onGoBack)
             } else {
                 SearchIcon()
             }
         },
         trailingIcon = {
             if (isFocused && query.isNotEmpty()) {
-                QueryClearanceButton(onClearQuery)
+                QueryClearanceIcon(onClearQuery)
             }
         },
         active = isActive,
@@ -81,21 +81,21 @@ private fun SearchIcon() {
 }
 
 @Composable
-private fun UpNavigationButton(onGoUp: () -> Unit) {
-    IconButton(onClick = onGoUp) {
+private fun BackNavigationIcon(onGoBack: () -> Unit) {
+    IconButton(onClick = onGoBack) {
         Icon(
             imageVector = Icons.Default.ArrowBack,
-            contentDescription = stringResource(R.string.up_navigation_button_description)
+            contentDescription = stringResource(R.string.back_navigation_icon_description)
         )
     }
 }
 
 @Composable
-private fun QueryClearanceButton(onClearQuery: () -> Unit) {
+private fun QueryClearanceIcon(onClearQuery: () -> Unit) {
     IconButton(onClick = onClearQuery) {
         Icon(
             imageVector = Icons.Default.Clear,
-            contentDescription = stringResource(R.string.query_clearance_button_description)
+            contentDescription = stringResource(R.string.query_clearance_icon_description)
         )
     }
 }

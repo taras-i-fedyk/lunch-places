@@ -16,10 +16,6 @@ fun NavGraphBuilder.searchScreen(
     lunchPlacesStatus: Status<SearchFilter, List<LunchPlace>>?
 ) {
     composable(SEARCH_ROUTE) {
-        SearchScreen(
-            onSearchLunchPlaces,
-            onDiscardLunchPlaces,
-            lunchPlacesStatus
-        )
+        SearchScreen(onSearchLunchPlaces, onDiscardLunchPlaces, lunchPlacesStatus)
     }
 }
