@@ -1,4 +1,4 @@
-package com.tarasfedyk.lunchplaces.ui
+package com.tarasfedyk.lunchplaces.ui.util
 
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
@@ -13,10 +13,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import com.tarasfedyk.lunchplaces.R
 import com.tarasfedyk.lunchplaces.biz.util.circularInc
-import com.tarasfedyk.lunchplaces.ui.util.goToAppSettings
 
 @Composable
-fun PermanentError(
+fun PermanentErrorSnackbar(
     snackbarHostState: SnackbarHostState,
     errorMessage: String,
     onRetry: () -> Unit,

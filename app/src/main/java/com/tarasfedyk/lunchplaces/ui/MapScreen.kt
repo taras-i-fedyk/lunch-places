@@ -26,6 +26,7 @@ import com.tarasfedyk.lunchplaces.biz.data.LocationPermissionsLevel
 import com.tarasfedyk.lunchplaces.biz.data.LocationSnapshot
 import com.tarasfedyk.lunchplaces.biz.data.Status
 import com.tarasfedyk.lunchplaces.biz.data.isCoarseOrFine
+import com.tarasfedyk.lunchplaces.ui.util.PermanentErrorSnackbar
 import kotlin.math.log2
 
 // the higher the zoom level, the larger the value of this constant as the degree of magnification
@@ -125,7 +126,7 @@ private fun MapError(
         stringResource(R.string.map_error_message)
     }
 
-    PermanentError(
+    PermanentErrorSnackbar(
         snackbarHostState = snackbarHostState,
         isAppSettingsError = isAppSettingsError,
         errorMessage = errorMessage,

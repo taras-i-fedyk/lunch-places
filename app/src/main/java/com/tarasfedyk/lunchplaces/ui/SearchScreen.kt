@@ -32,6 +32,7 @@ import com.tarasfedyk.lunchplaces.biz.data.SearchInput
 import com.tarasfedyk.lunchplaces.biz.data.SizeLimit
 import com.tarasfedyk.lunchplaces.biz.data.Status
 import com.tarasfedyk.lunchplaces.ui.util.CompactSearchBar
+import com.tarasfedyk.lunchplaces.ui.util.PermanentErrorSnackbar
 
 @Composable
 fun SearchScreen(
@@ -215,7 +216,7 @@ private fun SearchError(errorType: ErrorType, onRetrySearch: () -> Unit) {
             SnackbarHost(hostState = snackbarHostState)
         }
     ) {
-        PermanentError(
+        PermanentErrorSnackbar(
             snackbarHostState = snackbarHostState,
             isAppSettingsError = isAppSettingsError,
             errorMessage = errorMessage,
