@@ -41,31 +41,21 @@ fun SearchScreen(
     lunchPlacesStatus: Status<SearchFilter, List<LunchPlace>>?
 ) {
     var isSearchBarActive by rememberSaveable { mutableStateOf(false) }
-    val onSetSearchBarActiveness: (Boolean) -> Unit = remember { { isSearchBarActive = it } }
+    val onSetSearchBarActiveness: (Boolean) -> Unit = { isSearchBarActive = it }
 
     val focusManager = LocalFocusManager.current
     val searchBarInteractionSource = remember { MutableInteractionSource() }
     val isSearchBarFocused by searchBarInteractionSource.collectIsFocusedAsState()
 
     var currentQuery by rememberSaveable { mutableStateOf("") }
-    val onSetCurrentQuery: (String) -> Unit = remember { { currentQuery = it } }
-    val onClearCurrentQuery = remember(onSetCurrentQuery) { { onSetCurrentQuery("") } }
+    val onSetCurrentQuery: (String) -> Unit = { currentQuery = it }
+    val onClearCurrentQuery = { onSetCurrentQuery("") }
     var appliedQuery by rememberSaveable { mutableStateOf("") }
-    val onSetAppliedQuery: (String) -> Unit = remember { { appliedQuery = it } }
+    val onSetAppliedQuery: (String) -> Unit = { appliedQuery = it }
 
     val thumbnailSizeLimit = thumbnailSizeLimit()
 
-    val onGoBack = remember(
-        onSetSearchBarActiveness,
-        focusManager,
-        isSearchBarFocused,
-        onSetCurrentQuery,
-        onClearCurrentQuery,
-        appliedQuery,
-        onSetAppliedQuery,
-        onDiscardLunchPlaces
-    ) {
-        {
+    val onGoBack = {
             goBack(
                 onSetSearchBarActiveness = onSetSearchBarActiveness,
                 focusManager = focusManager,
@@ -76,29 +66,18 @@ fun SearchScreen(
                 onSetAppliedQuery = onSetAppliedQuery,
                 onDiscardLunchPlaces = onDiscardLunchPlaces
             )
-        }
     }
-
-    val onTrySearch: (String) -> Unit = remember(
-        focusManager,
-        currentQuery,
-        onSetAppliedQuery,
-        onGoBack,
-        thumbnailSizeLimit,
-        onSearchLunchPlaces
-    ) {
-        {
-            trySearch(
-                focusManager,
-                currentQuery,
-                onSetAppliedQuery,
-                onGoBack,
-                thumbnailSizeLimit,
-                onSearchLunchPlaces
-            )
-        }
+    val onTrySearch: (String) -> Unit = {
+        trySearch(
+            focusManager,
+            currentQuery,
+            onSetAppliedQuery,
+            onGoBack,
+            thumbnailSizeLimit,
+            onSearchLunchPlaces
+        )
     }
-    val onRetrySearch = remember(onTrySearch, appliedQuery) { { onTrySearch(appliedQuery) } }
+    val onRetrySearch = { onTrySearch(appliedQuery) }
 
     // TODO: when it becomes possible, set the horizontal padding of an inactive search bar
     CompactSearchBar(
