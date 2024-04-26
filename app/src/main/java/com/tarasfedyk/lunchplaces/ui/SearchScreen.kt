@@ -1,6 +1,8 @@
 package com.tarasfedyk.lunchplaces.ui
 
 import android.annotation.SuppressLint
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffColorFilter
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.PaddingValues
@@ -8,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -19,6 +22,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusManager
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
@@ -27,10 +31,12 @@ import androidx.compose.ui.unit.dp
 import com.tarasfedyk.lunchplaces.R
 import com.tarasfedyk.lunchplaces.biz.data.ErrorType
 import com.tarasfedyk.lunchplaces.biz.data.LunchPlace
+import com.tarasfedyk.lunchplaces.biz.data.MediaLimits
 import com.tarasfedyk.lunchplaces.biz.data.SearchFilter
 import com.tarasfedyk.lunchplaces.biz.data.SearchInput
 import com.tarasfedyk.lunchplaces.biz.data.SizeLimit
 import com.tarasfedyk.lunchplaces.biz.data.Status
+import com.tarasfedyk.lunchplaces.ui.data.ThumbnailAspects
 import com.tarasfedyk.lunchplaces.ui.util.CompactSearchBar
 import com.tarasfedyk.lunchplaces.ui.util.PermanentErrorSnackbar
 
@@ -53,19 +59,20 @@ fun SearchScreen(
     var appliedQuery by rememberSaveable { mutableStateOf("") }
     val onSetAppliedQuery: (String) -> Unit = { appliedQuery = it }
 
-    val thumbnailSizeLimit = thumbnailSizeLimit()
+    val mediaLimits = mediaLimits()
+    val thumbnailAspects = thumbnailAspects()
 
     val onGoBack = {
-            goBack(
-                onSetSearchBarActiveness = onSetSearchBarActiveness,
-                focusManager = focusManager,
-                isSearchBarFocused = isSearchBarFocused,
-                onSetCurrentQuery = onSetCurrentQuery,
-                onClearCurrentQuery = onClearCurrentQuery,
-                appliedQuery = appliedQuery,
-                onSetAppliedQuery = onSetAppliedQuery,
-                onDiscardLunchPlaces = onDiscardLunchPlaces
-            )
+        goBack(
+            onSetSearchBarActiveness = onSetSearchBarActiveness,
+            focusManager = focusManager,
+            isSearchBarFocused = isSearchBarFocused,
+            onSetCurrentQuery = onSetCurrentQuery,
+            onClearCurrentQuery = onClearCurrentQuery,
+            appliedQuery = appliedQuery,
+            onSetAppliedQuery = onSetAppliedQuery,
+            onDiscardLunchPlaces = onDiscardLunchPlaces
+        )
     }
     val onTrySearch: (String) -> Unit = {
         trySearch(
@@ -73,7 +80,7 @@ fun SearchScreen(
             currentQuery,
             onSetAppliedQuery,
             onGoBack,
-            thumbnailSizeLimit,
+            mediaLimits,
             onSearchLunchPlaces
         )
     }
@@ -93,16 +100,37 @@ fun SearchScreen(
         onTrySearch = onTrySearch
     ) {
         if (!isSearchBarFocused) {
-            SearchStatus(lunchPlacesStatus, onRetrySearch)
+            SearchStatus(lunchPlacesStatus, thumbnailAspects, onRetrySearch)
         }
     }
 }
 
 @Composable
-private fun thumbnailSizeLimit(): SizeLimit {
+private fun mediaLimits(): MediaLimits {
     val context = LocalContext.current
     val thumbnailSize = context.resources.getDimensionPixelSize(R.dimen.thumbnail_size)
-    return SizeLimit(maxWidth = thumbnailSize, maxHeight = thumbnailSize)
+    return MediaLimits(
+        thumbnailSizeLimit = SizeLimit(
+            maxWidth = thumbnailSize,
+            maxHeight = thumbnailSize
+        )
+    )
+}
+
+@Composable
+private fun thumbnailAspects(): ThumbnailAspects {
+    val context = LocalContext.current
+    val contentColor = LocalContentColor.current
+
+    val cornerRadius = context.resources.getDimensionPixelSize(R.dimen.thumbnail_corner_radius)
+
+    val rawPlaceholderDrawable = context.getDrawable(R.drawable.ic_thumbnail_placeholder)
+    val placeholderDrawable = rawPlaceholderDrawable?.apply {
+        mutate()
+        colorFilter = PorterDuffColorFilter(contentColor.toArgb(), PorterDuff.Mode.SRC_IN)
+    }
+
+    return ThumbnailAspects(cornerRadius, placeholderDrawable)
 }
 
 private fun goBack(
@@ -131,17 +159,14 @@ private fun trySearch(
     currentQuery: String,
     onSetAppliedQuery: (String) -> Unit,
     onGoBack: () -> Unit,
-    thumbnailSizeLimit: SizeLimit,
+    mediaLimits: MediaLimits,
     onSearchLunchPlaces: (SearchInput) -> Unit
 ) {
     onSetAppliedQuery(currentQuery)
     if (currentQuery.isNotEmpty()) {
         focusManager.clearFocus()
         onSearchLunchPlaces(
-            SearchInput(
-                query = currentQuery,
-                thumbnailSizeLimit = thumbnailSizeLimit
-            )
+            SearchInput(currentQuery, mediaLimits)
         )
     } else {
         onGoBack()
@@ -151,13 +176,20 @@ private fun trySearch(
 @Composable
 private fun SearchStatus(
     lunchPlacesStatus: Status<SearchFilter, List<LunchPlace>>?,
+    thumbnailAspects: ThumbnailAspects,
     onRetrySearch: () -> Unit
 ) {
     when (lunchPlacesStatus) {
         null -> {}
         is Status.Pending -> SearchProgress()
-        is Status.Success -> SearchResult(lunchPlaces = lunchPlacesStatus.result)
-        is Status.Failure -> SearchError(lunchPlacesStatus.errorType, onRetrySearch)
+        is Status.Success -> SearchResult(
+            lunchPlaces = lunchPlacesStatus.result,
+            thumbnailAspects
+        )
+        is Status.Failure -> SearchError(
+            errorType = lunchPlacesStatus.errorType,
+            onRetrySearch
+        )
     }
 }
 
@@ -167,12 +199,12 @@ private fun SearchProgress() {
 }
 
 @Composable
-private fun SearchResult(lunchPlaces: List<LunchPlace>) {
+private fun SearchResult(lunchPlaces: List<LunchPlace>, thumbnailAspects: ThumbnailAspects) {
     LazyColumn(
         contentPadding = PaddingValues(vertical = 8.dp)
     ) {
-        items(lunchPlaces) {
-            LunchPlaceItem(it)
+        items(lunchPlaces) { lunchPlace ->
+            LunchPlaceItem(lunchPlace, thumbnailAspects)
         }
     }
 }

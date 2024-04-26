@@ -4,7 +4,7 @@ import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-data class SearchInput(
-    val query: String,
-    val mediaLimits: MediaLimits = MediaLimits()
+data class MediaLimits(
+    val thumbnailSizeLimit: SizeLimit = SizeLimit(),
+    val photoSizeLimit: SizeLimit = SizeLimit()
 ) : Parcelable

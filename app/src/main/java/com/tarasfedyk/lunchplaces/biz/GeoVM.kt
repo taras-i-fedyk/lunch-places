@@ -124,7 +124,7 @@ class GeoVM @Inject constructor(
     }
 
     private suspend fun searchLunchPlacesImpl(searchInput: SearchInput) {
-        var searchFilter = SearchFilter(input = searchInput)
+        var searchFilter = SearchFilter(searchInput)
         try {
             updateGeoState { it.copy(lunchPlacesStatus = Status.Pending(searchFilter)) }
 

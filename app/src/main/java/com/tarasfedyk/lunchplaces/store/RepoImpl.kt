@@ -13,6 +13,7 @@ import com.google.android.libraries.places.api.net.PlacesClient
 import com.google.android.libraries.places.api.net.SearchByTextRequest
 import com.tarasfedyk.lunchplaces.biz.Repo
 import com.tarasfedyk.lunchplaces.biz.data.LunchPlace
+import com.tarasfedyk.lunchplaces.biz.data.MediaLimits
 import com.tarasfedyk.lunchplaces.biz.data.SearchFilter
 import com.tarasfedyk.lunchplaces.biz.data.SizeLimit
 import kotlinx.coroutines.Dispatchers
@@ -65,33 +66,27 @@ class RepoImpl @Inject constructor(
             .build()
         val searchByTextTask = placesClient.searchByText(searchByTextRequest)
         return searchByTextTask.await(cancellationTokenSource).places
-            .toLunchPlaces(
-                searchFilter.currentLatLng,
-                searchFilter.input.thumbnailSizeLimit,
-                searchFilter.input.photoSizeLimit
-            )
+            .toLunchPlaces(searchFilter.currentLatLng, searchFilter.input.mediaLimits)
     }
 
     private suspend fun List<Place>.toLunchPlaces(
         currentLatLng: LatLng,
-        thumbnailSizeLimit: SizeLimit,
-        photoSizeLimit: SizeLimit
+        mediaLimits: MediaLimits
     ): List<LunchPlace> = coroutineScope {
         val lunchPlacesDeferred = map { place ->
-            async { place.toLunchPlace(currentLatLng, thumbnailSizeLimit, photoSizeLimit) }
+            async { place.toLunchPlace(currentLatLng, mediaLimits) }
         }
         lunchPlacesDeferred.awaitAll()
     }
 
     private suspend fun Place.toLunchPlace(
         currentLatLng: LatLng,
-        thumbnailSizeLimit: SizeLimit,
-        photoSizeLimit: SizeLimit
+        mediaLimits: MediaLimits
     ): LunchPlace = coroutineScope {
         val distanceDeferred = async { calculateDistance(currentLatLng) }
         val isOpenDeferred = async { determineIfOpen() }
-        val thumbnailUriDeferred = async { obtainPhotoUri(thumbnailSizeLimit) }
-        val photoUriDeferred = async { obtainPhotoUri(photoSizeLimit) }
+        val thumbnailUriDeferred = async { obtainPhotoUri(mediaLimits.thumbnailSizeLimit) }
+        val photoUriDeferred = async { obtainPhotoUri(mediaLimits.photoSizeLimit) }
         joinAll(distanceDeferred, isOpenDeferred, thumbnailUriDeferred, photoUriDeferred)
         val distance = distanceDeferred.await()
         val isOpen = isOpenDeferred.await()
