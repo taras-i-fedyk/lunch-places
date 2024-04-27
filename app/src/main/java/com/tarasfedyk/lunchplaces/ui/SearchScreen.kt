@@ -47,44 +47,62 @@ fun SearchScreen(
     lunchPlacesStatus: Status<SearchFilter, List<LunchPlace>>?
 ) {
     var isSearchBarActive by rememberSaveable { mutableStateOf(false) }
-    val onSetSearchBarActiveness: (Boolean) -> Unit = { isSearchBarActive = it }
+    val onSetSearchBarActiveness: (Boolean) -> Unit = remember { { isSearchBarActive = it } }
 
     val focusManager = LocalFocusManager.current
     val searchBarInteractionSource = remember { MutableInteractionSource() }
     val isSearchBarFocused by searchBarInteractionSource.collectIsFocusedAsState()
 
     var currentQuery by rememberSaveable { mutableStateOf("") }
-    val onSetCurrentQuery: (String) -> Unit = { currentQuery = it }
-    val onClearCurrentQuery = { onSetCurrentQuery("") }
+    val onSetCurrentQuery: (String) -> Unit = remember { { currentQuery = it } }
+    val onClearCurrentQuery = remember { { onSetCurrentQuery("") } }
     var appliedQuery by rememberSaveable { mutableStateOf("") }
-    val onSetAppliedQuery: (String) -> Unit = { appliedQuery = it }
+    val onSetAppliedQuery: (String) -> Unit = remember { { appliedQuery = it } }
 
-    val mediaLimits = mediaLimits()
-    val thumbnailAspects = thumbnailAspects()
+    val mediaLimits = rememberMediaLimits()
+    val thumbnailAspects = rememberThumbnailAspects()
 
-    val onGoBack = {
-        goBack(
-            onSetSearchBarActiveness = onSetSearchBarActiveness,
-            focusManager = focusManager,
-            isSearchBarFocused = isSearchBarFocused,
-            onSetCurrentQuery = onSetCurrentQuery,
-            onClearCurrentQuery = onClearCurrentQuery,
-            appliedQuery = appliedQuery,
-            onSetAppliedQuery = onSetAppliedQuery,
-            onDiscardLunchPlaces = onDiscardLunchPlaces
-        )
+    val onGoBack = remember(
+        focusManager,
+        isSearchBarFocused,
+        appliedQuery,
+        onDiscardLunchPlaces
+    ) {
+        {
+            goBack(
+                onSetSearchBarActiveness = onSetSearchBarActiveness,
+                focusManager = focusManager,
+                isSearchBarFocused = isSearchBarFocused,
+                onSetCurrentQuery = onSetCurrentQuery,
+                onClearCurrentQuery = onClearCurrentQuery,
+                appliedQuery = appliedQuery,
+                onSetAppliedQuery = onSetAppliedQuery,
+                onDiscardLunchPlaces = onDiscardLunchPlaces
+            )
+        }
     }
-    val onTrySearch: (String) -> Unit = {
-        trySearch(
-            focusManager,
-            currentQuery,
-            onSetAppliedQuery,
-            onGoBack,
-            mediaLimits,
-            onSearchLunchPlaces
-        )
+
+    val onTrySearch: (String) -> Unit = remember(
+        focusManager,
+        currentQuery,
+        mediaLimits,
+        onGoBack,
+        onSearchLunchPlaces
+    ) {
+        {
+            trySearch(
+                focusManager,
+                currentQuery,
+                onSetAppliedQuery,
+                mediaLimits,
+                onGoBack,
+                onSearchLunchPlaces
+            )
+        }
     }
-    val onRetrySearch = { onTrySearch(appliedQuery) }
+    val onRetrySearch = remember(onTrySearch, appliedQuery) {
+        { onTrySearch(appliedQuery) }
+    }
 
     // TODO: when it becomes possible, set the horizontal padding of an inactive search bar
     CompactSearchBar(
@@ -106,31 +124,34 @@ fun SearchScreen(
 }
 
 @Composable
-private fun mediaLimits(): MediaLimits {
+private fun rememberMediaLimits(): MediaLimits {
     val context = LocalContext.current
-    val thumbnailSize = context.resources.getDimensionPixelSize(R.dimen.thumbnail_size)
-    return MediaLimits(
-        thumbnailSizeLimit = SizeLimit(
-            maxWidth = thumbnailSize,
-            maxHeight = thumbnailSize
+    return remember(context) {
+        val thumbnailSize = context.resources.getDimensionPixelSize(R.dimen.thumbnail_size)
+        MediaLimits(
+            thumbnailSizeLimit = SizeLimit(
+                maxWidth = thumbnailSize,
+                maxHeight = thumbnailSize
+            )
         )
-    )
+    }
 }
 
 @Composable
-private fun thumbnailAspects(): ThumbnailAspects {
+private fun rememberThumbnailAspects(): ThumbnailAspects {
     val context = LocalContext.current
     val contentColor = LocalContentColor.current
+    return remember(context, contentColor) {
+        val cornerRadius = context.resources.getDimensionPixelSize(R.dimen.thumbnail_corner_radius)
 
-    val cornerRadius = context.resources.getDimensionPixelSize(R.dimen.thumbnail_corner_radius)
+        val rawPlaceholderDrawable = context.getDrawable(R.drawable.ic_thumbnail_placeholder)
+        val placeholderDrawable = rawPlaceholderDrawable?.apply {
+            mutate()
+            colorFilter = PorterDuffColorFilter(contentColor.toArgb(), PorterDuff.Mode.SRC_IN)
+        }
 
-    val rawPlaceholderDrawable = context.getDrawable(R.drawable.ic_thumbnail_placeholder)
-    val placeholderDrawable = rawPlaceholderDrawable?.apply {
-        mutate()
-        colorFilter = PorterDuffColorFilter(contentColor.toArgb(), PorterDuff.Mode.SRC_IN)
+        ThumbnailAspects(cornerRadius, placeholderDrawable)
     }
-
-    return ThumbnailAspects(cornerRadius, placeholderDrawable)
 }
 
 private fun goBack(
@@ -158,8 +179,8 @@ private fun trySearch(
     focusManager: FocusManager,
     currentQuery: String,
     onSetAppliedQuery: (String) -> Unit,
-    onGoBack: () -> Unit,
     mediaLimits: MediaLimits,
+    onGoBack: () -> Unit,
     onSearchLunchPlaces: (SearchInput) -> Unit
 ) {
     onSetAppliedQuery(currentQuery)
