@@ -8,6 +8,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -22,6 +23,7 @@ fun PermanentErrorSnackbar(
     isAppSettingsError: Boolean = false
 ) {
     val context = LocalContext.current
+
     var snackbarAppearanceId by remember { mutableStateOf(UByte.MIN_VALUE) }
 
     val actionLabel = if (isAppSettingsError) {
@@ -30,21 +32,26 @@ fun PermanentErrorSnackbar(
         stringResource(R.string.retry_label)
     }
 
-    LaunchedEffect(snackbarAppearanceId) {
+    val onPerformAction = remember(context, snackbarAppearanceId, isAppSettingsError, onRetry) {
+        {
+            if (isAppSettingsError) {
+                snackbarAppearanceId = snackbarAppearanceId.circularInc()
+                context.goToAppSettings()
+            } else {
+                onRetry()
+            }
+        }
+    }
+    val currentOnPerformAction by rememberUpdatedState(onPerformAction)
+
+    LaunchedEffect(snackbarHostState, snackbarAppearanceId, errorMessage, actionLabel) {
         val snackbarResult = snackbarHostState.showSnackbar(
             message = errorMessage,
             actionLabel = actionLabel,
             duration = SnackbarDuration.Indefinite
         )
         when (snackbarResult) {
-            SnackbarResult.ActionPerformed -> {
-                if (isAppSettingsError) {
-                    snackbarAppearanceId = snackbarAppearanceId.circularInc()
-                    context.goToAppSettings()
-                } else {
-                    onRetry()
-                }
-            }
+            SnackbarResult.ActionPerformed -> currentOnPerformAction()
             SnackbarResult.Dismissed -> {}
         }
     }

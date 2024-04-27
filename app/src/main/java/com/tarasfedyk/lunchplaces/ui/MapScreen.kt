@@ -9,7 +9,9 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -88,17 +90,19 @@ private fun CameraPositionAnimation(
     isCurrentLocationEnabled: Boolean,
     currentLocationStatus: Status<Unit, LocationSnapshot>?
 ) {
+    val currentCameraPositionState by rememberUpdatedState(cameraPositionState)
+
     LaunchedEffect(isCurrentLocationEnabled, currentLocationStatus) {
         if (!isCurrentLocationEnabled) {
             val defaultCameraPosition = CameraPositionState().position
             val cameraUpdate = CameraUpdateFactory.newCameraPosition(defaultCameraPosition)
-            cameraPositionState.animate(cameraUpdate)
+            currentCameraPositionState.animate(cameraUpdate)
         } else if (currentLocationStatus is Status.Success<*, LocationSnapshot>) {
             val currentLocation = currentLocationStatus.result
             val currentLatLng = currentLocation.latLng
             val currentZoomLevel = recommendZoomLevel(currentLocation.accuracy)
             val cameraUpdate = CameraUpdateFactory.newLatLngZoom(currentLatLng, currentZoomLevel)
-            cameraPositionState.animate(cameraUpdate)
+            currentCameraPositionState.animate(cameraUpdate)
         }
     }
 }

@@ -4,6 +4,8 @@ import android.Manifest.permission.ACCESS_COARSE_LOCATION
 import android.Manifest.permission.ACCESS_FINE_LOCATION
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.LocalInspectionMode
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.MultiplePermissionsState
@@ -18,6 +20,10 @@ fun LocationPermissionsTracker(
     onSolelyCoarseLocationPermissionGranted: () -> Unit,
     onFineLocationPermissionGranted: () -> Unit
 ) {
+    val currentOnAllLocationPermissionsDenied by rememberUpdatedState(onAllLocationPermissionsDenied)
+    val currentOnSolelyCoarseLocationPermissionGranted by rememberUpdatedState(onSolelyCoarseLocationPermissionGranted)
+    val currentOnFineLocationPermissionGranted by rememberUpdatedState(onFineLocationPermissionGranted)
+
     // TODO: when it becomes possible, call a Preview-friendly library function instead
     val locationPermissionsState = safelyRememberMultiplePermissionsState(
         permissions = listOf(ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION)
@@ -34,17 +40,17 @@ fun LocationPermissionsTracker(
 
     LaunchedEffect(areAllLocationPermissionsDenied) {
         if (areAllLocationPermissionsDenied) {
-            onAllLocationPermissionsDenied()
+            currentOnAllLocationPermissionsDenied()
         }
     }
     LaunchedEffect(isSolelyCoarseLocationPermissionGranted) {
         if (isSolelyCoarseLocationPermissionGranted) {
-            onSolelyCoarseLocationPermissionGranted()
+            currentOnSolelyCoarseLocationPermissionGranted()
         }
     }
     LaunchedEffect(isFineLocationPermissionGranted) {
         if (isFineLocationPermissionGranted) {
-            onFineLocationPermissionGranted()
+            currentOnFineLocationPermissionGranted()
         } else {
             locationPermissionsState.launchMultiplePermissionRequest()
         }
