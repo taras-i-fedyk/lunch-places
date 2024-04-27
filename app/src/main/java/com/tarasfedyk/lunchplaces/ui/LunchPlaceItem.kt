@@ -8,14 +8,17 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.bumptech.glide.integration.compose.CrossFade
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
@@ -41,14 +44,18 @@ fun LunchPlaceItem(lunchPlace: LunchPlace, thumbnailAspects: ThumbnailAspects) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         LunchPlaceThumbnail(lunchPlace.thumbnailUri, thumbnailAspects)
+
         Spacer(modifier = Modifier.size(16.dp))
+
         Column {
             LunchPlaceName(lunchPlace.name)
-            LunchPlaceRating(lunchPlace.rating)
+
+            val spacerSize = 2.dp
+            LunchPlaceRating(lunchPlace.rating, spacerSize)
             Row(verticalAlignment = Alignment.CenterVertically) {
                 LunchPlaceDistance(lunchPlace.distance)
-                Spacer(modifier = Modifier.size(8.dp))
-                LunchPlaceAvailability(lunchPlace.isOpen)
+                Spacer(modifier = Modifier.size(spacerSize))
+                LunchPlaceOpenness(lunchPlace.isOpen)
             }
         }
     }
@@ -85,7 +92,7 @@ private fun LunchPlaceName(name: String) {
 }
 
 @Composable
-private fun LunchPlaceRating(rating: Double?) {
+private fun LunchPlaceRating(rating: Double?, spacerSize: Dp) {
     if (rating == null) return
 
     val roundedRating = rating.roundToDecimalPlaces(decimalPlaceCount = 1)
@@ -95,8 +102,9 @@ private fun LunchPlaceRating(rating: Double?) {
             style = MaterialTheme.typography.bodyMedium,
             text = roundedRating.toString(),
         )
+        Spacer(modifier = Modifier.size(spacerSize))
         SmallRatingIndicator(
-            modifier = Modifier.padding(start = 2.dp, bottom = 2.dp),
+            modifier = Modifier.padding(bottom = 2.dp),
             rating = roundedRating.toFloat()
         )
     }
@@ -127,12 +135,12 @@ private fun LunchPlaceDistance(distance: Float) {
 }
 
 @Composable
-private fun LunchPlaceAvailability(isOpen: Boolean?) {
+private fun LunchPlaceOpenness(isOpen: Boolean?) {
     if (isOpen != false) return
 
-    Text(
-        style = MaterialTheme.typography.bodyMedium,
-        text = stringResource(R.string.unavailability_label),
-        color = MaterialTheme.colorScheme.error
+    Icon(
+        painter = painterResource(R.drawable.ic_closed),
+        tint = MaterialTheme.colorScheme.error,
+        contentDescription = null
     )
 }

@@ -5,7 +5,8 @@
     <string name="search_hint">Search lunch places</string>
     <string name="meters_distance_template">%d m</string>
     <string name="kilometers_distance_template">%s km</string>
-    <string name="unavailability_label">Closed</string>
+    <string name="resolve_label">Resolve</string>
+    <string name="retry_label">Retry</string>
 
     <string name="current_location_button_description">Current location button</string>
     <string name="search_icon_description">Search icon</string>
@@ -19,7 +20,4 @@
     <string name="search_location_error_message">Search failed because of unknown current location</string>
     <string name="search_connection_error_message">Search failed due to no internet connection</string>
     <string name="search_error_message">Search failed</string>
-
-    <string name="resolve_action_label">Resolve</string>
-    <string name="retry_action_label">Retry</string>
 </resources>
