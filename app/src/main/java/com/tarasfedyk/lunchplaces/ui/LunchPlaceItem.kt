@@ -1,5 +1,8 @@
 package com.tarasfedyk.lunchplaces.ui
 
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffColorFilter
+import android.graphics.drawable.Drawable
 import android.net.Uri
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -9,11 +12,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -30,12 +36,11 @@ import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.tarasfedyk.lunchplaces.R
 import com.tarasfedyk.lunchplaces.biz.data.LunchPlace
 import com.tarasfedyk.lunchplaces.biz.util.roundToDecimalPlaces
-import com.tarasfedyk.lunchplaces.ui.data.ThumbnailAspects
 import com.tarasfedyk.lunchplaces.ui.util.SmallRatingIndicator
 import kotlin.math.roundToInt
 
 @Composable
-fun LunchPlaceItem(lunchPlace: LunchPlace, thumbnailAspects: ThumbnailAspects) {
+fun LunchPlaceItem(lunchPlace: LunchPlace) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -43,7 +48,7 @@ fun LunchPlaceItem(lunchPlace: LunchPlace, thumbnailAspects: ThumbnailAspects) {
             .padding(horizontal = 16.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        LunchPlaceThumbnail(lunchPlace.thumbnailUri, thumbnailAspects)
+        LunchPlaceThumbnail(lunchPlace.thumbnailUri)
 
         Spacer(modifier = Modifier.size(16.dp))
 
@@ -63,21 +68,41 @@ fun LunchPlaceItem(lunchPlace: LunchPlace, thumbnailAspects: ThumbnailAspects) {
 
 @OptIn(ExperimentalGlideComposeApi::class)
 @Composable
-private fun LunchPlaceThumbnail(thumbnailUri: Uri?, thumbnailAspects: ThumbnailAspects) {
+private fun LunchPlaceThumbnail(thumbnailUri: Uri?) {
+    val thumbnailCornerRadius = thumbnailCornerRadius()
+    val thumbnailPlaceholderDrawable = thumbnailPlaceholderDrawable()
+
     GlideImage(
         modifier = Modifier.size(dimensionResource(R.dimen.thumbnail_size)),
         model = thumbnailUri,
-        loading = placeholder(thumbnailAspects.placeholderDrawable),
-        failure = placeholder(thumbnailAspects.placeholderDrawable),
+        loading = placeholder(thumbnailPlaceholderDrawable),
+        failure = placeholder(thumbnailPlaceholderDrawable),
         transition = CrossFade,
         contentDescription = stringResource(R.string.lunch_place_thumbnail_description)
     ) {
         it.transform(
             MultiTransformation(
                 CenterCrop(),
-                RoundedCorners(thumbnailAspects.cornerRadius)
+                RoundedCorners(thumbnailCornerRadius)
             )
         )
+    }
+}
+
+@Composable
+private fun thumbnailCornerRadius(): Int {
+    val context = LocalContext.current
+    return context.resources.getDimensionPixelSize(R.dimen.thumbnail_corner_radius)
+}
+
+@Composable
+private fun thumbnailPlaceholderDrawable(): Drawable? {
+    val context = LocalContext.current
+    val contentColor = LocalContentColor.current
+    val rawPlaceholderDrawable = context.getDrawable(R.drawable.ic_thumbnail_placeholder)
+    return rawPlaceholderDrawable?.apply {
+        mutate()
+        colorFilter = PorterDuffColorFilter(contentColor.toArgb(), PorterDuff.Mode.SRC_IN)
     }
 }
 
