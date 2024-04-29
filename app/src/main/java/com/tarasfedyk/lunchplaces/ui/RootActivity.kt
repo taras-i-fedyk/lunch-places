@@ -15,7 +15,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import com.tarasfedyk.lunchplaces.biz.GeoVM
@@ -52,10 +51,10 @@ class RootActivity : ComponentActivity() {
         val locationPermissionsLevel by geoVM.locationPermissionsLevelFlow.collectAsStateWithLifecycle()
         val geoState by geoVM.geoStateFlow.collectAsStateWithLifecycle()
 
-        val onSetLocationPermissionsLevel = geoVM::setLocationPermissionsLevel
-        val onDetermineCurrentLocation = geoVM::determineCurrentLocation
-        val onSearchLunchPlaces = geoVM::searchLunchPlaces
-        val onDiscardLunchPlaces = geoVM::discardLunchPlaces
+        val onSetLocationPermissionsLevel = remember(geoVM) { geoVM::setLocationPermissionsLevel }
+        val onDetermineCurrentLocation = remember(geoVM) { geoVM::determineCurrentLocation }
+        val onSearchLunchPlaces = remember(geoVM) { geoVM::searchLunchPlaces }
+        val onDiscardLunchPlaces = remember(geoVM) { geoVM::discardLunchPlaces }
 
         RootContentImpl(
             locationPermissionsLevel = locationPermissionsLevel,
@@ -114,20 +113,23 @@ class RootActivity : ComponentActivity() {
         onSetMapVisibility: (Boolean) -> Unit,
         onSearchLunchPlaces: (SearchInput) -> Unit,
         onDiscardLunchPlaces: () -> Unit,
-        lunchPlacesStatus: Status<SearchFilter, List<LunchPlace>>?,
-        navController: NavHostController = rememberNavController()
+        lunchPlacesStatus: Status<SearchFilter, List<LunchPlace>>?
     ) {
+        val navController = rememberNavController()
+        val onNavigateToDetails = remember { navController::navigateToDetails }
+        val onNavigateUp: () -> Unit = remember { { navController.navigateUp() } }
+
         NavHost(navController, startDestination = SEARCH_ROUTE) {
             searchScreen(
                 onSetMapVisibility,
                 onSearchLunchPlaces,
                 onDiscardLunchPlaces,
                 lunchPlacesStatus,
-                onNavigateToDetails = navController::navigateToDetails
+                onNavigateToDetails
             )
             detailsScreen(
                 lunchPlacesStatus,
-                onNavigateUp = navController::navigateUp
+                onNavigateUp
             )
         }
     }
