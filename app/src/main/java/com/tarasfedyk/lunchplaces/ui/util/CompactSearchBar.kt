@@ -27,6 +27,7 @@ import com.tarasfedyk.lunchplaces.R
 fun CompactSearchBar(
     isActive: Boolean,
     onActivenessChanged: (Boolean) -> Unit,
+    interactionSource: MutableInteractionSource,
     hint: String,
     query: String,
     onQueryChanged: (String) -> Unit,
@@ -34,8 +35,7 @@ fun CompactSearchBar(
     onNavigateBack: () -> Unit,
     onTrySearch: (String) -> Unit,
     modifier: Modifier = Modifier,
-    interactionSource: MutableInteractionSource = MutableInteractionSource(),
-    content: @Composable ColumnScope.() -> Unit
+    searchStatusContent: @Composable ColumnScope.() -> Unit
 ) {
     val isFocused by interactionSource.collectIsFocusedAsState()
 
@@ -62,7 +62,9 @@ fun CompactSearchBar(
         onQueryChange = onQueryChanged,
         onSearch = onTrySearch
     ) {
-        content()
+        if (!isFocused) {
+            searchStatusContent()
+        }
         ResumableBackHandler(isEnabled = isActive, onNavigateBack)
     }
 }

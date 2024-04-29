@@ -113,9 +113,7 @@ fun SearchScreen(
         onNavigateBack = onNavigateBack,
         onTrySearch = onTrySearch
     ) {
-        if (!isSearchBarFocused) {
-            SearchStatus(lunchPlacesStatus, onNavigateToDetails, onRetrySearch)
-        }
+        SearchStatus(lunchPlacesStatus, onNavigateToDetails, onRetrySearch)
     }
 
     LaunchedEffect(isSearchBarActive) {
