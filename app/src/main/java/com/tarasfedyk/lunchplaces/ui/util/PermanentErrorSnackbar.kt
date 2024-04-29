@@ -32,7 +32,7 @@ fun PermanentErrorSnackbar(
         stringResource(R.string.retry_label)
     }
 
-    val onPerformAction = remember(context, snackbarAppearanceId, isAppSettingsError, onRetry) {
+    val onPerformAction = remember(context, isAppSettingsError, onRetry) {
         {
             if (isAppSettingsError) {
                 snackbarAppearanceId = snackbarAppearanceId.circularInc()
