@@ -5,7 +5,6 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -16,8 +15,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.currentStateAsState
 import com.tarasfedyk.lunchplaces.R
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -29,7 +31,7 @@ fun CompactSearchBar(
     query: String,
     onQueryChanged: (String) -> Unit,
     onClearQuery: () -> Unit,
-    onGoBack: () -> Unit,
+    onNavigateBack: () -> Unit,
     onTrySearch: (String) -> Unit,
     modifier: Modifier = Modifier,
     interactionSource: MutableInteractionSource = MutableInteractionSource(),
@@ -43,7 +45,7 @@ fun CompactSearchBar(
         placeholder = { Placeholder(hint) },
         leadingIcon = {
             if (isActive) {
-                BackNavigationIcon(onGoBack)
+                UpNavigationIcon(onNavigateUp = onNavigateBack)
             } else {
                 SearchIcon()
             }
@@ -61,9 +63,7 @@ fun CompactSearchBar(
         onSearch = onTrySearch
     ) {
         content()
-        BackHandler(enabled = isActive) {
-            onGoBack()
-        }
+        ResumableBackHandler(isEnabled = isActive, onNavigateBack)
     }
 }
 
@@ -81,21 +81,22 @@ private fun SearchIcon() {
 }
 
 @Composable
-private fun BackNavigationIcon(onGoBack: () -> Unit) {
-    IconButton(onClick = onGoBack) {
-        Icon(
-            imageVector = Icons.Default.ArrowBack,
-            contentDescription = stringResource(R.string.back_navigation_icon_description)
-        )
-    }
-}
-
-@Composable
 private fun QueryClearanceIcon(onClearQuery: () -> Unit) {
     IconButton(onClick = onClearQuery) {
         Icon(
             imageVector = Icons.Default.Clear,
             contentDescription = stringResource(R.string.query_clearance_icon_description)
         )
+    }
+}
+
+@Composable
+private fun ResumableBackHandler(isEnabled: Boolean, onNavigateBack: () -> Unit) {
+    val lifecycleOwner = LocalLifecycleOwner.current
+    val currentLifecycleState = lifecycleOwner.lifecycle.currentStateAsState()
+    if (currentLifecycleState.value.isAtLeast(Lifecycle.State.RESUMED)) {
+        BackHandler(isEnabled) {
+            onNavigateBack()
+        }
     }
 }

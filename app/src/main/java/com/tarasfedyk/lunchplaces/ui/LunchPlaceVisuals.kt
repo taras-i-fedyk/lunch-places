@@ -4,11 +4,9 @@ import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import android.graphics.drawable.Drawable
 import android.net.Uri
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
@@ -40,26 +38,21 @@ import com.tarasfedyk.lunchplaces.ui.util.SmallRatingIndicator
 import kotlin.math.roundToInt
 
 @Composable
-fun LunchPlaceItem(lunchPlace: LunchPlace) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable {}
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
+fun LunchPlaceItem(
+    lunchPlace: LunchPlace,
+    largeSpacerSize: Dp,
+    smallSpacerSize: Dp,
+    modifier: Modifier = Modifier
+) {
+    Row(modifier, verticalAlignment = Alignment.CenterVertically) {
         LunchPlaceThumbnail(lunchPlace.thumbnailUri)
-
-        Spacer(modifier = Modifier.size(16.dp))
-
+        Spacer(modifier = Modifier.size(largeSpacerSize))
         Column {
-            LunchPlaceName(lunchPlace.name)
-
-            val spacerSize = 2.dp
-            LunchPlaceRating(lunchPlace.rating, spacerSize)
+            LunchPlaceTitle(lunchPlace.name)
+            LunchPlaceRating(lunchPlace.rating, smallSpacerSize)
             Row(verticalAlignment = Alignment.CenterVertically) {
                 LunchPlaceDistance(lunchPlace.distance)
-                Spacer(modifier = Modifier.size(spacerSize))
+                Spacer(modifier = Modifier.size(smallSpacerSize))
                 LunchPlaceOpenness(lunchPlace.isOpen)
             }
         }
@@ -107,12 +100,12 @@ private fun thumbnailPlaceholderDrawable(): Drawable? {
 }
 
 @Composable
-private fun LunchPlaceName(name: String) {
+private fun LunchPlaceTitle(text: String) {
     Text(
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,
         style = MaterialTheme.typography.bodyLarge,
-        text = name
+        text = text
     )
 }
 
@@ -167,5 +160,15 @@ private fun LunchPlaceOpenness(isOpen: Boolean?) {
         painter = painterResource(R.drawable.ic_closed),
         tint = MaterialTheme.colorScheme.error,
         contentDescription = null
+    )
+}
+
+@Composable
+fun LunchPlaceHeadline(text: String) {
+    Text(
+        maxLines = 2,
+        overflow = TextOverflow.Ellipsis,
+        style = MaterialTheme.typography.headlineMedium,
+        text = text
     )
 }

@@ -3,9 +3,15 @@ package com.tarasfedyk.lunchplaces.ui
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -20,6 +26,8 @@ import com.tarasfedyk.lunchplaces.biz.data.Status
 import com.tarasfedyk.lunchplaces.biz.data.LocationPermissionsLevel
 import com.tarasfedyk.lunchplaces.biz.data.SearchInput
 import com.tarasfedyk.lunchplaces.ui.nav.SEARCH_ROUTE
+import com.tarasfedyk.lunchplaces.ui.nav.detailsScreen
+import com.tarasfedyk.lunchplaces.ui.nav.navigateToDetails
 import com.tarasfedyk.lunchplaces.ui.nav.searchScreen
 import com.tarasfedyk.lunchplaces.ui.theme.AppTheme
 import com.tarasfedyk.lunchplaces.ui.util.LocationPermissionsTracker
@@ -68,17 +76,22 @@ class RootActivity : ComponentActivity() {
         onDiscardLunchPlaces: () -> Unit,
         geoState: GeoState
     ) {
-        MapScreen(
-            locationPermissionsLevel,
-            onDetermineCurrentLocation,
-            geoState.currentLocationStatus
-        )
-
-        NavGraph(
-            onSearchLunchPlaces,
-            onDiscardLunchPlaces,
-            geoState.lunchPlacesStatus
-        )
+        var isMapVisible by rememberSaveable { mutableStateOf(true)}
+        val onSetMapVisibility: (Boolean) -> Unit = remember { { isMapVisible = it } }
+        Box(modifier = Modifier.fillMaxSize()) {
+            MapScreen(
+                isMapVisible,
+                locationPermissionsLevel,
+                onDetermineCurrentLocation,
+                currentLocationStatus = geoState.currentLocationStatus
+            )
+            NavGraph(
+                onSetMapVisibility,
+                onSearchLunchPlaces,
+                onDiscardLunchPlaces,
+                lunchPlacesStatus = geoState.lunchPlacesStatus
+            )
+        }
 
         val onAllLocationPermissionsDenied = remember(onSetLocationPermissionsLevel) {
             { onSetLocationPermissionsLevel(LocationPermissionsLevel.NONE) }
@@ -98,19 +111,30 @@ class RootActivity : ComponentActivity() {
 
     @Composable
     private fun NavGraph(
+        onSetMapVisibility: (Boolean) -> Unit,
         onSearchLunchPlaces: (SearchInput) -> Unit,
         onDiscardLunchPlaces: () -> Unit,
         lunchPlacesStatus: Status<SearchFilter, List<LunchPlace>>?,
         navController: NavHostController = rememberNavController()
     ) {
-        NavHost(navController = navController, startDestination = SEARCH_ROUTE) {
-            searchScreen(onSearchLunchPlaces, onDiscardLunchPlaces, lunchPlacesStatus)
+        NavHost(navController, startDestination = SEARCH_ROUTE) {
+            searchScreen(
+                onSetMapVisibility,
+                onSearchLunchPlaces,
+                onDiscardLunchPlaces,
+                lunchPlacesStatus,
+                onNavigateToDetails = navController::navigateToDetails
+            )
+            detailsScreen(
+                lunchPlacesStatus,
+                onNavigateUp = navController::navigateUp
+            )
         }
     }
 
     @Preview(showBackground = true)
     @Composable
-    private fun RootPreview() {
+    private fun RootContentPreview() {
         AppTheme {
             RootContentImpl(
                 locationPermissionsLevel = LocationPermissionsLevel.NONE,

@@ -166,6 +166,6 @@ class GeoVM @Inject constructor(
     }
 
     private object Keys {
-        const val GEO_STATE: String = "geo_state"
+        const val GEO_STATE: String = "geoState"
     }
 }

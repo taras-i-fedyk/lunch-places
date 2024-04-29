@@ -13,6 +13,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -38,6 +39,7 @@ private const val MAX_LOCATION_ACCURACY: Float = 4f
 
 @Composable
 fun MapScreen(
+    isMapVisible: Boolean,
     locationPermissionsLevel: LocationPermissionsLevel?,
     onDetermineCurrentLocation: () -> Unit,
     currentLocationStatus: Status<Unit, LocationSnapshot>?
@@ -48,6 +50,7 @@ fun MapScreen(
     val snackbarHostState = remember { SnackbarHostState() }
 
     Scaffold(
+        modifier = Modifier.alpha(if (isMapVisible) 1f else 0f),
         snackbarHost = {
             SnackbarHost(hostState = snackbarHostState)
         },
@@ -145,8 +148,9 @@ private fun recommendZoomLevel(locationAccuracy: Float): Float =
 
 @Preview(showBackground = true)
 @Composable
-private fun MapPreview() {
+private fun MapScreenPreview() {
     MapScreen(
+        isMapVisible = true,
         locationPermissionsLevel = null,
         onDetermineCurrentLocation = {},
         currentLocationStatus = null

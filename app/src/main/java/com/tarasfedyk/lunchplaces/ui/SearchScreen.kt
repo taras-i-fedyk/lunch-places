@@ -1,17 +1,20 @@
 package com.tarasfedyk.lunchplaces.ui
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -37,9 +40,11 @@ import com.tarasfedyk.lunchplaces.ui.util.PermanentErrorSnackbar
 
 @Composable
 fun SearchScreen(
+    onSetMapVisibility: (Boolean) -> Unit,
     onSearchLunchPlaces: (SearchInput) -> Unit,
     onDiscardLunchPlaces: () -> Unit,
-    lunchPlacesStatus: Status<SearchFilter, List<LunchPlace>>?
+    lunchPlacesStatus: Status<SearchFilter, List<LunchPlace>>?,
+    onNavigateToDetails: (Int) -> Unit
 ) {
     var isSearchBarActive by rememberSaveable { mutableStateOf(false) }
     val onSetSearchBarActiveness: (Boolean) -> Unit = remember { { isSearchBarActive = it } }
@@ -56,14 +61,14 @@ fun SearchScreen(
 
     val mediaLimits = mediaLimits()
 
-    val onGoBack = remember(
+    val onNavigateBack = remember(
         focusManager,
         isSearchBarFocused,
         appliedQuery,
         onDiscardLunchPlaces
     ) {
         {
-            goBack(
+            navigateBack(
                 onSetSearchBarActiveness = onSetSearchBarActiveness,
                 focusManager = focusManager,
                 isSearchBarFocused = isSearchBarFocused,
@@ -80,7 +85,7 @@ fun SearchScreen(
         focusManager,
         currentQuery,
         mediaLimits,
-        onGoBack,
+        onNavigateBack,
         onSearchLunchPlaces
     ) {
         {
@@ -89,7 +94,7 @@ fun SearchScreen(
                 currentQuery,
                 onSetAppliedQuery,
                 mediaLimits,
-                onGoBack,
+                onNavigateBack,
                 onSearchLunchPlaces
             )
         }
@@ -108,12 +113,17 @@ fun SearchScreen(
         query = currentQuery,
         onQueryChanged = onSetCurrentQuery,
         onClearQuery = onClearCurrentQuery,
-        onGoBack = onGoBack,
+        onNavigateBack = onNavigateBack,
         onTrySearch = onTrySearch
     ) {
         if (!isSearchBarFocused) {
-            SearchStatus(lunchPlacesStatus, onRetrySearch)
+            SearchStatus(lunchPlacesStatus, onNavigateToDetails, onRetrySearch)
         }
+    }
+
+    LaunchedEffect(isSearchBarActive) {
+        val isMapVisible = !isSearchBarActive
+        onSetMapVisibility(isMapVisible)
     }
 }
 
@@ -129,7 +139,7 @@ private fun mediaLimits(): MediaLimits {
     )
 }
 
-private fun goBack(
+private fun navigateBack(
     onSetSearchBarActiveness: (Boolean) -> Unit,
     focusManager: FocusManager,
     isSearchBarFocused: Boolean,
@@ -155,7 +165,7 @@ private fun trySearch(
     currentQuery: String,
     onSetAppliedQuery: (String) -> Unit,
     mediaLimits: MediaLimits,
-    onGoBack: () -> Unit,
+    onNavigateBack: () -> Unit,
     onSearchLunchPlaces: (SearchInput) -> Unit
 ) {
     onSetAppliedQuery(currentQuery)
@@ -165,20 +175,22 @@ private fun trySearch(
             SearchInput(currentQuery, mediaLimits)
         )
     } else {
-        onGoBack()
+        onNavigateBack()
     }
 }
 
 @Composable
 private fun SearchStatus(
     lunchPlacesStatus: Status<SearchFilter, List<LunchPlace>>?,
+    onNavigateToDetails: (Int) -> Unit,
     onRetrySearch: () -> Unit
 ) {
     when (lunchPlacesStatus) {
         null -> {}
         is Status.Pending -> SearchProgress()
         is Status.Success -> SearchResult(
-            lunchPlaces = lunchPlacesStatus.result
+            lunchPlaces = lunchPlacesStatus.result,
+            onNavigateToDetails
         )
         is Status.Failure -> SearchError(
             errorType = lunchPlacesStatus.errorType,
@@ -193,12 +205,20 @@ private fun SearchProgress() {
 }
 
 @Composable
-private fun SearchResult(lunchPlaces: List<LunchPlace>) {
+private fun SearchResult(lunchPlaces: List<LunchPlace>, onNavigateToDetails: (Int) -> Unit) {
     LazyColumn(
         contentPadding = PaddingValues(vertical = 8.dp)
     ) {
-        items(lunchPlaces) { lunchPlace ->
-            LunchPlaceItem(lunchPlace)
+        itemsIndexed(lunchPlaces) { index, lunchPlace ->
+            LunchPlaceItem(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onNavigateToDetails(index) }
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                largeSpacerSize = 16.dp,
+                smallSpacerSize = 2.dp,
+                lunchPlace = lunchPlace
+            )
         }
     }
 }
@@ -232,10 +252,12 @@ private fun SearchError(errorType: ErrorType, onRetrySearch: () -> Unit) {
 
 @Preview(showBackground = true)
 @Composable
-private fun SearchPreview() {
+private fun SearchScreenPreview() {
     SearchScreen(
+        onSetMapVisibility = {},
         onSearchLunchPlaces = {},
         onDiscardLunchPlaces = {},
-        lunchPlacesStatus = null
+        lunchPlacesStatus = null,
+        onNavigateToDetails = {}
     )
 }
