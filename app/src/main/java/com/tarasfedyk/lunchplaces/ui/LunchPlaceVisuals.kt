@@ -92,6 +92,7 @@ private fun thumbnailCornerRadius(): Int {
 private fun thumbnailPlaceholderDrawable(): Drawable? {
     val context = LocalContext.current
     val contentColor = LocalContentColor.current
+
     val rawPlaceholderDrawable = context.getDrawable(R.drawable.ic_thumbnail_placeholder)
     return rawPlaceholderDrawable?.apply {
         mutate()

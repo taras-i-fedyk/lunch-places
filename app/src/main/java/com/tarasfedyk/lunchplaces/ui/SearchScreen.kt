@@ -63,8 +63,6 @@ fun SearchScreen(
 
     val onNavigateBack = remember(
         focusManager,
-        isSearchBarFocused,
-        appliedQuery,
         onDiscardLunchPlaces
     ) {
         {
@@ -83,7 +81,6 @@ fun SearchScreen(
 
     val onTrySearch: (String) -> Unit = remember(
         focusManager,
-        currentQuery,
         mediaLimits,
         onNavigateBack,
         onSearchLunchPlaces
@@ -99,7 +96,7 @@ fun SearchScreen(
             )
         }
     }
-    val onRetrySearch = remember(onTrySearch, appliedQuery) {
+    val onRetrySearch = remember(onTrySearch) {
         { onTrySearch(appliedQuery) }
     }
 
