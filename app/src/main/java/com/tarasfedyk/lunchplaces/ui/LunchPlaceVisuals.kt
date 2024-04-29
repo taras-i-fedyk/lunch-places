@@ -22,6 +22,7 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.bumptech.glide.integration.compose.CrossFade
@@ -31,11 +32,25 @@ import com.bumptech.glide.integration.compose.placeholder
 import com.bumptech.glide.load.MultiTransformation
 import com.bumptech.glide.load.resource.bitmap.CenterCrop
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
+import com.google.android.gms.maps.model.LatLng
 import com.tarasfedyk.lunchplaces.R
 import com.tarasfedyk.lunchplaces.biz.data.LunchPlace
 import com.tarasfedyk.lunchplaces.biz.util.roundToDecimalPlaces
+import com.tarasfedyk.lunchplaces.ui.theme.AppTheme
 import com.tarasfedyk.lunchplaces.ui.util.SmallRatingIndicator
 import kotlin.math.roundToInt
+
+private val MOCK_LUNCH_PLACE = LunchPlace(
+    id = "ChIJRx5D7mzdOkcR8MgRrmieLvc",
+    name = "Pizza Calcio",
+    rating = 3.8,
+    latLng = LatLng(49.842306799999996, 24.034497899999998),
+    distance = 2923.3997f,
+    address = "вулиця Підвальна, 9, Львів, Львівська область, Україна, 79000",
+    isOpen = false,
+    thumbnailUri = Uri.parse("https://lh3.googleusercontent.com/places/ANXAkqFiFHd0LKC_e89MhGD3GjL6zEhZkkkowyR5_CxLn1keGgxNIBCcbNfNUzc7gqQoib29wBCkwN5M0INME092a5PLgCUtdSUZVn4=s4800-w192-h192"),
+    photoUri = Uri.parse("https://lh3.googleusercontent.com/places/ANXAkqFiFHd0LKC_e89MhGD3GjL6zEhZkkkowyR5_CxLn1keGgxNIBCcbNfNUzc7gqQoib29wBCkwN5M0INME092a5PLgCUtdSUZVn4=s4800-w1920-h1080")
+)
 
 @Composable
 fun LunchPlaceItem(
@@ -164,6 +179,18 @@ private fun LunchPlaceOpenness(isOpen: Boolean?) {
     )
 }
 
+@Preview(showBackground = true)
+@Composable
+private fun LunchPlaceItemPreview() {
+    AppTheme {
+        LunchPlaceItem(
+            lunchPlace = MOCK_LUNCH_PLACE,
+            largeSpacerSize = 16.dp,
+            smallSpacerSize = 2.dp
+        )
+    }
+}
+
 @Composable
 fun LunchPlaceHeadline(text: String) {
     Text(
@@ -172,4 +199,12 @@ fun LunchPlaceHeadline(text: String) {
         style = MaterialTheme.typography.headlineMedium,
         text = text
     )
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun LunchPlaceHeadlinePreview() {
+    AppTheme {
+        LunchPlaceHeadline(text = MOCK_LUNCH_PLACE.name)
+    }
 }

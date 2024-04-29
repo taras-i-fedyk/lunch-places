@@ -139,7 +139,7 @@ class RootActivity : ComponentActivity() {
     private fun RootContentPreview() {
         AppTheme {
             RootContentImpl(
-                locationPermissionsLevel = LocationPermissionsLevel.NONE,
+                locationPermissionsLevel = LocationPermissionsLevel.FINE,
                 onSetLocationPermissionsLevel = {},
                 onDetermineCurrentLocation = {},
                 onSearchLunchPlaces = {},

@@ -29,6 +29,7 @@ import com.tarasfedyk.lunchplaces.biz.data.LocationPermissionsLevel
 import com.tarasfedyk.lunchplaces.biz.data.LocationSnapshot
 import com.tarasfedyk.lunchplaces.biz.data.Status
 import com.tarasfedyk.lunchplaces.biz.data.isCoarseOrFine
+import com.tarasfedyk.lunchplaces.ui.theme.AppTheme
 import com.tarasfedyk.lunchplaces.ui.util.PermanentErrorSnackbar
 import kotlin.math.log2
 
@@ -149,10 +150,12 @@ private fun recommendZoomLevel(locationAccuracy: Float): Float =
 @Preview(showBackground = true)
 @Composable
 private fun MapScreenPreview() {
-    MapScreen(
-        isMapVisible = true,
-        locationPermissionsLevel = null,
-        onDetermineCurrentLocation = {},
-        currentLocationStatus = null
-    )
+    AppTheme {
+        MapScreen(
+            isMapVisible = true,
+            locationPermissionsLevel = LocationPermissionsLevel.FINE,
+            onDetermineCurrentLocation = {},
+            currentLocationStatus = null
+        )
+    }
 }

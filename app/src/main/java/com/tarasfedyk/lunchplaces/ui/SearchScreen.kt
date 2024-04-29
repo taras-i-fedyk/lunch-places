@@ -35,6 +35,7 @@ import com.tarasfedyk.lunchplaces.biz.data.SearchFilter
 import com.tarasfedyk.lunchplaces.biz.data.SearchInput
 import com.tarasfedyk.lunchplaces.biz.data.SizeLimit
 import com.tarasfedyk.lunchplaces.biz.data.Status
+import com.tarasfedyk.lunchplaces.ui.theme.AppTheme
 import com.tarasfedyk.lunchplaces.ui.util.CompactSearchBar
 import com.tarasfedyk.lunchplaces.ui.util.PermanentErrorSnackbar
 
@@ -248,11 +249,13 @@ private fun SearchError(errorType: ErrorType, onRetrySearch: () -> Unit) {
 @Preview(showBackground = true)
 @Composable
 private fun SearchScreenPreview() {
-    SearchScreen(
-        onSetMapVisibility = {},
-        onSearchLunchPlaces = {},
-        onDiscardLunchPlaces = {},
-        lunchPlacesStatus = null,
-        onNavigateToDetails = {}
-    )
+    AppTheme {
+        SearchScreen(
+            onSetMapVisibility = {},
+            onSearchLunchPlaces = {},
+            onDiscardLunchPlaces = {},
+            lunchPlacesStatus = null,
+            onNavigateToDetails = {}
+        )
+    }
 }
