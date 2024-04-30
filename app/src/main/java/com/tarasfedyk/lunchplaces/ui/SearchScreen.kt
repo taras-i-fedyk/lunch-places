@@ -1,12 +1,11 @@
 package com.tarasfedyk.lunchplaces.ui
 
 import android.annotation.SuppressLint
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.LinearProgressIndicator
@@ -26,7 +25,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import com.tarasfedyk.lunchplaces.R
 import com.tarasfedyk.lunchplaces.biz.data.ErrorType
 import com.tarasfedyk.lunchplaces.biz.data.LunchPlace
@@ -203,18 +201,11 @@ private fun SearchProgress() {
 @Composable
 private fun SearchResult(lunchPlaces: List<LunchPlace>, onNavigateToDetails: (Int) -> Unit) {
     LazyColumn(
-        contentPadding = PaddingValues(vertical = 8.dp)
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(vertical = LunchPlaceItemPadding.vertical)
     ) {
         itemsIndexed(lunchPlaces) { index, lunchPlace ->
-            LunchPlaceItem(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { onNavigateToDetails(index) }
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                largeSpacerSize = 16.dp,
-                smallSpacerSize = 2.dp,
-                lunchPlace = lunchPlace
-            )
+            LunchPlaceItem(index, lunchPlace, onNavigateToDetails)
         }
     }
 }

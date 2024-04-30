@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <dimen name="photo_placeholder_size">192dp</dimen>
     <dimen name="thumbnail_size">64dp</dimen>
+
     <dimen name="thumbnail_corner_radius">8dp</dimen>
+    <dimen name="photo_corner_radius">12dp</dimen>
 </resources>
