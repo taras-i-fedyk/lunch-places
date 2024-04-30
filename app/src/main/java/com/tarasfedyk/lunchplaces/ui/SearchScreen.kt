@@ -1,11 +1,16 @@
 package com.tarasfedyk.lunchplaces.ui
 
 import android.annotation.SuppressLint
+import android.net.Uri
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.LinearProgressIndicator
@@ -19,12 +24,16 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import com.google.android.gms.maps.model.LatLng
 import com.tarasfedyk.lunchplaces.R
 import com.tarasfedyk.lunchplaces.biz.data.ErrorType
 import com.tarasfedyk.lunchplaces.biz.data.LunchPlace
@@ -37,6 +46,11 @@ import com.tarasfedyk.lunchplaces.ui.theme.AppTheme
 import com.tarasfedyk.lunchplaces.ui.util.CompactSearchBar
 import com.tarasfedyk.lunchplaces.ui.util.PermanentErrorSnackbar
 
+private object SearchResultItemPadding {
+    val horizontal: Dp = 16.dp
+    val vertical: Dp = 8.dp
+}
+
 @Composable
 fun SearchScreen(
     onSetMapVisibility: (Boolean) -> Unit,
@@ -48,6 +62,30 @@ fun SearchScreen(
     var isSearchBarActive by rememberSaveable { mutableStateOf(false) }
     val onSetSearchBarActiveness: (Boolean) -> Unit = remember { { isSearchBarActive = it } }
 
+    SearchScreenImpl(
+        isSearchBarActive,
+        onSetSearchBarActiveness,
+        onSearchLunchPlaces,
+        onDiscardLunchPlaces,
+        lunchPlacesStatus,
+        onNavigateToDetails
+    )
+
+    LaunchedEffect(isSearchBarActive) {
+        val isMapVisible = !isSearchBarActive
+        onSetMapVisibility(isMapVisible)
+    }
+}
+
+@Composable
+fun SearchScreenImpl(
+    isSearchBarActive: Boolean,
+    onSetSearchBarActiveness: (Boolean) -> Unit,
+    onSearchLunchPlaces: (SearchInput) -> Unit,
+    onDiscardLunchPlaces: () -> Unit,
+    lunchPlacesStatus: Status<SearchFilter, List<LunchPlace>>?,
+    onNavigateToDetails: (Int) -> Unit
+) {
     val focusManager = LocalFocusManager.current
     val searchBarInteractionSource = remember { MutableInteractionSource() }
     val isSearchBarFocused by searchBarInteractionSource.collectIsFocusedAsState()
@@ -95,6 +133,7 @@ fun SearchScreen(
             )
         }
     }
+
     val onRetrySearch = remember(onTrySearch) {
         { onTrySearch(appliedQuery) }
     }
@@ -113,11 +152,6 @@ fun SearchScreen(
         onTrySearch = onTrySearch
     ) {
         SearchStatus(lunchPlacesStatus, onNavigateToDetails, onRetrySearch)
-    }
-
-    LaunchedEffect(isSearchBarActive) {
-        val isMapVisible = !isSearchBarActive
-        onSetMapVisibility(isMapVisible)
     }
 }
 
@@ -202,10 +236,44 @@ private fun SearchProgress() {
 private fun SearchResult(lunchPlaces: List<LunchPlace>, onNavigateToDetails: (Int) -> Unit) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(vertical = LunchPlaceItemPadding.vertical)
+        contentPadding = PaddingValues(vertical = SearchResultItemPadding.vertical)
     ) {
         itemsIndexed(lunchPlaces) { index, lunchPlace ->
-            LunchPlaceItem(index, lunchPlace, onNavigateToDetails)
+            SearchResultItem(index, lunchPlace, onNavigateToDetails)
+        }
+    }
+}
+
+@Composable
+private fun SearchResultItem(
+    index: Int,
+    lunchPlace: LunchPlace,
+    onNavigateToDetails: (Int) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable { onNavigateToDetails(index) }
+            .padding(
+                horizontal = SearchResultItemPadding.horizontal,
+                vertical = SearchResultItemPadding.vertical
+            ),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        LunchPlacePhoto(lunchPlace.photoUri, isThumbnail = true)
+        Column(
+            modifier = Modifier.padding(start = SearchResultItemPadding.horizontal)
+        ) {
+            LunchPlaceName(lunchPlace.name)
+            LunchPlaceRating(lunchPlace.rating)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                LunchPlaceDistance(lunchPlace.distance)
+                LunchPlaceOpenness(
+                    lunchPlace.isOpen,
+                    modifier = Modifier.padding(start = 1.dp)
+                )
+            }
         }
     }
 }
@@ -241,11 +309,29 @@ private fun SearchError(errorType: ErrorType, onRetrySearch: () -> Unit) {
 @Composable
 private fun SearchScreenPreview() {
     AppTheme {
-        SearchScreen(
-            onSetMapVisibility = {},
+        SearchScreenImpl(
+            isSearchBarActive = true,
+            onSetSearchBarActiveness = {},
             onSearchLunchPlaces = {},
             onDiscardLunchPlaces = {},
-            lunchPlacesStatus = null,
+            lunchPlacesStatus = Status.Success(
+                SearchFilter(
+                    SearchInput(query = "burger")
+                ),
+                result = listOf(
+                    LunchPlace(
+                        id = "ChIJRx5D7mzdOkcR8MgRrmieLvc",
+                        name = "Pizza Calcio",
+                        rating = 3.8,
+                        latLng = LatLng(49.842306799999996, 24.034497899999998),
+                        distance = 2923.3997f,
+                        address = "вулиця Підвальна, 9, Львів, Львівська область, Україна, 79000",
+                        isOpen = false,
+                        thumbnailUri = Uri.parse("https://lh3.googleusercontent.com/places/ANXAkqFiFHd0LKC_e89MhGD3GjL6zEhZkkkowyR5_CxLn1keGgxNIBCcbNfNUzc7gqQoib29wBCkwN5M0INME092a5PLgCUtdSUZVn4=s4800-w192-h192"),
+                        photoUri = Uri.parse("https://lh3.googleusercontent.com/places/ANXAkqFiFHd0LKC_e89MhGD3GjL6zEhZkkkowyR5_CxLn1keGgxNIBCcbNfNUzc7gqQoib29wBCkwN5M0INME092a5PLgCUtdSUZVn4=s4800-w1920-h1080")
+                    )
+                )
+            ),
             onNavigateToDetails = {}
         )
     }
