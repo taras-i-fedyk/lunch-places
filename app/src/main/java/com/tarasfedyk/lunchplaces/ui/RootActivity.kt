@@ -27,6 +27,8 @@ import com.tarasfedyk.lunchplaces.biz.data.SearchInput
 import com.tarasfedyk.lunchplaces.ui.nav.SEARCH_ROUTE
 import com.tarasfedyk.lunchplaces.ui.nav.detailsScreen
 import com.tarasfedyk.lunchplaces.ui.nav.navigateToDetails
+import com.tarasfedyk.lunchplaces.ui.nav.navigateToProximity
+import com.tarasfedyk.lunchplaces.ui.nav.proximityScreen
 import com.tarasfedyk.lunchplaces.ui.nav.searchScreen
 import com.tarasfedyk.lunchplaces.ui.theme.AppTheme
 import com.tarasfedyk.lunchplaces.ui.util.LocationPermissionsTracker
@@ -116,8 +118,9 @@ class RootActivity : ComponentActivity() {
         lunchPlacesStatus: Status<SearchFilter, List<LunchPlace>>?
     ) {
         val navController = rememberNavController()
-        val onNavigateToDetails = remember { navController::navigateToDetails }
         val onNavigateUp: () -> Unit = remember { { navController.navigateUp() } }
+        val onNavigateToDetails = remember { navController::navigateToDetails }
+        val onNavigateToProximity = remember { navController::navigateToProximity }
 
         NavHost(navController, startDestination = SEARCH_ROUTE) {
             searchScreen(
@@ -127,10 +130,8 @@ class RootActivity : ComponentActivity() {
                 lunchPlacesStatus,
                 onNavigateToDetails
             )
-            detailsScreen(
-                lunchPlacesStatus,
-                onNavigateUp
-            )
+            detailsScreen(lunchPlacesStatus, onNavigateUp, onNavigateToProximity)
+            proximityScreen(onSetMapVisibility, lunchPlacesStatus, onNavigateUp)
         }
     }
 

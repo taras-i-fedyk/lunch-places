@@ -11,13 +11,14 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.SearchBar
+import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.Dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.currentStateAsState
 import com.tarasfedyk.lunchplaces.R
@@ -35,13 +36,16 @@ fun CompactSearchBar(
     onNavigateBack: () -> Unit,
     onTrySearch: (String) -> Unit,
     modifier: Modifier = Modifier,
+    tonalElevation: Dp = SearchBarDefaults.TonalElevation,
+    shadowElevation: Dp = SearchBarDefaults.ShadowElevation,
     searchStatusContent: @Composable ColumnScope.() -> Unit
 ) {
     val isFocused by interactionSource.collectIsFocusedAsState()
 
     SearchBar(
         modifier = modifier,
-        shadowElevation = 6.dp,
+        tonalElevation = tonalElevation,
+        shadowElevation = shadowElevation,
         placeholder = { Placeholder(hint) },
         leadingIcon = {
             if (isActive) {

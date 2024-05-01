@@ -13,8 +13,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
@@ -31,7 +33,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.google.android.gms.maps.model.LatLng
 import com.tarasfedyk.lunchplaces.R
@@ -45,11 +46,6 @@ import com.tarasfedyk.lunchplaces.biz.data.Status
 import com.tarasfedyk.lunchplaces.ui.theme.AppTheme
 import com.tarasfedyk.lunchplaces.ui.util.CompactSearchBar
 import com.tarasfedyk.lunchplaces.ui.util.PermanentErrorSnackbar
-
-private object SearchResultItemPadding {
-    val horizontal: Dp = 16.dp
-    val vertical: Dp = 8.dp
-}
 
 @Composable
 fun SearchScreen(
@@ -77,6 +73,7 @@ fun SearchScreen(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchScreenImpl(
     isSearchBarActive: Boolean,
@@ -141,6 +138,7 @@ fun SearchScreenImpl(
     // TODO: when it becomes possible, set the horizontal padding of an inactive search bar
     CompactSearchBar(
         modifier = Modifier.fillMaxWidth(),
+        shadowElevation = SearchBarDefaults.TonalElevation,
         isActive = isSearchBarActive,
         onActivenessChanged = onSetSearchBarActiveness,
         interactionSource = searchBarInteractionSource,
@@ -233,37 +231,36 @@ private fun SearchProgress() {
 }
 
 @Composable
-private fun SearchResult(lunchPlaces: List<LunchPlace>, onNavigateToDetails: (Int) -> Unit) {
+private fun SearchResult(
+    lunchPlaces: List<LunchPlace>,
+    onNavigateToDetails: (Int) -> Unit
+) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(vertical = SearchResultItemPadding.vertical)
+        contentPadding = PaddingValues(vertical = 8.dp)
     ) {
-        itemsIndexed(lunchPlaces) { index, lunchPlace ->
-            SearchResultItem(index, lunchPlace, onNavigateToDetails)
+        itemsIndexed(lunchPlaces) { lunchPlaceIndex, lunchPlace ->
+            SearchResultItem(lunchPlaceIndex, lunchPlace, onNavigateToDetails)
         }
     }
 }
 
 @Composable
 private fun SearchResultItem(
-    index: Int,
+    lunchPlaceIndex: Int,
     lunchPlace: LunchPlace,
-    onNavigateToDetails: (Int) -> Unit,
-    modifier: Modifier = Modifier
+    onNavigateToDetails: (Int) -> Unit
 ) {
     Row(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxWidth()
-            .clickable { onNavigateToDetails(index) }
-            .padding(
-                horizontal = SearchResultItemPadding.horizontal,
-                vertical = SearchResultItemPadding.vertical
-            ),
+            .clickable { onNavigateToDetails(lunchPlaceIndex) }
+            .padding(horizontal = 16.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         LunchPlacePhoto(lunchPlace.photoUri, isThumbnail = true)
         Column(
-            modifier = Modifier.padding(start = SearchResultItemPadding.horizontal)
+            modifier = Modifier.padding(start = 16.dp)
         ) {
             LunchPlaceName(lunchPlace.name)
             LunchPlaceRating(lunchPlace.rating)

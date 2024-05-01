@@ -12,6 +12,7 @@
     <string name="up_navigation_icon_description">Up navigation icon</string>
     <string name="query_clearance_icon_description">Query clearance icon</string>
     <string name="closedness_icon_description">Closedness icon</string>
+    <string name="location_icon_description">Location icon</string>
     <string name="lunch_place_thumbnail_description">Lunch place thumbnail</string>
     <string name="lunch_place_photo_description">Lunch place photo</string>
 
