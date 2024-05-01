@@ -13,8 +13,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.google.android.gms.maps.model.LatLng
 import com.tarasfedyk.lunchplaces.biz.data.LunchPlace
-import com.tarasfedyk.lunchplaces.ui.data.TopBarDefaults
 import com.tarasfedyk.lunchplaces.ui.theme.AppTheme
+import com.tarasfedyk.lunchplaces.ui.util.TopBarDefaults
 import com.tarasfedyk.lunchplaces.ui.util.UpNavigationIcon
 
 @OptIn(ExperimentalMaterial3Api::class)

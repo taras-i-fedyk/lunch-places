@@ -6,7 +6,13 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import com.tarasfedyk.lunchplaces.R
+
+object TopBarDefaults {
+    val TonalElevation: Dp = 3.dp
+}
 
 @Composable
 fun UpNavigationIcon(onNavigateUp: () -> Unit) {
