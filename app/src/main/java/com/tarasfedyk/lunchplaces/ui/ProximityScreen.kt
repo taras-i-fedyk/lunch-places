@@ -20,7 +20,7 @@ import com.tarasfedyk.lunchplaces.ui.util.UpNavigationIcon
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProximityScreen(
-    onSetMapVisibility: (Boolean) -> Unit,
+    onSetMapVisible: (Boolean) -> Unit,
     lunchPlace: LunchPlace,
     onNavigateUp: () -> Unit
 ) {
@@ -35,9 +35,9 @@ fun ProximityScreen(
     }
 
     DisposableEffect(Unit) {
-        onSetMapVisibility(true)
+        onSetMapVisible(true)
         onDispose {
-            onSetMapVisibility(false)
+            onSetMapVisible(false)
         }
     }
 }
@@ -47,7 +47,7 @@ fun ProximityScreen(
 private fun ProximityScreenPreview() {
     AppTheme {
         ProximityScreen(
-            onSetMapVisibility = {},
+            onSetMapVisible = {},
             lunchPlace = LunchPlace(
                 id = "ChIJRx5D7mzdOkcR8MgRrmieLvc",
                 name = "Pizza Calcio",

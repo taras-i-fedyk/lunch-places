@@ -49,18 +49,18 @@ import com.tarasfedyk.lunchplaces.ui.util.PermanentErrorSnackbar
 
 @Composable
 fun SearchScreen(
-    onSetMapVisibility: (Boolean) -> Unit,
+    onSetMapVisible: (Boolean) -> Unit,
     onSearchLunchPlaces: (SearchInput) -> Unit,
     onDiscardLunchPlaces: () -> Unit,
     lunchPlacesStatus: Status<SearchFilter, List<LunchPlace>>?,
     onNavigateToDetails: (Int) -> Unit
 ) {
     var isSearchBarActive by rememberSaveable { mutableStateOf(false) }
-    val onSetSearchBarActiveness: (Boolean) -> Unit = remember { { isSearchBarActive = it } }
+    val onSetSearchBarActive: (Boolean) -> Unit = remember { { isSearchBarActive = it } }
 
     SearchScreenImpl(
         isSearchBarActive,
-        onSetSearchBarActiveness,
+        onSetSearchBarActive,
         onSearchLunchPlaces,
         onDiscardLunchPlaces,
         lunchPlacesStatus,
@@ -68,8 +68,7 @@ fun SearchScreen(
     )
 
     LaunchedEffect(isSearchBarActive) {
-        val isMapVisible = !isSearchBarActive
-        onSetMapVisibility(isMapVisible)
+        onSetMapVisible(!isSearchBarActive)
     }
 }
 
@@ -77,7 +76,7 @@ fun SearchScreen(
 @Composable
 fun SearchScreenImpl(
     isSearchBarActive: Boolean,
-    onSetSearchBarActiveness: (Boolean) -> Unit,
+    onSetSearchBarActive: (Boolean) -> Unit,
     onSearchLunchPlaces: (SearchInput) -> Unit,
     onDiscardLunchPlaces: () -> Unit,
     lunchPlacesStatus: Status<SearchFilter, List<LunchPlace>>?,
@@ -101,7 +100,7 @@ fun SearchScreenImpl(
     ) {
         {
             navigateBack(
-                onSetSearchBarActiveness = onSetSearchBarActiveness,
+                onSetSearchBarActive = onSetSearchBarActive,
                 focusManager = focusManager,
                 isSearchBarFocused = isSearchBarFocused,
                 onSetCurrentQuery = onSetCurrentQuery,
@@ -140,7 +139,7 @@ fun SearchScreenImpl(
         modifier = Modifier.fillMaxWidth(),
         shadowElevation = SearchBarDefaults.TonalElevation,
         isActive = isSearchBarActive,
-        onActivenessChanged = onSetSearchBarActiveness,
+        onActiveChanged = onSetSearchBarActive,
         interactionSource = searchBarInteractionSource,
         hint = stringResource(R.string.search_hint),
         query = currentQuery,
@@ -166,7 +165,7 @@ private fun mediaLimits(): MediaLimits {
 }
 
 private fun navigateBack(
-    onSetSearchBarActiveness: (Boolean) -> Unit,
+    onSetSearchBarActive: (Boolean) -> Unit,
     focusManager: FocusManager,
     isSearchBarFocused: Boolean,
     onSetCurrentQuery: (String) -> Unit,
@@ -181,7 +180,7 @@ private fun navigateBack(
     } else {
         onSetAppliedQuery("")
         onClearCurrentQuery()
-        onSetSearchBarActiveness(false)
+        onSetSearchBarActive(false)
         onDiscardLunchPlaces()
     }
 }
@@ -308,7 +307,7 @@ private fun SearchScreenPreview() {
     AppTheme {
         SearchScreenImpl(
             isSearchBarActive = true,
-            onSetSearchBarActiveness = {},
+            onSetSearchBarActive = {},
             onSearchLunchPlaces = {},
             onDiscardLunchPlaces = {},
             lunchPlacesStatus = Status.Success(

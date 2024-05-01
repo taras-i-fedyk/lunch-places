@@ -78,7 +78,7 @@ class RootActivity : ComponentActivity() {
         geoState: GeoState
     ) {
         var isMapVisible by rememberSaveable { mutableStateOf(true)}
-        val onSetMapVisibility: (Boolean) -> Unit = remember { { isMapVisible = it } }
+        val onSetMapVisible: (Boolean) -> Unit = remember { { isMapVisible = it } }
         Box(modifier = Modifier.fillMaxSize()) {
             MapScreen(
                 isMapVisible,
@@ -87,7 +87,7 @@ class RootActivity : ComponentActivity() {
                 currentLocationStatus = geoState.currentLocationStatus
             )
             NavGraph(
-                onSetMapVisibility,
+                onSetMapVisible,
                 onSearchLunchPlaces,
                 onDiscardLunchPlaces,
                 lunchPlacesStatus = geoState.lunchPlacesStatus
@@ -112,7 +112,7 @@ class RootActivity : ComponentActivity() {
 
     @Composable
     private fun NavGraph(
-        onSetMapVisibility: (Boolean) -> Unit,
+        onSetMapVisible: (Boolean) -> Unit,
         onSearchLunchPlaces: (SearchInput) -> Unit,
         onDiscardLunchPlaces: () -> Unit,
         lunchPlacesStatus: Status<SearchFilter, List<LunchPlace>>?
@@ -124,14 +124,14 @@ class RootActivity : ComponentActivity() {
 
         NavHost(navController, startDestination = SEARCH_ROUTE) {
             searchScreen(
-                onSetMapVisibility,
+                onSetMapVisible,
                 onSearchLunchPlaces,
                 onDiscardLunchPlaces,
                 lunchPlacesStatus,
                 onNavigateToDetails
             )
             detailsScreen(lunchPlacesStatus, onNavigateUp, onNavigateToProximity)
-            proximityScreen(onSetMapVisibility, lunchPlacesStatus, onNavigateUp)
+            proximityScreen(onSetMapVisible, lunchPlacesStatus, onNavigateUp)
         }
     }
 

@@ -16,7 +16,7 @@ private const val PROXIMITY_ROUTE_BASIS = "proximity/"
 private const val PROXIMITY_ROUTE = "$PROXIMITY_ROUTE_BASIS{$LUNCH_PLACE_INDEX_KEY}"
 
 fun NavGraphBuilder.proximityScreen(
-    onSetMapVisibility: (Boolean) -> Unit,
+    onSetMapVisible: (Boolean) -> Unit,
     lunchPlacesStatus: Status<SearchFilter, List<LunchPlace>>?,
     onNavigateUp: () -> Unit
 ) {
@@ -41,7 +41,7 @@ fun NavGraphBuilder.proximityScreen(
             lunchPlaces.getOrNull(lunchPlaceIndex) ?:
             error("The $LUNCH_PLACE_INDEX_KEY is out of bounds!")
 
-        ProximityScreen(onSetMapVisibility, lunchPlace, onNavigateUp)
+        ProximityScreen(onSetMapVisible, lunchPlace, onNavigateUp)
     }
 }
 

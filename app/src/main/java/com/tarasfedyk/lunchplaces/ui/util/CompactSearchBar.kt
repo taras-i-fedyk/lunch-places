@@ -27,7 +27,7 @@ import com.tarasfedyk.lunchplaces.R
 @Composable
 fun CompactSearchBar(
     isActive: Boolean,
-    onActivenessChanged: (Boolean) -> Unit,
+    onActiveChanged: (Boolean) -> Unit,
     interactionSource: MutableInteractionSource,
     hint: String,
     query: String,
@@ -60,7 +60,7 @@ fun CompactSearchBar(
             }
         },
         active = isActive,
-        onActiveChange = onActivenessChanged,
+        onActiveChange = onActiveChanged,
         interactionSource = interactionSource,
         query = query,
         onQueryChange = onQueryChanged,
