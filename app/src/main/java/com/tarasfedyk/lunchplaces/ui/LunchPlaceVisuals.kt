@@ -171,7 +171,7 @@ fun LunchPlaceOpenness(
     } else {
         Icon(
             modifier = modifier,
-            painter = painterResource(R.drawable.ic_closed),
+            painter = painterResource(R.drawable.ic_closedness),
             tint = tintColor,
             contentDescription = stringResource(R.string.closedness_icon_description)
         )
