@@ -9,9 +9,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.res.painterResource
@@ -63,8 +61,8 @@ fun MapScreen(
     ) { paddingValues ->
         GoogleMap(
             modifier = Modifier
-                .padding(paddingValues)
-                .fillMaxSize(),
+                .fillMaxSize()
+                .padding(paddingValues),
             uiSettings = MapUiSettings(
                 myLocationButtonEnabled = false,
                 zoomControlsEnabled = false
@@ -94,19 +92,17 @@ private fun CameraPositionAnimation(
     isCurrentLocationEnabled: Boolean,
     currentLocationStatus: Status<Unit, LocationSnapshot>?
 ) {
-    val currentCameraPositionState by rememberUpdatedState(cameraPositionState)
-
-    LaunchedEffect(isCurrentLocationEnabled, currentLocationStatus) {
+    LaunchedEffect(cameraPositionState, isCurrentLocationEnabled, currentLocationStatus) {
         if (!isCurrentLocationEnabled) {
             val defaultCameraPosition = CameraPositionState().position
             val cameraUpdate = CameraUpdateFactory.newCameraPosition(defaultCameraPosition)
-            currentCameraPositionState.animate(cameraUpdate)
+            cameraPositionState.animate(cameraUpdate)
         } else if (currentLocationStatus is Status.Success<*, LocationSnapshot>) {
             val currentLocation = currentLocationStatus.result
             val currentLatLng = currentLocation.latLng
-            val currentZoomLevel = recommendZoomLevel(currentLocation.accuracy)
+            val currentZoomLevel = calculateZoomLevel(currentLocation.accuracy)
             val cameraUpdate = CameraUpdateFactory.newLatLngZoom(currentLatLng, currentZoomLevel)
-            currentCameraPositionState.animate(cameraUpdate)
+            cameraPositionState.animate(cameraUpdate)
         }
     }
 }
@@ -142,7 +138,7 @@ private fun MapError(
     )
 }
 
-private fun recommendZoomLevel(locationAccuracy: Float): Float =
+private fun calculateZoomLevel(locationAccuracy: Float): Float =
     // based on how close the given location accuracy is to the maximum location accuracy
     // and assuming the maximum location accuracy should be accompanied by the maximum zoom level
     MAX_ZOOM_LEVEL - (log2(locationAccuracy) - log2(MAX_LOCATION_ACCURACY))
