@@ -25,26 +25,13 @@ import com.tarasfedyk.lunchplaces.ui.util.UpNavigationIcon
 @Composable
 fun ProximityScreen(
     onSetMapConfig: (MapConfig) -> Unit,
+    onSetMapViewportFocused: (Boolean) -> Unit,
     originPoint: LatLng,
     lunchPlace: LunchPlace,
     onNavigateUp: () -> Unit
 ) {
-    val onSwitchMapToProximityMode = remember(onSetMapConfig, originPoint, lunchPlace.point) {
-        {
-            val mapViewport = MapViewport(
-                originPoint = originPoint, destinationPoint = lunchPlace.point
-            )
-            val mapConfig = MapConfig(
-                isMapVisible = true, mapViewport = mapViewport
-            )
-            onSetMapConfig(mapConfig)
-        }
-    }
-    val onSwitchMapToDefaultMode = remember(onSetMapConfig) {
-        {
-            val mapConfig = MapConfig()
-            onSetMapConfig(mapConfig)
-        }
+    val onExploreLocation = remember(onSetMapViewportFocused) {
+        { onSetMapViewportFocused(true) }
     }
 
     Surface(tonalElevation = TopBarDefaults.TonalElevation) {
@@ -52,17 +39,26 @@ fun ProximityScreen(
             TopAppBar(
                 title = { LunchPlaceName(lunchPlace.name, isTextLarge = true) },
                 navigationIcon = { UpNavigationIcon(onNavigateUp) },
-                actions = { LocationIcon(onExploreLocation = onSwitchMapToProximityMode) },
+                actions = { LocationIcon(onExploreLocation) },
             )
             LunchPlaceDistance(lunchPlace.distance, modifier = Modifier.padding(16.dp))
         }
     }
 
     DisposableEffect(onSetMapConfig, originPoint, lunchPlace.point) {
-        onSwitchMapToProximityMode()
+        onSetMapConfig(
+            MapConfig(
+                isMapVisible = true,
+                mapViewport = MapViewport(
+                    isFocused = true,
+                    originPoint = originPoint,
+                    destinationPoint = lunchPlace.point
+                )
+            )
+        )
 
         onDispose {
-            onSwitchMapToDefaultMode()
+            onSetMapConfig(MapConfig())
         }
     }
 }
@@ -73,6 +69,7 @@ private fun ProximityScreenPreview() {
     AppTheme {
         ProximityScreen(
             onSetMapConfig = {},
+            onSetMapViewportFocused = {},
             originPoint = LatLng(0.0, 0.0),
             lunchPlace = LunchPlace(
                 id = "ChIJRx5D7mzdOkcR8MgRrmieLvc",

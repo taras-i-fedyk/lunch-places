@@ -85,18 +85,28 @@ class RootActivity : ComponentActivity() {
         val onSetMapVisible: (Boolean) -> Unit = remember {
             { mapConfig = mapConfig.copy(isMapVisible = it) }
         }
+        val onSetMapViewportFocused: (Boolean) -> Unit = remember {
+            { isFocused ->
+                mapConfig = mapConfig.copy(
+                    mapViewport = mapConfig.mapViewport?.copy(
+                        isFocused = isFocused
+                    )
+                )
+            }
+        }
         Box(modifier = Modifier.fillMaxSize()) {
             MapScreen(
-                mapConfig,
-                areAllLocationPermissionsDenied,
-                onDetermineCurrentLocation,
+                mapConfig = mapConfig,
+                areAllLocationPermissionsDenied = areAllLocationPermissionsDenied,
+                onDetermineCurrentLocation = onDetermineCurrentLocation,
                 currentLocationStatus = geoState.currentLocationStatus
             )
             NavGraph(
-                onSetMapVisible,
-                onSetMapConfig,
-                onSearchLunchPlaces,
-                onDiscardLunchPlaces,
+                onSetMapConfig = onSetMapConfig,
+                onSetMapVisible = onSetMapVisible,
+                onSetMapViewportFocused = onSetMapViewportFocused,
+                onSearchLunchPlaces = onSearchLunchPlaces,
+                onDiscardLunchPlaces = onDiscardLunchPlaces,
                 lunchPlacesStatus = geoState.lunchPlacesStatus
             )
         }
@@ -119,8 +129,9 @@ class RootActivity : ComponentActivity() {
 
     @Composable
     private fun NavGraph(
-        onSetMapVisible: (Boolean) -> Unit,
         onSetMapConfig: (MapConfig) -> Unit,
+        onSetMapVisible: (Boolean) -> Unit,
+        onSetMapViewportFocused: (Boolean) -> Unit,
         onSearchLunchPlaces: (SearchInput) -> Unit,
         onDiscardLunchPlaces: () -> Unit,
         lunchPlacesStatus: Status<SearchFilter, List<LunchPlace>>?
@@ -139,7 +150,12 @@ class RootActivity : ComponentActivity() {
                 onNavigateToDetails
             )
             detailsScreen(lunchPlacesStatus, onNavigateUp, onNavigateToProximity)
-            proximityScreen(onSetMapConfig, lunchPlacesStatus, onNavigateUp)
+            proximityScreen(
+                onSetMapConfig,
+                onSetMapViewportFocused,
+                lunchPlacesStatus,
+                onNavigateUp
+            )
         }
     }
 

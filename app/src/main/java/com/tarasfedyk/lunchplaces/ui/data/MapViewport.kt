@@ -7,7 +7,8 @@ import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-class MapViewport(
+data class MapViewport(
+    val isFocused: Boolean,
     val originPoint: LatLng,
     val destinationPoint: LatLng
 ) : Parcelable {
