@@ -24,6 +24,7 @@ import com.tarasfedyk.lunchplaces.biz.data.SearchFilter
 import com.tarasfedyk.lunchplaces.biz.data.Status
 import com.tarasfedyk.lunchplaces.biz.data.LocationPermissionsLevel
 import com.tarasfedyk.lunchplaces.biz.data.SearchInput
+import com.tarasfedyk.lunchplaces.biz.data.isCoarseOrFine
 import com.tarasfedyk.lunchplaces.ui.data.MapConfig
 import com.tarasfedyk.lunchplaces.ui.nav.SEARCH_ROUTE
 import com.tarasfedyk.lunchplaces.ui.nav.detailsScreen
@@ -52,15 +53,16 @@ class RootActivity : ComponentActivity() {
         geoVM: GeoVM = hiltViewModel()
     ) {
         val locationPermissionsLevel by geoVM.locationPermissionsLevelFlow.collectAsStateWithLifecycle()
-        val geoState by geoVM.geoStateFlow.collectAsStateWithLifecycle()
+        val areAllLocationPermissionsDenied = !locationPermissionsLevel.isCoarseOrFine
 
+        val geoState by geoVM.geoStateFlow.collectAsStateWithLifecycle()
         val onSetLocationPermissionsLevel = remember(geoVM) { geoVM::setLocationPermissionsLevel }
         val onDetermineCurrentLocation = remember(geoVM) { geoVM::determineCurrentLocation }
         val onSearchLunchPlaces = remember(geoVM) { geoVM::searchLunchPlaces }
         val onDiscardLunchPlaces = remember(geoVM) { geoVM::discardLunchPlaces }
 
         RootContentImpl(
-            locationPermissionsLevel = locationPermissionsLevel,
+            areAllLocationPermissionsDenied = areAllLocationPermissionsDenied,
             onSetLocationPermissionsLevel = onSetLocationPermissionsLevel,
             onDetermineCurrentLocation = onDetermineCurrentLocation,
             onSearchLunchPlaces = onSearchLunchPlaces,
@@ -71,7 +73,7 @@ class RootActivity : ComponentActivity() {
 
     @Composable
     private fun RootContentImpl(
-        locationPermissionsLevel: LocationPermissionsLevel?,
+        areAllLocationPermissionsDenied: Boolean,
         onSetLocationPermissionsLevel: (LocationPermissionsLevel) -> Unit,
         onDetermineCurrentLocation: () -> Unit,
         onSearchLunchPlaces: (SearchInput) -> Unit,
@@ -86,7 +88,7 @@ class RootActivity : ComponentActivity() {
         Box(modifier = Modifier.fillMaxSize()) {
             MapScreen(
                 mapConfig,
-                locationPermissionsLevel,
+                areAllLocationPermissionsDenied,
                 onDetermineCurrentLocation,
                 currentLocationStatus = geoState.currentLocationStatus
             )
@@ -146,7 +148,7 @@ class RootActivity : ComponentActivity() {
     private fun RootContentPreview() {
         AppTheme {
             RootContentImpl(
-                locationPermissionsLevel = LocationPermissionsLevel.FINE,
+                areAllLocationPermissionsDenied = false,
                 onSetLocationPermissionsLevel = {},
                 onDetermineCurrentLocation = {},
                 onSearchLunchPlaces = {},

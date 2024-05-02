@@ -1,5 +1,6 @@
 package com.tarasfedyk.lunchplaces.ui
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.FloatingActionButton
@@ -23,10 +24,8 @@ import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.tarasfedyk.lunchplaces.R
 import com.tarasfedyk.lunchplaces.biz.data.ErrorType
-import com.tarasfedyk.lunchplaces.biz.data.LocationPermissionsLevel
 import com.tarasfedyk.lunchplaces.biz.data.LocationSnapshot
 import com.tarasfedyk.lunchplaces.biz.data.Status
-import com.tarasfedyk.lunchplaces.biz.data.isCoarseOrFine
 import com.tarasfedyk.lunchplaces.ui.data.MapConfig
 import com.tarasfedyk.lunchplaces.ui.theme.AppTheme
 import com.tarasfedyk.lunchplaces.ui.util.PermanentErrorSnackbar
@@ -40,12 +39,10 @@ private const val MAX_LOCATION_ACCURACY: Float = 4f
 @Composable
 fun MapScreen(
     mapConfig: MapConfig,
-    locationPermissionsLevel: LocationPermissionsLevel?,
+    areAllLocationPermissionsDenied: Boolean,
     onDetermineCurrentLocation: () -> Unit,
     currentLocationStatus: Status<Unit, LocationSnapshot>?
 ) {
-    val isCurrentLocationEnabled = locationPermissionsLevel.isCoarseOrFine
-
     val cameraPositionState = rememberCameraPositionState()
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -55,47 +52,51 @@ fun MapScreen(
             SnackbarHost(hostState = snackbarHostState)
         },
         floatingActionButton = {
-            if (isCurrentLocationEnabled) {
+            if (!areAllLocationPermissionsDenied) {
                 CurrentLocationButton(onDetermineCurrentLocation)
             }
         }
     ) { paddingValues ->
-        GoogleMap(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues),
-            uiSettings = MapUiSettings(
-                myLocationButtonEnabled = false,
-                zoomControlsEnabled = false
-            ),
-            properties = MapProperties(
-                maxZoomPreference = MAX_ZOOM_LEVEL,
-                isMyLocationEnabled = isCurrentLocationEnabled
-            ),
-            cameraPositionState = cameraPositionState,
-            contentDescription = stringResource(R.string.map_description)
-        )
-
-        CameraPositionAnimation(
-            cameraPositionState, isCurrentLocationEnabled, currentLocationStatus
-        )
-
-        if (currentLocationStatus is Status.Failure) {
-            MapError(
-                snackbarHostState, currentLocationStatus.errorType, onDetermineCurrentLocation
+                .padding(paddingValues)
+        ) {
+            GoogleMap(
+                modifier = Modifier.fillMaxSize(),
+                uiSettings = MapUiSettings(
+                    myLocationButtonEnabled = false,
+                    zoomControlsEnabled = false
+                ),
+                properties = MapProperties(
+                    maxZoomPreference = MAX_ZOOM_LEVEL,
+                    isMyLocationEnabled = areAllLocationPermissionsDenied
+                ),
+                cameraPositionState = cameraPositionState,
+                contentDescription = stringResource(R.string.map_description)
             )
+
+            AnimatedCameraPosition(
+                cameraPositionState, areAllLocationPermissionsDenied, currentLocationStatus
+            )
+
+            if (currentLocationStatus is Status.Failure) {
+                MapError(
+                    snackbarHostState, currentLocationStatus.errorType, onDetermineCurrentLocation
+                )
+            }
         }
     }
 }
 
 @Composable
-private fun CameraPositionAnimation(
+private fun AnimatedCameraPosition(
     cameraPositionState: CameraPositionState,
-    isCurrentLocationEnabled: Boolean,
+    areAllLocationPermissionsDenied: Boolean,
     currentLocationStatus: Status<Unit, LocationSnapshot>?
 ) {
-    LaunchedEffect(cameraPositionState, isCurrentLocationEnabled, currentLocationStatus) {
-        if (!isCurrentLocationEnabled) {
+    LaunchedEffect(cameraPositionState, areAllLocationPermissionsDenied, currentLocationStatus) {
+        if (areAllLocationPermissionsDenied) {
             val defaultCameraPosition = CameraPositionState().position
             val cameraUpdate = CameraUpdateFactory.newCameraPosition(defaultCameraPosition)
             cameraPositionState.animate(cameraUpdate)
@@ -151,7 +152,7 @@ private fun MapScreenPreview() {
     AppTheme {
         MapScreen(
             mapConfig = MapConfig(),
-            locationPermissionsLevel = LocationPermissionsLevel.FINE,
+            areAllLocationPermissionsDenied = false,
             onDetermineCurrentLocation = {},
             currentLocationStatus = null
         )
