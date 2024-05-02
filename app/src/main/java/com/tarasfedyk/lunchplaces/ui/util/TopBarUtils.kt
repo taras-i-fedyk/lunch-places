@@ -2,6 +2,7 @@ package com.tarasfedyk.lunchplaces.ui.util
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
@@ -20,6 +21,16 @@ fun UpNavigationIcon(onNavigateUp: () -> Unit) {
         Icon(
             imageVector = Icons.Default.ArrowBack,
             contentDescription = stringResource(R.string.up_navigation_icon_description)
+        )
+    }
+}
+
+@Composable
+fun LocationIcon(onExploreLocation: () -> Unit) {
+    IconButton(onClick = onExploreLocation) {
+        Icon(
+            imageVector = Icons.Default.LocationOn,
+            contentDescription = stringResource(R.string.location_icon_description)
         )
     }
 }

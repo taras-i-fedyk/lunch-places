@@ -67,7 +67,7 @@ fun SearchScreen(
         onNavigateToDetails
     )
 
-    LaunchedEffect(isSearchBarActive) {
+    LaunchedEffect(isSearchBarActive, onSetMapVisible) {
         val isMapVisible = !isSearchBarActive
         onSetMapVisible(isMapVisible)
     }

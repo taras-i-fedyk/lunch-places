@@ -8,6 +8,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -16,6 +17,7 @@ import com.tarasfedyk.lunchplaces.biz.data.LunchPlace
 import com.tarasfedyk.lunchplaces.ui.data.MapConfig
 import com.tarasfedyk.lunchplaces.ui.data.MapViewport
 import com.tarasfedyk.lunchplaces.ui.theme.AppTheme
+import com.tarasfedyk.lunchplaces.ui.util.LocationIcon
 import com.tarasfedyk.lunchplaces.ui.util.TopBarDefaults
 import com.tarasfedyk.lunchplaces.ui.util.UpNavigationIcon
 
@@ -27,29 +29,40 @@ fun ProximityScreen(
     lunchPlace: LunchPlace,
     onNavigateUp: () -> Unit
 ) {
+    val onSwitchMapToProximityMode = remember(onSetMapConfig, originPoint, lunchPlace.point) {
+        {
+            val mapViewport = MapViewport(
+                originPoint = originPoint, destinationPoint = lunchPlace.point
+            )
+            val mapConfig = MapConfig(
+                isMapVisible = true, mapViewport = mapViewport
+            )
+            onSetMapConfig(mapConfig)
+        }
+    }
+    val onSwitchMapToDefaultMode = remember(onSetMapConfig) {
+        {
+            val mapConfig = MapConfig()
+            onSetMapConfig(mapConfig)
+        }
+    }
+
     Surface(tonalElevation = TopBarDefaults.TonalElevation) {
         Column {
             TopAppBar(
                 title = { LunchPlaceName(lunchPlace.name, isTextLarge = true) },
-                navigationIcon = { UpNavigationIcon(onNavigateUp) }
+                navigationIcon = { UpNavigationIcon(onNavigateUp) },
+                actions = { LocationIcon(onExploreLocation = onSwitchMapToProximityMode) },
             )
             LunchPlaceDistance(lunchPlace.distance, modifier = Modifier.padding(16.dp))
         }
     }
 
-    DisposableEffect(Unit) {
-        onSetMapConfig(
-            MapConfig(
-                isMapVisible = true,
-                mapViewport = MapViewport(
-                    originPoint = originPoint,
-                    destinationPoint = lunchPlace.point
-                )
-            )
-        )
+    DisposableEffect(onSetMapConfig, originPoint, lunchPlace.point) {
+        onSwitchMapToProximityMode()
 
         onDispose {
-            onSetMapConfig(MapConfig())
+            onSwitchMapToDefaultMode()
         }
     }
 }
