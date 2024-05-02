@@ -48,7 +48,7 @@ class RepoImpl @Inject constructor(
         )
         val placeType = PlaceTypes.RESTAURANT
         val circularBounds = CircularBounds.newInstance(
-            searchFilter.currentLatLng, searchFilter.radius
+            searchFilter.originPoint, searchFilter.radius
         )
         val rankPreference = if (searchFilter.shouldRankByDistance) {
             SearchByTextRequest.RankPreference.DISTANCE
@@ -66,24 +66,24 @@ class RepoImpl @Inject constructor(
             .build()
         val searchByTextTask = placesClient.searchByText(searchByTextRequest)
         return searchByTextTask.await(cancellationTokenSource).places
-            .toLunchPlaces(searchFilter.currentLatLng, searchFilter.input.mediaLimits)
+            .toLunchPlaces(searchFilter.originPoint, searchFilter.input.mediaLimits)
     }
 
     private suspend fun List<Place>.toLunchPlaces(
-        currentLatLng: LatLng,
+        originPoint: LatLng,
         mediaLimits: MediaLimits
     ): List<LunchPlace> = coroutineScope {
         val lunchPlacesDeferred = map { place ->
-            async { place.toLunchPlace(currentLatLng, mediaLimits) }
+            async { place.toLunchPlace(originPoint, mediaLimits) }
         }
         lunchPlacesDeferred.awaitAll()
     }
 
     private suspend fun Place.toLunchPlace(
-        currentLatLng: LatLng,
+        originPoint: LatLng,
         mediaLimits: MediaLimits
     ): LunchPlace = coroutineScope {
-        val distanceDeferred = async { calculateDistance(currentLatLng) }
+        val distanceDeferred = async { calculateDistance(originPoint) }
         val isOpenDeferred = async { determineIfOpen() }
         val thumbnailUriDeferred = async { obtainPhotoUri(mediaLimits.thumbnailSizeLimit) }
         val photoUriDeferred = async { obtainPhotoUri(mediaLimits.photoSizeLimit) }
@@ -97,7 +97,7 @@ class RepoImpl @Inject constructor(
             id = id!!,
             name = name!!,
             rating = rating,
-            latLng = latLng!!,
+            point = latLng!!,
             distance = distance,
             address = address,
             isOpen = isOpen,
@@ -107,12 +107,12 @@ class RepoImpl @Inject constructor(
     }
 
     private suspend fun Place.calculateDistance(
-        currentLatLng: LatLng
+        originPoint: LatLng
     ): Float = withContext(Dispatchers.Default) {
         val distanceResults = FloatArray(size = 3)
         Location.distanceBetween(
             latLng!!.latitude, latLng!!.longitude,
-            currentLatLng.latitude, currentLatLng.longitude,
+            originPoint.latitude, originPoint.longitude,
             distanceResults
         )
         distanceResults[0]

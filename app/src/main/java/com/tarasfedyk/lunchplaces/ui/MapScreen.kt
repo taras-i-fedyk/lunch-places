@@ -27,6 +27,7 @@ import com.tarasfedyk.lunchplaces.biz.data.LocationPermissionsLevel
 import com.tarasfedyk.lunchplaces.biz.data.LocationSnapshot
 import com.tarasfedyk.lunchplaces.biz.data.Status
 import com.tarasfedyk.lunchplaces.biz.data.isCoarseOrFine
+import com.tarasfedyk.lunchplaces.ui.data.MapConfig
 import com.tarasfedyk.lunchplaces.ui.theme.AppTheme
 import com.tarasfedyk.lunchplaces.ui.util.PermanentErrorSnackbar
 import kotlin.math.log2
@@ -38,7 +39,7 @@ private const val MAX_LOCATION_ACCURACY: Float = 4f
 
 @Composable
 fun MapScreen(
-    isMapVisible: Boolean,
+    mapConfig: MapConfig,
     locationPermissionsLevel: LocationPermissionsLevel?,
     onDetermineCurrentLocation: () -> Unit,
     currentLocationStatus: Status<Unit, LocationSnapshot>?
@@ -49,7 +50,7 @@ fun MapScreen(
     val snackbarHostState = remember { SnackbarHostState() }
 
     Scaffold(
-        modifier = Modifier.alpha(if (isMapVisible) 1f else 0f),
+        modifier = Modifier.alpha(if (mapConfig.isMapVisible) 1f else 0f),
         snackbarHost = {
             SnackbarHost(hostState = snackbarHostState)
         },
@@ -100,9 +101,9 @@ private fun CameraPositionAnimation(
             cameraPositionState.animate(cameraUpdate)
         } else if (currentLocationStatus is Status.Success<*, LocationSnapshot>) {
             val currentLocation = currentLocationStatus.result
-            val currentLatLng = currentLocation.latLng
+            val currentPoint = currentLocation.point
             val currentZoomLevel = calculateZoomLevel(currentLocation.accuracy)
-            val cameraUpdate = CameraUpdateFactory.newLatLngZoom(currentLatLng, currentZoomLevel)
+            val cameraUpdate = CameraUpdateFactory.newLatLngZoom(currentPoint, currentZoomLevel)
             cameraPositionState.animate(cameraUpdate)
         }
     }
@@ -149,7 +150,7 @@ private fun calculateZoomLevel(locationAccuracy: Float): Float =
 private fun MapScreenPreview() {
     AppTheme {
         MapScreen(
-            isMapVisible = true,
+            mapConfig = MapConfig(),
             locationPermissionsLevel = LocationPermissionsLevel.FINE,
             onDetermineCurrentLocation = {},
             currentLocationStatus = null

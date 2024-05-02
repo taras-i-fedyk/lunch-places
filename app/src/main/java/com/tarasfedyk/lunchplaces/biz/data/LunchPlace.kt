@@ -10,7 +10,7 @@ data class LunchPlace(
     val id: String,
     val name: String,
     val rating: Double?,
-    val latLng: LatLng,
+    val point: LatLng,
     val distance: Float,
     val address: String?,
     val isOpen: Boolean?,

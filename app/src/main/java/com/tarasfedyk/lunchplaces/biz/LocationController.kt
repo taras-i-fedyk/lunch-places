@@ -30,5 +30,8 @@ class LocationControllerImpl @Inject constructor(
     }
 
     private fun Location.toLocationSnapshot() =
-        LocationSnapshot(LatLng(latitude, longitude), accuracy)
+        LocationSnapshot(
+            point = LatLng(latitude, longitude),
+            accuracy
+        )
 }

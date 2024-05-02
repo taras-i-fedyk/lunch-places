@@ -134,8 +134,8 @@ class GeoVM @Inject constructor(
                 .currentLocationStatus
 
             if (currentLocationTerminalStatus is Status.Success) {
-                val currentLatLng = currentLocationTerminalStatus.result.latLng
-                searchFilter = searchFilter.copy(currentLatLng = currentLatLng)
+                val currentPoint = currentLocationTerminalStatus.result.point
+                searchFilter = searchFilter.copy(originPoint = currentPoint)
                 val lunchPlaces = repo.searchLunchPlaces(searchFilter)
 
                 updateGeoState { it.copy(lunchPlacesStatus = Status.Success(searchFilter, lunchPlaces)) }

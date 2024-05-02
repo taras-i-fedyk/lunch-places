@@ -6,6 +6,6 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class LocationSnapshot(
-    val latLng: LatLng,
+    val point: LatLng,
     val accuracy: Float
 ) : Parcelable

@@ -13,6 +13,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.google.android.gms.maps.model.LatLng
 import com.tarasfedyk.lunchplaces.biz.data.LunchPlace
+import com.tarasfedyk.lunchplaces.ui.data.MapConfig
+import com.tarasfedyk.lunchplaces.ui.data.MapViewport
 import com.tarasfedyk.lunchplaces.ui.theme.AppTheme
 import com.tarasfedyk.lunchplaces.ui.util.TopBarDefaults
 import com.tarasfedyk.lunchplaces.ui.util.UpNavigationIcon
@@ -20,7 +22,8 @@ import com.tarasfedyk.lunchplaces.ui.util.UpNavigationIcon
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProximityScreen(
-    onSetMapVisible: (Boolean) -> Unit,
+    onSetMapConfig: (MapConfig) -> Unit,
+    originPoint: LatLng,
     lunchPlace: LunchPlace,
     onNavigateUp: () -> Unit
 ) {
@@ -35,9 +38,18 @@ fun ProximityScreen(
     }
 
     DisposableEffect(Unit) {
-        onSetMapVisible(true)
+        onSetMapConfig(
+            MapConfig(
+                isMapVisible = true,
+                mapViewport = MapViewport(
+                    originPoint = originPoint,
+                    destinationPoint = lunchPlace.point
+                )
+            )
+        )
+
         onDispose {
-            onSetMapVisible(false)
+            onSetMapConfig(MapConfig())
         }
     }
 }
@@ -47,12 +59,13 @@ fun ProximityScreen(
 private fun ProximityScreenPreview() {
     AppTheme {
         ProximityScreen(
-            onSetMapVisible = {},
+            onSetMapConfig = {},
+            originPoint = LatLng(0.0, 0.0),
             lunchPlace = LunchPlace(
                 id = "ChIJRx5D7mzdOkcR8MgRrmieLvc",
                 name = "Pizza Calcio",
                 rating = 3.8,
-                latLng = LatLng(49.842306799999996, 24.034497899999998),
+                point = LatLng(49.842306799999996, 24.034497899999998),
                 distance = 2923.3997f,
                 address = "вулиця Підвальна, 9, Львів, Львівська область, Україна, 79000",
                 isOpen = false,

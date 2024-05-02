@@ -24,6 +24,7 @@ import com.tarasfedyk.lunchplaces.biz.data.SearchFilter
 import com.tarasfedyk.lunchplaces.biz.data.Status
 import com.tarasfedyk.lunchplaces.biz.data.LocationPermissionsLevel
 import com.tarasfedyk.lunchplaces.biz.data.SearchInput
+import com.tarasfedyk.lunchplaces.ui.data.MapConfig
 import com.tarasfedyk.lunchplaces.ui.nav.SEARCH_ROUTE
 import com.tarasfedyk.lunchplaces.ui.nav.detailsScreen
 import com.tarasfedyk.lunchplaces.ui.nav.navigateToDetails
@@ -77,17 +78,21 @@ class RootActivity : ComponentActivity() {
         onDiscardLunchPlaces: () -> Unit,
         geoState: GeoState
     ) {
-        var isMapVisible by rememberSaveable { mutableStateOf(true)}
-        val onSetMapVisible: (Boolean) -> Unit = remember { { isMapVisible = it } }
+        var mapConfig by rememberSaveable { mutableStateOf(MapConfig()) }
+        val onSetMapConfig: (MapConfig) -> Unit = remember { { mapConfig = it } }
+        val onSetMapVisible: (Boolean) -> Unit = remember {
+            { mapConfig = mapConfig.copy(isMapVisible = it) }
+        }
         Box(modifier = Modifier.fillMaxSize()) {
             MapScreen(
-                isMapVisible,
+                mapConfig,
                 locationPermissionsLevel,
                 onDetermineCurrentLocation,
                 currentLocationStatus = geoState.currentLocationStatus
             )
             NavGraph(
                 onSetMapVisible,
+                onSetMapConfig,
                 onSearchLunchPlaces,
                 onDiscardLunchPlaces,
                 lunchPlacesStatus = geoState.lunchPlacesStatus
@@ -113,6 +118,7 @@ class RootActivity : ComponentActivity() {
     @Composable
     private fun NavGraph(
         onSetMapVisible: (Boolean) -> Unit,
+        onSetMapConfig: (MapConfig) -> Unit,
         onSearchLunchPlaces: (SearchInput) -> Unit,
         onDiscardLunchPlaces: () -> Unit,
         lunchPlacesStatus: Status<SearchFilter, List<LunchPlace>>?
@@ -131,7 +137,7 @@ class RootActivity : ComponentActivity() {
                 onNavigateToDetails
             )
             detailsScreen(lunchPlacesStatus, onNavigateUp, onNavigateToProximity)
-            proximityScreen(onSetMapVisible, lunchPlacesStatus, onNavigateUp)
+            proximityScreen(onSetMapConfig, lunchPlacesStatus, onNavigateUp)
         }
     }
 

@@ -90,7 +90,7 @@ private fun DetailsScreenPreview() {
                 id = "ChIJRx5D7mzdOkcR8MgRrmieLvc",
                 name = "Pizza Calcio",
                 rating = 3.8,
-                latLng = LatLng(49.842306799999996, 24.034497899999998),
+                point = LatLng(49.842306799999996, 24.034497899999998),
                 distance = 2923.3997f,
                 address = "вулиця Підвальна, 9, Львів, Львівська область, Україна, 79000",
                 isOpen = false,

@@ -9,6 +9,7 @@ import com.tarasfedyk.lunchplaces.biz.data.LunchPlace
 import com.tarasfedyk.lunchplaces.biz.data.SearchFilter
 import com.tarasfedyk.lunchplaces.biz.data.Status
 import com.tarasfedyk.lunchplaces.ui.ProximityScreen
+import com.tarasfedyk.lunchplaces.ui.data.MapConfig
 
 private const val LUNCH_PLACE_INDEX_KEY: String = "lunchPlaceIndex"
 private const val INVALID_LUNCH_PLACE_INDEX: Int = -1
@@ -16,7 +17,7 @@ private const val PROXIMITY_ROUTE_BASIS = "proximity/"
 private const val PROXIMITY_ROUTE = "$PROXIMITY_ROUTE_BASIS{$LUNCH_PLACE_INDEX_KEY}"
 
 fun NavGraphBuilder.proximityScreen(
-    onSetMapVisible: (Boolean) -> Unit,
+    onSetMapConfig: (MapConfig) -> Unit,
     lunchPlacesStatus: Status<SearchFilter, List<LunchPlace>>?,
     onNavigateUp: () -> Unit
 ) {
@@ -41,7 +42,12 @@ fun NavGraphBuilder.proximityScreen(
             lunchPlaces.getOrNull(lunchPlaceIndex) ?:
             error("The $LUNCH_PLACE_INDEX_KEY is out of bounds!")
 
-        ProximityScreen(onSetMapVisible, lunchPlace, onNavigateUp)
+        ProximityScreen(
+            onSetMapConfig,
+            lunchPlacesStatus.arg.originPoint,
+            lunchPlace,
+            onNavigateUp
+        )
     }
 }
 
