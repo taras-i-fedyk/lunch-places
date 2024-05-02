@@ -44,7 +44,7 @@ fun MapScreen(
     onDetermineCurrentLocation: () -> Unit,
     currentLocationStatus: Status<Unit, LocationSnapshot>?
 ) {
-    val isLocationDeterminationEnabled = locationPermissionsLevel.isCoarseOrFine
+    val isCurrentLocationEnabled = locationPermissionsLevel.isCoarseOrFine
 
     val cameraPositionState = rememberCameraPositionState()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -55,7 +55,7 @@ fun MapScreen(
             SnackbarHost(hostState = snackbarHostState)
         },
         floatingActionButton = {
-            if (isLocationDeterminationEnabled) {
+            if (isCurrentLocationEnabled) {
                 CurrentLocationButton(onDetermineCurrentLocation)
             }
         }
@@ -70,14 +70,14 @@ fun MapScreen(
             ),
             properties = MapProperties(
                 maxZoomPreference = MAX_ZOOM_LEVEL,
-                isMyLocationEnabled = isLocationDeterminationEnabled
+                isMyLocationEnabled = isCurrentLocationEnabled
             ),
             cameraPositionState = cameraPositionState,
             contentDescription = stringResource(R.string.map_description)
         )
 
         CameraPositionAnimation(
-            cameraPositionState, isLocationDeterminationEnabled, currentLocationStatus
+            cameraPositionState, isCurrentLocationEnabled, currentLocationStatus
         )
 
         if (currentLocationStatus is Status.Failure) {
@@ -91,11 +91,11 @@ fun MapScreen(
 @Composable
 private fun CameraPositionAnimation(
     cameraPositionState: CameraPositionState,
-    isLocationDeterminationEnabled: Boolean,
+    isCurrentLocationEnabled: Boolean,
     currentLocationStatus: Status<Unit, LocationSnapshot>?
 ) {
-    LaunchedEffect(cameraPositionState, isLocationDeterminationEnabled, currentLocationStatus) {
-        if (!isLocationDeterminationEnabled) {
+    LaunchedEffect(cameraPositionState, isCurrentLocationEnabled, currentLocationStatus) {
+        if (!isCurrentLocationEnabled) {
             val defaultCameraPosition = CameraPositionState().position
             val cameraUpdate = CameraUpdateFactory.newCameraPosition(defaultCameraPosition)
             cameraPositionState.animate(cameraUpdate)
