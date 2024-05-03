@@ -37,6 +37,7 @@ fun ProximityScreen(
 
     Surface(
         tonalElevation = TopBarDefaults.TonalElevation,
+        shadowElevation = TopBarDefaults.TonalElevation,
         modifier = Modifier.onPlaced { layoutCoordinates ->
             height = layoutCoordinates.size.height
         }
