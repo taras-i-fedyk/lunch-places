@@ -8,7 +8,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -17,7 +16,6 @@ import com.tarasfedyk.lunchplaces.biz.data.LunchPlace
 import com.tarasfedyk.lunchplaces.ui.data.MapConfig
 import com.tarasfedyk.lunchplaces.ui.data.MapViewport
 import com.tarasfedyk.lunchplaces.ui.theme.AppTheme
-import com.tarasfedyk.lunchplaces.ui.util.LocationIcon
 import com.tarasfedyk.lunchplaces.ui.util.TopBarDefaults
 import com.tarasfedyk.lunchplaces.ui.util.UpNavigationIcon
 
@@ -25,21 +23,15 @@ import com.tarasfedyk.lunchplaces.ui.util.UpNavigationIcon
 @Composable
 fun ProximityScreen(
     onSetMapConfig: (MapConfig) -> Unit,
-    onSetMapViewportFocused: (Boolean) -> Unit,
     originPoint: LatLng,
     lunchPlace: LunchPlace,
     onNavigateUp: () -> Unit
 ) {
-    val onExploreLocation = remember(onSetMapViewportFocused) {
-        { onSetMapViewportFocused(true) }
-    }
-
     Surface(tonalElevation = TopBarDefaults.TonalElevation) {
         Column {
             TopAppBar(
                 title = { LunchPlaceName(lunchPlace.name, isTextLarge = true) },
-                navigationIcon = { UpNavigationIcon(onNavigateUp) },
-                actions = { LocationIcon(onExploreLocation) },
+                navigationIcon = { UpNavigationIcon(onNavigateUp) }
             )
             LunchPlaceDistance(lunchPlace.distance, modifier = Modifier.padding(16.dp))
         }
@@ -50,7 +42,6 @@ fun ProximityScreen(
             MapConfig(
                 isMapVisible = true,
                 mapViewport = MapViewport(
-                    isFocused = true,
                     originPoint = originPoint,
                     destinationPoint = lunchPlace.point
                 )
@@ -69,7 +60,6 @@ private fun ProximityScreenPreview() {
     AppTheme {
         ProximityScreen(
             onSetMapConfig = {},
-            onSetMapViewportFocused = {},
             originPoint = LatLng(0.0, 0.0),
             lunchPlace = LunchPlace(
                 id = "ChIJRx5D7mzdOkcR8MgRrmieLvc",

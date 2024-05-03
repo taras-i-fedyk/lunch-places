@@ -8,7 +8,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TopAppBarDefaults
@@ -16,12 +20,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.google.android.gms.maps.model.LatLng
+import com.tarasfedyk.lunchplaces.R
 import com.tarasfedyk.lunchplaces.biz.data.LunchPlace
 import com.tarasfedyk.lunchplaces.ui.theme.AppTheme
-import com.tarasfedyk.lunchplaces.ui.util.LocationIcon
 import com.tarasfedyk.lunchplaces.ui.util.UpNavigationIcon
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -62,6 +67,16 @@ fun DetailsScreen(
             LunchPlaceAddress(lunchPlace.address)
             LunchPlaceOpenness(lunchPlace.isOpen, shouldShowText = true)
         }
+    }
+}
+
+@Composable
+fun LocationIcon(onExploreLocation: () -> Unit) {
+    IconButton(onClick = onExploreLocation) {
+        Icon(
+            imageVector = Icons.Default.LocationOn,
+            contentDescription = stringResource(R.string.location_icon_description)
+        )
     }
 }
 

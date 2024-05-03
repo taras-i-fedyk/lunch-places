@@ -8,7 +8,6 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class MapViewport(
-    val isFocused: Boolean,
     val originPoint: LatLng,
     val destinationPoint: LatLng
 ) : Parcelable {

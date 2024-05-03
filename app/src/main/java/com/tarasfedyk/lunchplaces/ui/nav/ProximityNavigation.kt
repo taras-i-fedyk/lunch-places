@@ -18,7 +18,6 @@ private const val PROXIMITY_ROUTE = "$PROXIMITY_ROUTE_BASIS{$LUNCH_PLACE_INDEX_K
 
 fun NavGraphBuilder.proximityScreen(
     onSetMapConfig: (MapConfig) -> Unit,
-    onSetMapViewportFocused: (Boolean) -> Unit,
     lunchPlacesStatus: Status<SearchFilter, List<LunchPlace>>?,
     onNavigateUp: () -> Unit
 ) {
@@ -45,7 +44,6 @@ fun NavGraphBuilder.proximityScreen(
 
         ProximityScreen(
             onSetMapConfig,
-            onSetMapViewportFocused,
             lunchPlacesStatus.arg.originPoint,
             lunchPlace,
             onNavigateUp

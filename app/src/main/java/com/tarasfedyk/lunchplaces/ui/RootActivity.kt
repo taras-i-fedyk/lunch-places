@@ -85,15 +85,6 @@ class RootActivity : ComponentActivity() {
         val onSetMapVisible: (Boolean) -> Unit = remember {
             { mapConfig = mapConfig.copy(isMapVisible = it) }
         }
-        val onSetMapViewportFocused: (Boolean) -> Unit = remember {
-            { isFocused ->
-                mapConfig = mapConfig.copy(
-                    mapViewport = mapConfig.mapViewport?.copy(
-                        isFocused = isFocused
-                    )
-                )
-            }
-        }
         Box(modifier = Modifier.fillMaxSize()) {
             MapScreen(
                 mapConfig = mapConfig,
@@ -104,7 +95,6 @@ class RootActivity : ComponentActivity() {
             NavGraph(
                 onSetMapConfig = onSetMapConfig,
                 onSetMapVisible = onSetMapVisible,
-                onSetMapViewportFocused = onSetMapViewportFocused,
                 onSearchLunchPlaces = onSearchLunchPlaces,
                 onDiscardLunchPlaces = onDiscardLunchPlaces,
                 lunchPlacesStatus = geoState.lunchPlacesStatus
@@ -131,7 +121,6 @@ class RootActivity : ComponentActivity() {
     private fun NavGraph(
         onSetMapConfig: (MapConfig) -> Unit,
         onSetMapVisible: (Boolean) -> Unit,
-        onSetMapViewportFocused: (Boolean) -> Unit,
         onSearchLunchPlaces: (SearchInput) -> Unit,
         onDiscardLunchPlaces: () -> Unit,
         lunchPlacesStatus: Status<SearchFilter, List<LunchPlace>>?
@@ -152,7 +141,6 @@ class RootActivity : ComponentActivity() {
             detailsScreen(lunchPlacesStatus, onNavigateUp, onNavigateToProximity)
             proximityScreen(
                 onSetMapConfig,
-                onSetMapViewportFocused,
                 lunchPlacesStatus,
                 onNavigateUp
             )

@@ -81,7 +81,7 @@ fun MapScreen(
             )
 
             if (currentLocationStatus is Status.Failure) {
-                MapError(
+                CurrentLocationError(
                     snackbarHostState, currentLocationStatus.errorType, onDetermineCurrentLocation
                 )
             }
@@ -121,7 +121,7 @@ private fun CurrentLocationButton(onDetermineCurrentLocation: () -> Unit) {
 }
 
 @Composable
-private fun MapError(
+private fun CurrentLocationError(
     snackbarHostState: SnackbarHostState,
     errorType: ErrorType,
     onDetermineCurrentLocation: () -> Unit
