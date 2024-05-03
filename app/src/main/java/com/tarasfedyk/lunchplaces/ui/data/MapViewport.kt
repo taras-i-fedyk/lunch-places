@@ -22,6 +22,6 @@ data class MapViewport(
         .build()
 
     companion object {
-        val Padding: Dp = 16.dp
+        val Padding: Dp = 48.dp
     }
 }

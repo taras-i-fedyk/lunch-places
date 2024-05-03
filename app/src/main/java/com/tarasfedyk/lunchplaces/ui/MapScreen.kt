@@ -127,6 +127,7 @@ private fun AnimatedCameraPosition(
         isMapLaidOut,
         cameraPositionState,
         mapViewport,
+        mapViewportPadding,
         areAllLocationPermissionsDenied,
         currentLocationStatus
     ) {
