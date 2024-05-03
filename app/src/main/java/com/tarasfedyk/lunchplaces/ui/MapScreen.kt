@@ -29,6 +29,7 @@ import com.tarasfedyk.lunchplaces.biz.data.ErrorType
 import com.tarasfedyk.lunchplaces.biz.data.LocationSnapshot
 import com.tarasfedyk.lunchplaces.biz.data.Status
 import com.tarasfedyk.lunchplaces.ui.data.MapConfig
+import com.tarasfedyk.lunchplaces.ui.data.MapViewport
 import com.tarasfedyk.lunchplaces.ui.theme.AppTheme
 import com.tarasfedyk.lunchplaces.ui.util.PermanentErrorSnackbar
 import kotlin.math.log2
@@ -87,12 +88,17 @@ fun MapScreen(
             )
 
             AnimatedCameraPosition(
-                cameraPositionState, areAllLocationPermissionsDenied, currentLocationStatus
+                cameraPositionState,
+                areAllLocationPermissionsDenied,
+                currentLocationStatus,
+                mapConfig.mapViewport
             )
 
             if (currentLocationStatus is Status.Failure) {
                 CurrentLocationError(
-                    snackbarHostState, currentLocationStatus.errorType, onDetermineCurrentLocation
+                    snackbarHostState,
+                    currentLocationStatus.errorType,
+                    onDetermineCurrentLocation
                 )
             }
         }
@@ -103,20 +109,31 @@ fun MapScreen(
 private fun AnimatedCameraPosition(
     cameraPositionState: CameraPositionState,
     areAllLocationPermissionsDenied: Boolean,
-    currentLocationStatus: Status<Unit, LocationSnapshot>?
+    currentLocationStatus: Status<Unit, LocationSnapshot>?,
+    mapViewport: MapViewport?
 ) {
-    LaunchedEffect(cameraPositionState, areAllLocationPermissionsDenied, currentLocationStatus) {
-        if (areAllLocationPermissionsDenied) {
-            val defaultCameraPosition = CameraPositionState().position
-            val cameraUpdate = CameraUpdateFactory.newCameraPosition(defaultCameraPosition)
-            cameraPositionState.animate(cameraUpdate)
-        } else if (currentLocationStatus is Status.Success<*, LocationSnapshot>) {
-            val currentLocation = currentLocationStatus.result
-            val currentPoint = currentLocation.point
-            val currentZoomLevel = calculateZoomLevel(currentLocation.accuracy)
-            val cameraUpdate = CameraUpdateFactory.newLatLngZoom(currentPoint, currentZoomLevel)
-            cameraPositionState.animate(cameraUpdate)
+    LaunchedEffect(
+        cameraPositionState,
+        mapViewport,
+        areAllLocationPermissionsDenied,
+        currentLocationStatus
+    ) {
+        val cameraUpdate = if (mapViewport != null) {
+            CameraUpdateFactory.newLatLngBounds(mapViewport.bounds, 0)
+        } else {
+            if (areAllLocationPermissionsDenied) {
+                val defaultCameraPosition = CameraPositionState().position
+                CameraUpdateFactory.newCameraPosition(defaultCameraPosition)
+            } else if (currentLocationStatus is Status.Success<*, LocationSnapshot>) {
+                val currentLocation = currentLocationStatus.result
+                val currentPoint = currentLocation.point
+                val currentZoomLevel = calculateZoomLevel(currentLocation.accuracy)
+                CameraUpdateFactory.newLatLngZoom(currentPoint, currentZoomLevel)
+            } else {
+                null
+            }
         }
+        cameraUpdate?.let { cameraPositionState.animate(it) }
     }
 }
 
