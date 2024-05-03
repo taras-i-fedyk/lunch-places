@@ -52,7 +52,7 @@ fun MapScreen(
             SnackbarHost(hostState = snackbarHostState)
         },
         floatingActionButton = {
-            if (!areAllLocationPermissionsDenied) {
+            if (mapConfig.mapViewport == null && !areAllLocationPermissionsDenied) {
                 CurrentLocationButton(onDetermineCurrentLocation)
             }
         }
