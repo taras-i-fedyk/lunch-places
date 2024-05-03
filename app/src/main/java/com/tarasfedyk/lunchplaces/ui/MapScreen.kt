@@ -1,6 +1,7 @@
 package com.tarasfedyk.lunchplaces.ui
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.FloatingActionButton
@@ -13,6 +14,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -43,11 +45,18 @@ fun MapScreen(
     onDetermineCurrentLocation: () -> Unit,
     currentLocationStatus: Status<Unit, LocationSnapshot>?
 ) {
+    val mapAlpha = if (mapConfig.isMapVisible) 1f else 0f
+
+    val density = LocalDensity.current
+    val mapTopPadding = with (density) { mapConfig.mapTopPadding.toDp() }
+
     val cameraPositionState = rememberCameraPositionState()
     val snackbarHostState = remember { SnackbarHostState() }
 
     Scaffold(
-        modifier = Modifier.alpha(if (mapConfig.isMapVisible) 1f else 0f),
+        modifier = Modifier
+            .alpha(mapAlpha)
+            .padding(top = mapTopPadding),
         snackbarHost = {
             SnackbarHost(hostState = snackbarHostState)
         },
@@ -60,6 +69,7 @@ fun MapScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
+                .consumeWindowInsets(paddingValues)
                 .padding(paddingValues)
         ) {
             GoogleMap(

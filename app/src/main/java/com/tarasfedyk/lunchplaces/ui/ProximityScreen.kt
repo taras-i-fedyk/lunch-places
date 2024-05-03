@@ -8,7 +8,13 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.google.android.gms.maps.model.LatLng
@@ -27,7 +33,14 @@ fun ProximityScreen(
     lunchPlace: LunchPlace,
     onNavigateUp: () -> Unit
 ) {
-    Surface(tonalElevation = TopBarDefaults.TonalElevation) {
+    var height by remember { mutableIntStateOf(0) }
+
+    Surface(
+        tonalElevation = TopBarDefaults.TonalElevation,
+        modifier = Modifier.onPlaced { layoutCoordinates ->
+            height = layoutCoordinates.size.height
+        }
+    ) {
         Column {
             TopAppBar(
                 title = { LunchPlaceName(lunchPlace.name, isTextLarge = true) },
@@ -37,17 +50,20 @@ fun ProximityScreen(
         }
     }
 
-    DisposableEffect(onSetMapConfig, originPoint, lunchPlace.point) {
+    LaunchedEffect(onSetMapConfig, originPoint, lunchPlace.point, height) {
         onSetMapConfig(
             MapConfig(
                 isMapVisible = true,
+                mapTopPadding = height,
                 mapViewport = MapViewport(
                     originPoint = originPoint,
                     destinationPoint = lunchPlace.point
                 )
             )
         )
+    }
 
+    DisposableEffect(onSetMapConfig) {
         onDispose {
             onSetMapConfig(MapConfig())
         }
