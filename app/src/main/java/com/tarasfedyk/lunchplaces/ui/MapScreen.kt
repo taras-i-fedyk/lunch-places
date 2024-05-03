@@ -11,9 +11,13 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -46,11 +50,11 @@ fun MapScreen(
     onDetermineCurrentLocation: () -> Unit,
     currentLocationStatus: Status<Unit, LocationSnapshot>?
 ) {
-    val mapAlpha = if (mapConfig.isMapVisible) 1f else 0f
-
     val density = LocalDensity.current
+    val mapAlpha = if (mapConfig.isMapVisible) 1f else 0f
     val mapTopPadding = with (density) { mapConfig.mapTopPadding.toDp() }
 
+    var isMapLaidOut by remember { mutableStateOf(false) }
     val cameraPositionState = rememberCameraPositionState()
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -74,7 +78,9 @@ fun MapScreen(
                 .padding(paddingValues)
         ) {
             GoogleMap(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .onPlaced { isMapLaidOut = true },
                 uiSettings = MapUiSettings(
                     myLocationButtonEnabled = false,
                     zoomControlsEnabled = false
@@ -88,6 +94,7 @@ fun MapScreen(
             )
 
             AnimatedCameraPosition(
+                isMapLaidOut,
                 cameraPositionState,
                 areAllLocationPermissionsDenied,
                 currentLocationStatus,
@@ -107,19 +114,26 @@ fun MapScreen(
 
 @Composable
 private fun AnimatedCameraPosition(
+    isMapLaidOut: Boolean,
     cameraPositionState: CameraPositionState,
     areAllLocationPermissionsDenied: Boolean,
     currentLocationStatus: Status<Unit, LocationSnapshot>?,
     mapViewport: MapViewport?
 ) {
+    val density = LocalDensity.current
+    val mapViewportPadding = with (density) { MapViewport.Padding.roundToPx() }
+
     LaunchedEffect(
+        isMapLaidOut,
         cameraPositionState,
         mapViewport,
         areAllLocationPermissionsDenied,
         currentLocationStatus
     ) {
+        if (!isMapLaidOut) return@LaunchedEffect
+
         val cameraUpdate = if (mapViewport != null) {
-            CameraUpdateFactory.newLatLngBounds(mapViewport.bounds, 0)
+            CameraUpdateFactory.newLatLngBounds(mapViewport.bounds, mapViewportPadding)
         } else {
             if (areAllLocationPermissionsDenied) {
                 val defaultCameraPosition = CameraPositionState().position
@@ -133,7 +147,10 @@ private fun AnimatedCameraPosition(
                 null
             }
         }
-        cameraUpdate?.let { cameraPositionState.animate(it) }
+
+        if (cameraUpdate != null) {
+            cameraPositionState.animate(cameraUpdate)
+        }
     }
 }
 
