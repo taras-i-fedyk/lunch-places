@@ -81,7 +81,7 @@ fun MapScreen(
                 ),
                 properties = MapProperties(
                     maxZoomPreference = MAX_ZOOM_LEVEL,
-                    isMyLocationEnabled = areAllLocationPermissionsDenied
+                    isMyLocationEnabled = !areAllLocationPermissionsDenied
                 ),
                 cameraPositionState = cameraPositionState,
                 contentDescription = stringResource(R.string.map_description)
