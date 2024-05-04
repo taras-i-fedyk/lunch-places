@@ -9,6 +9,7 @@
 
     <string name="map_description">Map</string>
     <string name="current_location_button_description">Current location button</string>
+    <string name="proximity_button_description">Proximity button</string>
     <string name="search_icon_description">Search icon</string>
     <string name="up_navigation_icon_description">Up navigation icon</string>
     <string name="query_clearance_icon_description">Query clearance icon</string>

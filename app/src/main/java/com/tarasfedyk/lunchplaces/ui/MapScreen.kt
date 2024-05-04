@@ -13,15 +13,18 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.layout.onPlaced
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.model.LatLngBounds
 import com.google.maps.android.compose.CameraPositionState
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
@@ -37,6 +40,7 @@ import com.tarasfedyk.lunchplaces.ui.data.MapConfig
 import com.tarasfedyk.lunchplaces.ui.data.MapViewport
 import com.tarasfedyk.lunchplaces.ui.theme.AppTheme
 import com.tarasfedyk.lunchplaces.ui.util.PermanentErrorSnackbar
+import kotlinx.coroutines.launch
 import kotlin.math.log2
 
 // the higher the zoom level, the larger the value of this constant as the degree of magnification
@@ -54,10 +58,24 @@ fun MapScreen(
     val density = LocalDensity.current
     val mapAlpha = if (mapConfig.isMapVisible) 1f else 0f
     val mapTopPadding = with (density) { mapConfig.mapTopPadding.toDp() }
+    val mapViewportPadding = mapViewportPadding()
 
     var isMapLaidOut by remember { mutableStateOf(false) }
     val cameraPositionState = rememberCameraPositionState()
     val snackbarHostState = remember { SnackbarHostState() }
+
+    val coroutineScope = rememberCoroutineScope()
+    val onExploreProximity: () -> Unit = remember(mapConfig.mapViewport, mapViewportPadding) {
+        if (mapConfig.mapViewport == null) return@remember {}
+        {
+            coroutineScope.launch {
+                cameraPositionState.animateToMapViewport(
+                    mapConfig.mapViewport.bounds,
+                    mapViewportPadding
+                )
+            }
+        }
+    }
 
     Scaffold(
         modifier = Modifier
@@ -67,7 +85,9 @@ fun MapScreen(
             SnackbarHost(hostState = snackbarHostState)
         },
         floatingActionButton = {
-            if (mapConfig.mapViewport == null && !areAllLocationPermissionsDenied) {
+            if (mapConfig.mapViewport != null) {
+                ProximityButton(onExploreProximity)
+            } else if (!areAllLocationPermissionsDenied) {
                 CurrentLocationButton(onDetermineCurrentLocation)
             }
         }
@@ -101,7 +121,8 @@ fun MapScreen(
             cameraPositionState,
             areAllLocationPermissionsDenied,
             currentLocationStatus,
-            mapConfig.mapViewport
+            mapConfig.mapViewport,
+            mapViewportPadding
         )
 
         if (currentLocationStatus is Status.Failure) {
@@ -115,16 +136,20 @@ fun MapScreen(
 }
 
 @Composable
+private fun mapViewportPadding(): Int {
+    val context = LocalContext.current
+    return context.resources.getDimensionPixelSize(R.dimen.map_viewport_padding)
+}
+
+@Composable
 private fun AnimatedCameraPosition(
     isMapLaidOut: Boolean,
     cameraPositionState: CameraPositionState,
     areAllLocationPermissionsDenied: Boolean,
     currentLocationStatus: Status<Unit, LocationSnapshot>?,
-    mapViewport: MapViewport?
+    mapViewport: MapViewport?,
+    mapViewportPadding: Int
 ) {
-    val density = LocalDensity.current
-    val mapViewportPadding = with (density) { MapViewport.Padding.roundToPx() }
-
     LaunchedEffect(
         isMapLaidOut,
         cameraPositionState,
@@ -135,25 +160,53 @@ private fun AnimatedCameraPosition(
     ) {
         if (!isMapLaidOut) return@LaunchedEffect
 
-        val cameraUpdate = if (mapViewport != null) {
-            CameraUpdateFactory.newLatLngBounds(mapViewport.bounds, mapViewportPadding)
+        if (mapViewport != null) {
+            cameraPositionState.animateToMapViewport(mapViewport.bounds, mapViewportPadding)
         } else {
             if (areAllLocationPermissionsDenied) {
-                val defaultCameraPosition = CameraPositionState().position
-                CameraUpdateFactory.newCameraPosition(defaultCameraPosition)
+                cameraPositionState.animateToDefaultCameraPosition()
             } else if (currentLocationStatus is Status.Success<*, LocationSnapshot>) {
-                val currentLocation = currentLocationStatus.result
-                val currentPoint = currentLocation.point
-                val currentZoomLevel = calculateZoomLevel(currentLocation.accuracy)
-                CameraUpdateFactory.newLatLngZoom(currentPoint, currentZoomLevel)
-            } else {
-                null
+                cameraPositionState.animateToCurrentLocation(
+                    currentLocation = currentLocationStatus.result
+                )
             }
         }
+    }
+}
 
-        if (cameraUpdate != null) {
-            cameraPositionState.animate(cameraUpdate)
-        }
+suspend fun CameraPositionState.animateToMapViewport(
+    mapViewportBounds: LatLngBounds,
+    mapViewportPadding: Int
+) {
+    val cameraUpdate = CameraUpdateFactory.newLatLngBounds(mapViewportBounds, mapViewportPadding)
+    animate(cameraUpdate)
+}
+
+suspend fun CameraPositionState.animateToDefaultCameraPosition() {
+    val defaultCameraPosition = CameraPositionState().position
+    val cameraUpdate = CameraUpdateFactory.newCameraPosition(defaultCameraPosition)
+    animate(cameraUpdate)
+}
+
+suspend fun CameraPositionState.animateToCurrentLocation(currentLocation: LocationSnapshot) {
+    val currentPoint = currentLocation.point
+    val currentZoomLevel = calculateZoomLevel(currentLocation.accuracy)
+    val cameraUpdate = CameraUpdateFactory.newLatLngZoom(currentPoint, currentZoomLevel)
+    animate(cameraUpdate)
+}
+
+private fun calculateZoomLevel(locationAccuracy: Float): Float =
+    // based on how close the given location accuracy is to the maximum location accuracy
+    // and assuming the maximum location accuracy should be accompanied by the maximum zoom level
+    MAX_ZOOM_LEVEL - (log2(locationAccuracy) - log2(MAX_LOCATION_ACCURACY))
+
+@Composable
+private fun ProximityButton(onExploreProximity: () -> Unit) {
+    FloatingActionButton(onClick = onExploreProximity) {
+        Icon(
+            painter = painterResource(R.drawable.ic_proximity),
+            contentDescription = stringResource(R.string.proximity_button_description)
+        )
     }
 }
 
@@ -187,11 +240,6 @@ private fun CurrentLocationError(
         onRetry = onDetermineCurrentLocation
     )
 }
-
-private fun calculateZoomLevel(locationAccuracy: Float): Float =
-    // based on how close the given location accuracy is to the maximum location accuracy
-    // and assuming the maximum location accuracy should be accompanied by the maximum zoom level
-    MAX_ZOOM_LEVEL - (log2(locationAccuracy) - log2(MAX_LOCATION_ACCURACY))
 
 @Preview(showBackground = true)
 @Composable

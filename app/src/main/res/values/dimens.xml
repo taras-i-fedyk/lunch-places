@@ -5,4 +5,6 @@
 
     <dimen name="thumbnail_corner_radius">8dp</dimen>
     <dimen name="photo_corner_radius">12dp</dimen>
+
+    <dimen name="map_viewport_padding">48dp</dimen>
 </resources>
