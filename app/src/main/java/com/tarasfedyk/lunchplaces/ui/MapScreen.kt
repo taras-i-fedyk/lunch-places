@@ -27,6 +27,8 @@ import com.google.maps.android.compose.CameraPositionState
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapUiSettings
+import com.google.maps.android.compose.Marker
+import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.tarasfedyk.lunchplaces.R
 import com.tarasfedyk.lunchplaces.biz.data.ErrorType
@@ -91,7 +93,13 @@ fun MapScreen(
                 ),
                 cameraPositionState = cameraPositionState,
                 contentDescription = stringResource(R.string.map_description)
-            )
+            ) {
+                if (mapConfig.mapViewport != null) {
+                    Marker(
+                        state = MarkerState(position = mapConfig.mapViewport.destinationPoint)
+                    )
+                }
+            }
 
             AnimatedCameraPosition(
                 isMapLaidOut,
