@@ -9,8 +9,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -21,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -39,7 +38,7 @@ fun DetailsScreen(
     onNavigateToProximity: (Int) -> Unit
 ) {
     val topBarScrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
-    val onExploreLocation = remember(onNavigateToProximity) {
+    val onExploreProximity = remember(onNavigateToProximity) {
         { onNavigateToProximity(lunchPlaceIndex) }
     }
 
@@ -49,7 +48,7 @@ fun DetailsScreen(
             LargeTopAppBar(
                 title = { LunchPlaceName(lunchPlace.name, isTextLarge = true) },
                 navigationIcon = { UpNavigationIcon(onNavigateUp) },
-                actions = { LocationIcon(onExploreLocation) },
+                actions = { ProximityIcon(onExploreProximity) },
                 scrollBehavior = topBarScrollBehavior
             )
         }
@@ -73,11 +72,11 @@ fun DetailsScreen(
 }
 
 @Composable
-fun LocationIcon(onExploreLocation: () -> Unit) {
-    IconButton(onClick = onExploreLocation) {
+fun ProximityIcon(onExploreProximity: () -> Unit) {
+    IconButton(onClick = onExploreProximity) {
         Icon(
-            imageVector = Icons.Default.LocationOn,
-            contentDescription = stringResource(R.string.location_icon_description)
+            painterResource(R.drawable.ic_proximity),
+            contentDescription = stringResource(R.string.proximity_icon_description)
         )
     }
 }
