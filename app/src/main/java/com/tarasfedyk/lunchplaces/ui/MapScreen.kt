@@ -1,6 +1,5 @@
 package com.tarasfedyk.lunchplaces.ui
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -73,49 +72,44 @@ fun MapScreen(
             }
         }
     ) { paddingValues ->
-        Box(
+        GoogleMap(
             modifier = Modifier
                 .fillMaxSize()
                 .consumeWindowInsets(paddingValues)
                 .padding(paddingValues)
+                .onPlaced { isMapLaidOut = true },
+            uiSettings = MapUiSettings(
+                myLocationButtonEnabled = false,
+                zoomControlsEnabled = false
+            ),
+            properties = MapProperties(
+                maxZoomPreference = MAX_ZOOM_LEVEL,
+                isMyLocationEnabled = !areAllLocationPermissionsDenied
+            ),
+            cameraPositionState = cameraPositionState,
+            contentDescription = stringResource(R.string.map_description)
         ) {
-            GoogleMap(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .onPlaced { isMapLaidOut = true },
-                uiSettings = MapUiSettings(
-                    myLocationButtonEnabled = false,
-                    zoomControlsEnabled = false
-                ),
-                properties = MapProperties(
-                    maxZoomPreference = MAX_ZOOM_LEVEL,
-                    isMyLocationEnabled = !areAllLocationPermissionsDenied
-                ),
-                cameraPositionState = cameraPositionState,
-                contentDescription = stringResource(R.string.map_description)
-            ) {
-                if (mapConfig.mapViewport != null) {
-                    Marker(
-                        state = MarkerState(position = mapConfig.mapViewport.destinationPoint)
-                    )
-                }
-            }
-
-            AnimatedCameraPosition(
-                isMapLaidOut,
-                cameraPositionState,
-                areAllLocationPermissionsDenied,
-                currentLocationStatus,
-                mapConfig.mapViewport
-            )
-
-            if (currentLocationStatus is Status.Failure) {
-                CurrentLocationError(
-                    snackbarHostState,
-                    currentLocationStatus.errorType,
-                    onDetermineCurrentLocation
+            if (mapConfig.mapViewport != null) {
+                Marker(
+                    state = MarkerState(position = mapConfig.mapViewport.destinationPoint)
                 )
             }
+        }
+
+        AnimatedCameraPosition(
+            isMapLaidOut,
+            cameraPositionState,
+            areAllLocationPermissionsDenied,
+            currentLocationStatus,
+            mapConfig.mapViewport
+        )
+
+        if (currentLocationStatus is Status.Failure) {
+            CurrentLocationError(
+                snackbarHostState,
+                currentLocationStatus.errorType,
+                onDetermineCurrentLocation
+            )
         }
     }
 }
