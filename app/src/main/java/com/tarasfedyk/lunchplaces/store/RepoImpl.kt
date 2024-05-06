@@ -48,7 +48,7 @@ class RepoImpl @Inject constructor(
         )
         val placeType = PlaceTypes.RESTAURANT
         val circularBounds = CircularBounds.newInstance(
-            searchFilter.originPoint, searchFilter.radius
+            searchFilter.originPoint, searchFilter.preferredRadius
         )
         val rankPreference = if (searchFilter.shouldRankByDistance) {
             SearchByTextRequest.RankPreference.DISTANCE

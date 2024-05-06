@@ -8,6 +8,6 @@ import kotlinx.parcelize.Parcelize
 data class SearchFilter(
     val input: SearchInput,
     val originPoint: LatLng = LatLng(0.0, 0.0),
-    val radius: Double = 10000.0,
+    val preferredRadius: Double = 10000.0,
     val shouldRankByDistance: Boolean = false
 ) : Parcelable
