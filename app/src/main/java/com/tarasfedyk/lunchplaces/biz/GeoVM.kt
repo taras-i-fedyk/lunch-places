@@ -33,13 +33,14 @@ class GeoVM @Inject constructor(
     private val repo: Repo
 ) : ViewModel() {
 
+    private val currentLocationLauncher: ReplaceableLauncher = ReplaceableLauncher(viewModelScope)
+    private val lunchPlacesLauncher: ReplaceableLauncher = ReplaceableLauncher(viewModelScope)
+
     private val _locationPermissionsLevelFlow: MutableStateFlow<LocationPermissionsLevel?> =
         MutableStateFlow(value = null)
     val locationPermissionsLevelFlow: StateFlow<LocationPermissionsLevel?> =
         _locationPermissionsLevelFlow.asStateFlow()
 
-    private val currentLocationLauncher: ReplaceableLauncher = ReplaceableLauncher(viewModelScope)
-    private val lunchPlacesLauncher: ReplaceableLauncher = ReplaceableLauncher(viewModelScope)
     val geoStateFlow: StateFlow<GeoState> = savedStateHandle.getStateFlow(
         key = Keys.GEO_STATE,
         initialValue = GeoState()
@@ -78,9 +79,9 @@ class GeoVM @Inject constructor(
     }
 
     private suspend fun determineCurrentLocationImpl() {
-        try {
-            updateGeoState { it.copy(currentLocationStatus = Status.Pending(Unit)) }
+        updateGeoState { it.copy(currentLocationStatus = Status.Pending(Unit)) }
 
+        try {
             val currentLocation = locationController.determineCurrentLocation()
 
             val currentLocationStatus = if (currentLocation != null) {
@@ -125,14 +126,14 @@ class GeoVM @Inject constructor(
 
     private suspend fun searchLunchPlacesImpl(searchInput: SearchInput) {
         var searchFilter = SearchFilter(searchInput)
+        updateGeoState { it.copy(lunchPlacesStatus = Status.Pending(searchFilter)) }
+
+        safelyDetermineCurrentLocation()
+        val currentLocationTerminalStatus = geoStateFlow
+            .first { it.currentLocationStatus is Status.Terminal }
+            .currentLocationStatus
+
         try {
-            updateGeoState { it.copy(lunchPlacesStatus = Status.Pending(searchFilter)) }
-
-            safelyDetermineCurrentLocation()
-            val currentLocationTerminalStatus = geoStateFlow
-                .first { it.currentLocationStatus is Status.Terminal }
-                .currentLocationStatus
-
             if (currentLocationTerminalStatus is Status.Success) {
                 val currentPoint = currentLocationTerminalStatus.result.point
                 searchFilter = searchFilter.copy(originPoint = currentPoint)

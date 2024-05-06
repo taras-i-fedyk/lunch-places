@@ -130,7 +130,6 @@ fun SearchScreenImpl(
             )
         }
     }
-
     val onRetrySearch = remember(onTrySearch) {
         { onTrySearch(appliedQuery) }
     }

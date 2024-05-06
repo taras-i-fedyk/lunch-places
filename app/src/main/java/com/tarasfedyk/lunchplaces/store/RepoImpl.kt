@@ -47,21 +47,21 @@ class RepoImpl @Inject constructor(
             Place.Field.PHOTO_METADATAS
         )
         val placeType = PlaceTypes.RESTAURANT
-        val circularBounds = CircularBounds.newInstance(
-            searchFilter.originPoint, searchFilter.preferredRadius
-        )
         val rankPreference = if (searchFilter.shouldRankByDistance) {
             SearchByTextRequest.RankPreference.DISTANCE
         } else {
             SearchByTextRequest.RankPreference.RELEVANCE
         }
+        val circularBounds = CircularBounds.newInstance(
+            searchFilter.originPoint, searchFilter.preferredRadius
+        )
 
         val cancellationTokenSource = CancellationTokenSource()
         val searchByTextRequest = SearchByTextRequest
             .builder(searchFilter.input.query, placeFields)
             .setIncludedType(placeType)
-            .setLocationBias(circularBounds)
             .setRankPreference(rankPreference)
+            .setLocationBias(circularBounds)
             .setCancellationToken(cancellationTokenSource.token)
             .build()
         val searchByTextTask = placesClient.searchByText(searchByTextRequest)
