@@ -14,6 +14,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -33,14 +34,17 @@ fun ProximityScreen(
     lunchPlace: LunchPlace,
     onNavigateUp: () -> Unit
 ) {
-    var height by remember { mutableIntStateOf(0) }
+    var surfaceHeight by remember { mutableIntStateOf(0) }
+    val onSurfacePlaced: (LayoutCoordinates) -> Unit = remember {
+        { layoutCoordinates ->
+            surfaceHeight = layoutCoordinates.size.height
+        }
+    }
 
     Surface(
         tonalElevation = TopBarDefaults.TonalElevation,
         shadowElevation = TopBarDefaults.TonalElevation,
-        modifier = Modifier.onPlaced { layoutCoordinates ->
-            height = layoutCoordinates.size.height
-        }
+        modifier = Modifier.onPlaced(onSurfacePlaced)
     ) {
         Column {
             TopAppBar(
@@ -51,11 +55,11 @@ fun ProximityScreen(
         }
     }
 
-    LaunchedEffect(onSetMapConfig, originPoint, lunchPlace.point, height) {
+    LaunchedEffect(onSetMapConfig, originPoint, lunchPlace.point, surfaceHeight) {
         onSetMapConfig(
             MapConfig(
                 isMapVisible = true,
-                mapTopPadding = height,
+                mapTopPadding = surfaceHeight,
                 mapViewport = MapViewport(
                     originPoint = originPoint,
                     destinationPoint = lunchPlace.point

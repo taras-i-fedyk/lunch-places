@@ -18,12 +18,14 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.LatLngBounds
 import com.google.maps.android.compose.CameraMoveStartedReason
@@ -57,9 +59,8 @@ fun MapScreen(
     onDetermineCurrentLocation: () -> Unit,
     currentLocationStatus: Status<Unit, LocationSnapshot>?
 ) {
-    val density = LocalDensity.current
     val mapAlpha = if (mapConfig.isMapVisible) 1f else 0f
-    val mapTopPadding = with (density) { mapConfig.mapTopPadding.toDp() }
+    val mapTopPadding = mapTopPadding(mapConfig.mapTopPadding)
 
     val cameraPositionState = rememberCameraPositionState()
 
@@ -128,6 +129,12 @@ fun MapScreen(
 }
 
 @Composable
+private fun mapTopPadding(mapTopPadding: Int): Dp {
+    val density = LocalDensity.current
+    return with (density) { mapTopPadding.toDp() }
+}
+
+@Composable
 private fun mapViewportPadding(): Int {
     val context = LocalContext.current
     return context.resources.getDimensionPixelSize(R.dimen.map_viewport_padding)
@@ -143,10 +150,11 @@ private fun DynamicMap(
     currentLocationStatus: Status<Unit, LocationSnapshot>?,
     modifier: Modifier = Modifier
 ) {
-    var isMapLaidOut by remember { mutableStateOf(false) }
+    var isMapLayoutCompleted by remember { mutableStateOf(false) }
+    val onMapPlaced: (LayoutCoordinates) -> Unit = remember { { isMapLayoutCompleted = true } }
 
     GoogleMap(
-        modifier = modifier.onPlaced { isMapLaidOut = true },
+        modifier = modifier.onPlaced(onMapPlaced),
         uiSettings = MapUiSettings(
             myLocationButtonEnabled = false,
             zoomControlsEnabled = false
@@ -164,7 +172,7 @@ private fun DynamicMap(
     }
 
     DynamicCameraPosition(
-        isMapLaidOut = isMapLaidOut,
+        isMapLayoutCompleted = isMapLayoutCompleted,
         cameraPositionState = cameraPositionState,
         mapViewport = mapViewport,
         mapViewportPadding = mapViewportPadding,
@@ -176,7 +184,7 @@ private fun DynamicMap(
 
 @Composable
 private fun DynamicCameraPosition(
-    isMapLaidOut: Boolean,
+    isMapLayoutCompleted: Boolean,
     cameraPositionState: CameraPositionState,
     mapViewport: MapViewport?,
     mapViewportPadding: Int,
@@ -198,7 +206,7 @@ private fun DynamicCameraPosition(
     }
 
     LaunchedEffect(
-        isMapLaidOut,
+        isMapLayoutCompleted,
         cameraPositionState,
         mapViewport,
         mapViewportPadding,
@@ -206,7 +214,7 @@ private fun DynamicCameraPosition(
         areAllLocationPermissionsDenied,
         currentLocationStatus
     ) {
-        if (!isMapLaidOut) return@LaunchedEffect
+        if (!isMapLayoutCompleted) return@LaunchedEffect
 
         if (mapViewport != null) {
             cameraPositionState.animateToMapViewport(
