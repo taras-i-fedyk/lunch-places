@@ -10,6 +10,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -25,6 +26,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.LatLngBounds
+import com.google.maps.android.compose.CameraMoveStartedReason
 import com.google.maps.android.compose.CameraPositionState
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
@@ -58,80 +60,70 @@ fun MapScreen(
     val density = LocalDensity.current
     val mapAlpha = if (mapConfig.isMapVisible) 1f else 0f
     val mapTopPadding = with (density) { mapConfig.mapTopPadding.toDp() }
-    val mapViewportPadding = mapViewportPadding()
 
-    var isMapLaidOut by remember { mutableStateOf(false) }
     val cameraPositionState = rememberCameraPositionState()
-    val snackbarHostState = remember { SnackbarHostState() }
 
     val coroutineScope = rememberCoroutineScope()
+    val mapViewportPadding = mapViewportPadding()
+    var isMapViewportFocused by remember { mutableStateOf(false) }
+    val onSetMapViewportFocused: (Boolean) -> Unit = remember { { isMapViewportFocused = it } }
     val onExploreProximity: () -> Unit = remember(mapConfig.mapViewport, mapViewportPadding) {
-        if (mapConfig.mapViewport == null) return@remember {}
         {
             coroutineScope.launch {
                 cameraPositionState.animateToMapViewport(
-                    mapConfig.mapViewport.bounds,
-                    mapViewportPadding
+                    mapConfig.mapViewport!!.bounds,
+                    mapViewportPadding,
+                    onSetMapViewportFocused
                 )
             }
         }
     }
 
+    val snackbarHostState = remember { SnackbarHostState() }
+
     Scaffold(
         modifier = Modifier
             .alpha(mapAlpha)
             .padding(top = mapTopPadding),
-        snackbarHost = {
-            SnackbarHost(hostState = snackbarHostState)
-        },
         floatingActionButton = {
             if (mapConfig.mapViewport != null) {
-                ProximityButton(onExploreProximity)
-            } else if (!areAllLocationPermissionsDenied) {
-                CurrentLocationButton(onDetermineCurrentLocation)
+                if (!isMapViewportFocused) {
+                    ProximityButton(onExploreProximity)
+                }
+            } else {
+                if (!areAllLocationPermissionsDenied) {
+                    CurrentLocationButton(onDetermineCurrentLocation)
+                }
             }
+        },
+        snackbarHost = {
+            SnackbarHost(hostState = snackbarHostState)
         }
     ) { paddingValues ->
-        GoogleMap(
+        DynamicMap(
             modifier = Modifier
                 .fillMaxSize()
                 .consumeWindowInsets(paddingValues)
-                .padding(paddingValues)
-                .onPlaced { isMapLaidOut = true },
-            uiSettings = MapUiSettings(
-                myLocationButtonEnabled = false,
-                zoomControlsEnabled = false
-            ),
-            properties = MapProperties(
-                maxZoomPreference = MAX_ZOOM_LEVEL,
-                isMyLocationEnabled = !areAllLocationPermissionsDenied
-            ),
+                .padding(paddingValues),
             cameraPositionState = cameraPositionState,
-            contentDescription = stringResource(R.string.map_description)
-        ) {
-            if (mapConfig.mapViewport != null) {
-                Marker(
-                    state = MarkerState(position = mapConfig.mapViewport.destinationPoint)
-                )
-            }
-        }
-
-        AnimatedCameraPosition(
-            isMapLaidOut,
-            cameraPositionState,
-            areAllLocationPermissionsDenied,
-            currentLocationStatus,
-            mapConfig.mapViewport,
-            mapViewportPadding
+            mapViewport = mapConfig.mapViewport,
+            mapViewportPadding = mapViewportPadding,
+            onSetMapViewportFocused = onSetMapViewportFocused,
+            areAllLocationPermissionsDenied = areAllLocationPermissionsDenied,
+            currentLocationStatus = currentLocationStatus
         )
 
         if (currentLocationStatus is Status.Failure) {
             CurrentLocationError(
-                snackbarHostState,
-                currentLocationStatus.errorType,
-                onDetermineCurrentLocation
+                snackbarHostState = snackbarHostState,
+                errorType = currentLocationStatus.errorType,
+                onDetermineCurrentLocation = onDetermineCurrentLocation
             )
         }
+    }
+
+    LaunchedEffect(mapConfig.mapViewport) {
+        isMapViewportFocused = false
     }
 }
 
@@ -142,53 +134,121 @@ private fun mapViewportPadding(): Int {
 }
 
 @Composable
-private fun AnimatedCameraPosition(
-    isMapLaidOut: Boolean,
+private fun DynamicMap(
     cameraPositionState: CameraPositionState,
+    mapViewport: MapViewport?,
+    mapViewportPadding: Int,
+    onSetMapViewportFocused: (Boolean) -> Unit,
     areAllLocationPermissionsDenied: Boolean,
     currentLocationStatus: Status<Unit, LocationSnapshot>?,
-    mapViewport: MapViewport?,
-    mapViewportPadding: Int
+    modifier: Modifier = Modifier
 ) {
+    var isMapLaidOut by remember { mutableStateOf(false) }
+
+    GoogleMap(
+        modifier = modifier.onPlaced { isMapLaidOut = true },
+        uiSettings = MapUiSettings(
+            myLocationButtonEnabled = false,
+            zoomControlsEnabled = false
+        ),
+        properties = MapProperties(
+            maxZoomPreference = MAX_ZOOM_LEVEL,
+            isMyLocationEnabled = !areAllLocationPermissionsDenied
+        ),
+        cameraPositionState = cameraPositionState,
+        contentDescription = stringResource(R.string.map_description)
+    ) {
+        if (mapViewport != null) {
+            Marker(state = MarkerState(position = mapViewport.destinationPoint))
+        }
+    }
+
+    DynamicCameraPosition(
+        isMapLaidOut = isMapLaidOut,
+        cameraPositionState = cameraPositionState,
+        mapViewport = mapViewport,
+        mapViewportPadding = mapViewportPadding,
+        onSetMapViewportFocused = onSetMapViewportFocused,
+        areAllLocationPermissionsDenied = areAllLocationPermissionsDenied,
+        currentLocationStatus = currentLocationStatus
+    )
+}
+
+@Composable
+private fun DynamicCameraPosition(
+    isMapLaidOut: Boolean,
+    cameraPositionState: CameraPositionState,
+    mapViewport: MapViewport?,
+    mapViewportPadding: Int,
+    onSetMapViewportFocused: (Boolean) -> Unit,
+    areAllLocationPermissionsDenied: Boolean,
+    currentLocationStatus: Status<Unit, LocationSnapshot>?
+) {
+    val wasCameraMovedNotByDeveloper by remember {
+        derivedStateOf {
+            cameraPositionState.cameraMoveStartedReason == CameraMoveStartedReason.API_ANIMATION ||
+            cameraPositionState.cameraMoveStartedReason == CameraMoveStartedReason.GESTURE
+        }
+    }
+
+    LaunchedEffect(wasCameraMovedNotByDeveloper) {
+        if (wasCameraMovedNotByDeveloper) {
+            onSetMapViewportFocused(false)
+        }
+    }
+
     LaunchedEffect(
         isMapLaidOut,
         cameraPositionState,
         mapViewport,
         mapViewportPadding,
+        onSetMapViewportFocused,
         areAllLocationPermissionsDenied,
         currentLocationStatus
     ) {
         if (!isMapLaidOut) return@LaunchedEffect
 
         if (mapViewport != null) {
-            cameraPositionState.animateToMapViewport(mapViewport.bounds, mapViewportPadding)
+            cameraPositionState.animateToMapViewport(
+                mapViewport.bounds, mapViewportPadding, onSetMapViewportFocused
+            )
         } else {
             if (areAllLocationPermissionsDenied) {
-                cameraPositionState.animateToDefaultCameraPosition()
+                cameraPositionState.animateToDefaultCameraPosition(onSetMapViewportFocused)
             } else if (currentLocationStatus is Status.Success<*, LocationSnapshot>) {
                 cameraPositionState.animateToCurrentLocation(
-                    currentLocation = currentLocationStatus.result
+                    currentLocation = currentLocationStatus.result,
+                    onSetMapViewportFocused
                 )
             }
         }
     }
 }
 
-suspend fun CameraPositionState.animateToMapViewport(
+private suspend fun CameraPositionState.animateToMapViewport(
     mapViewportBounds: LatLngBounds,
-    mapViewportPadding: Int
+    mapViewportPadding: Int,
+    onSetMapViewportFocused: (Boolean) -> Unit
 ) {
+    onSetMapViewportFocused(true)
     val cameraUpdate = CameraUpdateFactory.newLatLngBounds(mapViewportBounds, mapViewportPadding)
     animate(cameraUpdate)
 }
 
-suspend fun CameraPositionState.animateToDefaultCameraPosition() {
+private suspend fun CameraPositionState.animateToDefaultCameraPosition(
+    onSetMapViewportFocused: (Boolean) -> Unit
+) {
+    onSetMapViewportFocused(false)
     val defaultCameraPosition = CameraPositionState().position
     val cameraUpdate = CameraUpdateFactory.newCameraPosition(defaultCameraPosition)
     animate(cameraUpdate)
 }
 
-suspend fun CameraPositionState.animateToCurrentLocation(currentLocation: LocationSnapshot) {
+private suspend fun CameraPositionState.animateToCurrentLocation(
+    currentLocation: LocationSnapshot,
+    onSetMapViewportFocused: (Boolean) -> Unit
+) {
+    onSetMapViewportFocused(false)
     val currentPoint = currentLocation.point
     val currentZoomLevel = calculateZoomLevel(currentLocation.accuracy)
     val cameraUpdate = CameraUpdateFactory.newLatLngZoom(currentPoint, currentZoomLevel)
