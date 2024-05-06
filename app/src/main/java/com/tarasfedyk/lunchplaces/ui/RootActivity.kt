@@ -30,8 +30,10 @@ import com.tarasfedyk.lunchplaces.ui.nav.SEARCH_ROUTE
 import com.tarasfedyk.lunchplaces.ui.nav.detailsScreen
 import com.tarasfedyk.lunchplaces.ui.nav.navigateToDetails
 import com.tarasfedyk.lunchplaces.ui.nav.navigateToProximity
+import com.tarasfedyk.lunchplaces.ui.nav.navigateToSettings
 import com.tarasfedyk.lunchplaces.ui.nav.proximityScreen
 import com.tarasfedyk.lunchplaces.ui.nav.searchScreen
+import com.tarasfedyk.lunchplaces.ui.nav.settingsScreen
 import com.tarasfedyk.lunchplaces.ui.theme.AppTheme
 import com.tarasfedyk.lunchplaces.ui.util.LocationPermissionsTracker
 import dagger.hilt.android.AndroidEntryPoint
@@ -82,9 +84,6 @@ class RootActivity : ComponentActivity() {
     ) {
         var mapConfig by rememberSaveable { mutableStateOf(MapConfig()) }
         val onSetMapConfig: (MapConfig) -> Unit = remember { { mapConfig = it } }
-        val onSetMapVisible: (Boolean) -> Unit = remember {
-            { mapConfig = mapConfig.copy(isMapVisible = it) }
-        }
         Box(modifier = Modifier.fillMaxSize()) {
             MapScreen(
                 mapConfig = mapConfig,
@@ -94,7 +93,6 @@ class RootActivity : ComponentActivity() {
             )
             NavGraph(
                 onSetMapConfig = onSetMapConfig,
-                onSetMapVisible = onSetMapVisible,
                 onSearchLunchPlaces = onSearchLunchPlaces,
                 onDiscardLunchPlaces = onDiscardLunchPlaces,
                 lunchPlacesStatus = geoState.lunchPlacesStatus
@@ -120,30 +118,28 @@ class RootActivity : ComponentActivity() {
     @Composable
     private fun NavGraph(
         onSetMapConfig: (MapConfig) -> Unit,
-        onSetMapVisible: (Boolean) -> Unit,
         onSearchLunchPlaces: (SearchInput) -> Unit,
         onDiscardLunchPlaces: () -> Unit,
         lunchPlacesStatus: Status<SearchFilter, List<LunchPlace>>?
     ) {
         val navController = rememberNavController()
         val onNavigateUp: () -> Unit = remember { { navController.navigateUp() } }
+        val onNavigateToSettings = remember { navController::navigateToSettings }
         val onNavigateToDetails = remember { navController::navigateToDetails }
         val onNavigateToProximity = remember { navController::navigateToProximity }
 
         NavHost(navController, startDestination = SEARCH_ROUTE) {
             searchScreen(
-                onSetMapVisible,
+                onSetMapConfig,
                 onSearchLunchPlaces,
                 onDiscardLunchPlaces,
                 lunchPlacesStatus,
+                onNavigateToSettings,
                 onNavigateToDetails
             )
-            detailsScreen(lunchPlacesStatus, onNavigateUp, onNavigateToProximity)
-            proximityScreen(
-                onSetMapConfig,
-                lunchPlacesStatus,
-                onNavigateUp
-            )
+            settingsScreen(onSetMapConfig, onNavigateUp)
+            detailsScreen(onSetMapConfig, lunchPlacesStatus, onNavigateUp, onNavigateToProximity)
+            proximityScreen(onSetMapConfig, lunchPlacesStatus, onNavigateUp)
         }
     }
 

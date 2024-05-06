@@ -7,7 +7,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Surface
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -66,12 +65,6 @@ fun ProximityScreen(
                 )
             )
         )
-    }
-
-    DisposableEffect(onSetMapConfig) {
-        onDispose {
-            onSetMapConfig(MapConfig())
-        }
     }
 }
 

@@ -16,6 +16,7 @@ import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -26,12 +27,14 @@ import androidx.compose.ui.unit.dp
 import com.google.android.gms.maps.model.LatLng
 import com.tarasfedyk.lunchplaces.R
 import com.tarasfedyk.lunchplaces.biz.data.LunchPlace
+import com.tarasfedyk.lunchplaces.ui.data.MapConfig
 import com.tarasfedyk.lunchplaces.ui.theme.AppTheme
 import com.tarasfedyk.lunchplaces.ui.util.UpNavigationIcon
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DetailsScreen(
+    onSetMapConfig: (MapConfig) -> Unit,
     lunchPlaceIndex: Int,
     lunchPlace: LunchPlace,
     onNavigateUp: () -> Unit,
@@ -69,6 +72,10 @@ fun DetailsScreen(
             LunchPlaceOpenness(lunchPlace.isOpen, shouldShowText = true)
         }
     }
+
+    LaunchedEffect(onSetMapConfig) {
+        onSetMapConfig(MapConfig())
+    }
 }
 
 @Composable
@@ -86,6 +93,7 @@ fun ProximityIcon(onExploreProximity: () -> Unit) {
 private fun DetailsScreenPreview() {
     AppTheme {
         DetailsScreen(
+            onSetMapConfig = {},
             lunchPlaceIndex = 0,
             lunchPlace = LunchPlace(
                 id = "ChIJRx5D7mzdOkcR8MgRrmieLvc",

@@ -4,7 +4,6 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.Row
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Search
@@ -58,10 +57,11 @@ fun CompactSearchBar(
             }
         },
         trailingIcon = {
-            Row {
-                if (isFocused && query.isNotEmpty()) {
+            if (isFocused) {
+                if (query.isNotEmpty()) {
                     QueryClearanceIcon(onClearQuery)
                 }
+            } else {
                 SettingsIcon(onNavigateToSettings)
             }
         },

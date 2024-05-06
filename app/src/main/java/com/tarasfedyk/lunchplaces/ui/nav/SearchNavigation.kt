@@ -7,22 +7,25 @@ import com.tarasfedyk.lunchplaces.biz.data.SearchFilter
 import com.tarasfedyk.lunchplaces.biz.data.SearchInput
 import com.tarasfedyk.lunchplaces.biz.data.Status
 import com.tarasfedyk.lunchplaces.ui.SearchScreen
+import com.tarasfedyk.lunchplaces.ui.data.MapConfig
 
 const val SEARCH_ROUTE = "search"
 
 fun NavGraphBuilder.searchScreen(
-    onSetMapVisible: (Boolean) -> Unit,
+    onSetMapConfig: (MapConfig) -> Unit,
     onSearchLunchPlaces: (SearchInput) -> Unit,
     onDiscardLunchPlaces: () -> Unit,
     lunchPlacesStatus: Status<SearchFilter, List<LunchPlace>>?,
+    onNavigateToSettings: () -> Unit,
     onNavigateToDetails: (Int) -> Unit
 ) {
     composable(SEARCH_ROUTE) {
         SearchScreen(
-            onSetMapVisible,
+            onSetMapConfig,
             onSearchLunchPlaces,
             onDiscardLunchPlaces,
             lunchPlacesStatus,
+            onNavigateToSettings,
             onNavigateToDetails
         )
     }

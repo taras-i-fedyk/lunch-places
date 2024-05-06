@@ -43,16 +43,18 @@ import com.tarasfedyk.lunchplaces.biz.data.SearchFilter
 import com.tarasfedyk.lunchplaces.biz.data.SearchInput
 import com.tarasfedyk.lunchplaces.biz.data.SizeLimit
 import com.tarasfedyk.lunchplaces.biz.data.Status
+import com.tarasfedyk.lunchplaces.ui.data.MapConfig
 import com.tarasfedyk.lunchplaces.ui.theme.AppTheme
 import com.tarasfedyk.lunchplaces.ui.util.CompactSearchBar
 import com.tarasfedyk.lunchplaces.ui.util.PermanentErrorSnackbar
 
 @Composable
 fun SearchScreen(
-    onSetMapVisible: (Boolean) -> Unit,
+    onSetMapConfig: (MapConfig) -> Unit,
     onSearchLunchPlaces: (SearchInput) -> Unit,
     onDiscardLunchPlaces: () -> Unit,
     lunchPlacesStatus: Status<SearchFilter, List<LunchPlace>>?,
+    onNavigateToSettings: () -> Unit,
     onNavigateToDetails: (Int) -> Unit
 ) {
     var isSearchBarActive by rememberSaveable { mutableStateOf(false) }
@@ -64,12 +66,15 @@ fun SearchScreen(
         onSearchLunchPlaces,
         onDiscardLunchPlaces,
         lunchPlacesStatus,
+        onNavigateToSettings,
         onNavigateToDetails
     )
 
-    LaunchedEffect(isSearchBarActive, onSetMapVisible) {
+    LaunchedEffect(isSearchBarActive, onSetMapConfig) {
         val isMapVisible = !isSearchBarActive
-        onSetMapVisible(isMapVisible)
+        onSetMapConfig(
+            MapConfig(isMapVisible)
+        )
     }
 }
 
@@ -81,6 +86,7 @@ fun SearchScreenImpl(
     onSearchLunchPlaces: (SearchInput) -> Unit,
     onDiscardLunchPlaces: () -> Unit,
     lunchPlacesStatus: Status<SearchFilter, List<LunchPlace>>?,
+    onNavigateToSettings: () -> Unit,
     onNavigateToDetails: (Int) -> Unit
 ) {
     val focusManager = LocalFocusManager.current
@@ -112,7 +118,6 @@ fun SearchScreenImpl(
             )
         }
     }
-    val onNavigateToSettings = remember { {} }
 
     val onTrySearch: (String) -> Unit = remember(
         focusManager,
@@ -330,6 +335,7 @@ private fun SearchScreenPreview() {
                     )
                 )
             ),
+            onNavigateToSettings = {},
             onNavigateToDetails = {}
         )
     }

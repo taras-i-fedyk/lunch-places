@@ -4,7 +4,7 @@ import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-data class SizeLimit(
-    val maxWidth: Int? = null,
-    val maxHeight: Int? = null
+data class SearchSettings(
+    val shouldRankByDistance: Boolean = false,
+    val preferredRadius: Double = 10000.0
 ) : Parcelable
