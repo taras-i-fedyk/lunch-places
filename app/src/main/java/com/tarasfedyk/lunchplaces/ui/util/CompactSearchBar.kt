@@ -4,9 +4,11 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Row
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -34,6 +36,7 @@ fun CompactSearchBar(
     onQueryChanged: (String) -> Unit,
     onClearQuery: () -> Unit,
     onNavigateBack: () -> Unit,
+    onNavigateToSettings: () -> Unit,
     onTrySearch: (String) -> Unit,
     modifier: Modifier = Modifier,
     tonalElevation: Dp = SearchBarDefaults.TonalElevation,
@@ -55,8 +58,11 @@ fun CompactSearchBar(
             }
         },
         trailingIcon = {
-            if (isFocused && query.isNotEmpty()) {
-                QueryClearanceIcon(onClearQuery)
+            Row {
+                if (isFocused && query.isNotEmpty()) {
+                    QueryClearanceIcon(onClearQuery)
+                }
+                SettingsIcon(onNavigateToSettings)
             }
         },
         active = isActive,
@@ -92,6 +98,16 @@ private fun QueryClearanceIcon(onClearQuery: () -> Unit) {
         Icon(
             imageVector = Icons.Default.Clear,
             contentDescription = stringResource(R.string.query_clearance_icon_description)
+        )
+    }
+}
+
+@Composable
+private fun SettingsIcon(onNavigateToSettings: () -> Unit) {
+    IconButton(onClick = onNavigateToSettings) {
+        Icon(
+            imageVector = Icons.Default.Settings,
+            contentDescription = stringResource(R.string.settings_icon_description)
         )
     }
 }

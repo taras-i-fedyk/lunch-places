@@ -112,6 +112,7 @@ fun SearchScreenImpl(
             )
         }
     }
+    val onNavigateToSettings = remember { {} }
 
     val onTrySearch: (String) -> Unit = remember(
         focusManager,
@@ -146,6 +147,7 @@ fun SearchScreenImpl(
         onQueryChanged = onSetCurrentQuery,
         onClearQuery = onClearCurrentQuery,
         onNavigateBack = onNavigateBack,
+        onNavigateToSettings = onNavigateToSettings,
         onTrySearch = onTrySearch
     ) {
         SearchStatus(lunchPlacesStatus, onNavigateToDetails, onRetrySearch)
