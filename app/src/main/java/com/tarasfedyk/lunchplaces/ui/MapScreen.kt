@@ -288,9 +288,9 @@ private fun CurrentLocationError(
 ) {
     val isAppSettingsError = errorType == ErrorType.LOCATION_PERMISSIONS
     val errorMessage = if (errorType == ErrorType.LOCATION_PERMISSIONS) {
-        stringResource(R.string.map_permissions_error_message)
+        stringResource(R.string.location_permissions_error_message)
     } else {
-        stringResource(R.string.map_error_message)
+        stringResource(R.string.location_error_message)
     }
 
     PermanentErrorSnackbar(
