@@ -126,7 +126,9 @@ data class GeoState(
 }
 
 private enum class StatusType {
-    PENDING, SUCCESS, FAILURE
+    PENDING,
+    SUCCESS,
+    FAILURE
 }
 
 val Status<SearchFilter, List<LunchPlace>>?.isFailureDueToLocationPermissions: Boolean
