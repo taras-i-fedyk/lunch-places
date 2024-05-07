@@ -30,7 +30,7 @@ import javax.inject.Inject
 class GeoVM @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val locationController: LocationController,
-    private val repo: Repo
+    private val geoRepo: GeoRepo
 ) : ViewModel() {
 
     private val currentLocationLauncher: ReplaceableLauncher = ReplaceableLauncher(viewModelScope)
@@ -137,7 +137,7 @@ class GeoVM @Inject constructor(
             if (currentLocationTerminalStatus is Status.Success) {
                 val currentPoint = currentLocationTerminalStatus.result.point
                 searchFilter = searchFilter.copy(originPoint = currentPoint)
-                val lunchPlaces = repo.searchLunchPlaces(searchFilter)
+                val lunchPlaces = geoRepo.searchLunchPlaces(searchFilter)
 
                 updateGeoState { it.copy(lunchPlacesStatus = Status.Success(searchFilter, lunchPlaces)) }
             } else {
@@ -167,6 +167,6 @@ class GeoVM @Inject constructor(
     }
 
     private object Keys {
-        const val GEO_STATE: String = "geoState"
+        const val GEO_STATE: String = "geo_state"
     }
 }

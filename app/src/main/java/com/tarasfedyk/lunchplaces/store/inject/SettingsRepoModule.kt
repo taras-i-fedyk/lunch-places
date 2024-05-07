@@ -1,7 +1,7 @@
 package com.tarasfedyk.lunchplaces.store.inject
 
-import com.tarasfedyk.lunchplaces.biz.Repo
-import com.tarasfedyk.lunchplaces.store.RepoImpl
+import com.tarasfedyk.lunchplaces.biz.SettingsRepo
+import com.tarasfedyk.lunchplaces.store.SettingsRepoImpl
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -10,9 +10,9 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-interface RepoModule {
+interface SettingsRepoModule {
 
     @Singleton
     @Binds
-    fun bindRepo(repoImpl: RepoImpl): Repo
+    fun bindSettingsRepo(settingsRepoImpl: SettingsRepoImpl): SettingsRepo
 }

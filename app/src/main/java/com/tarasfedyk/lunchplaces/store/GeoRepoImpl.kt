@@ -11,7 +11,7 @@ import com.google.android.libraries.places.api.net.FetchResolvedPhotoUriRequest
 import com.google.android.libraries.places.api.net.IsOpenRequest
 import com.google.android.libraries.places.api.net.PlacesClient
 import com.google.android.libraries.places.api.net.SearchByTextRequest
-import com.tarasfedyk.lunchplaces.biz.Repo
+import com.tarasfedyk.lunchplaces.biz.GeoRepo
 import com.tarasfedyk.lunchplaces.biz.data.LunchPlace
 import com.tarasfedyk.lunchplaces.biz.data.MediaLimits
 import com.tarasfedyk.lunchplaces.biz.data.RankPreference
@@ -29,9 +29,9 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class RepoImpl @Inject constructor(
+class GeoRepoImpl @Inject constructor(
     private val placesClient: PlacesClient
-) : Repo {
+) : GeoRepo {
 
     @OptIn(ExperimentalCoroutinesApi::class)
     override suspend fun searchLunchPlaces(searchFilter: SearchFilter): List<LunchPlace> {
