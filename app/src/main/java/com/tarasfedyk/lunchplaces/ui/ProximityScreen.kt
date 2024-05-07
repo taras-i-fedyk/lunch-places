@@ -42,8 +42,8 @@ fun ProximityScreen(
     }
 
     Surface(
-        tonalElevation = TopBarDefaults.TonalElevation,
-        shadowElevation = TopBarDefaults.TonalElevation,
+        tonalElevation = TopBarDefaults.TONAL_ELEVATION,
+        shadowElevation = TopBarDefaults.TONAL_ELEVATION,
         modifier = Modifier
             // we're using a bottom padding for a smoother application of the shadow elevation
             .padding(bottom = 16.dp)

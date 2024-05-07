@@ -3,6 +3,7 @@ package com.tarasfedyk.lunchplaces.ui.theme
 import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
@@ -15,8 +16,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
-private val DarkColorScheme = darkColorScheme()
-private val LightColorScheme = lightColorScheme()
+private val DARK_COLOR_SCHEME: ColorScheme = darkColorScheme()
+private val LIGHT_COLOR_SCHEME: ColorScheme = lightColorScheme()
 
 @Composable
 fun AppTheme(
@@ -29,8 +30,8 @@ fun AppTheme(
             val context = LocalContext.current
             if (isDarkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
-        isDarkTheme -> DarkColorScheme
-        else -> LightColorScheme
+        isDarkTheme -> DARK_COLOR_SCHEME
+        else -> LIGHT_COLOR_SCHEME
     }
 
     val view = LocalView.current

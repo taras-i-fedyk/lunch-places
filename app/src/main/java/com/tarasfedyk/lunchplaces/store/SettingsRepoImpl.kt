@@ -8,7 +8,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.tarasfedyk.lunchplaces.biz.SettingsRepo
-import com.tarasfedyk.lunchplaces.biz.data.RankPreference
+import com.tarasfedyk.lunchplaces.biz.data.RankingCriterion
 import com.tarasfedyk.lunchplaces.biz.data.SearchSettings
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
@@ -26,12 +26,12 @@ class SettingsRepoImpl @Inject constructor(
     override val searchSettingsFlow: Flow<SearchSettings?> =
         appContext.dataStore.data.map { prefs ->
             try {
-                val rankPreference = run {
-                    val rankPreferenceName = prefs[Keys.RankPreferenceName] ?: return@map null
-                    enumValueOf<RankPreference>(rankPreferenceName)
+                val rankingCriterion = run {
+                    val rankingCriterionName = prefs[Keys.RANKING_CRITERION_NAME] ?: return@map null
+                    enumValueOf<RankingCriterion>(rankingCriterionName)
                 }
-                val preferredRadius = prefs[Keys.PreferredRadius] ?: return@map null
-                SearchSettings(rankPreference, preferredRadius)
+                val preferredRadius = prefs[Keys.PREFERRED_RADIUS] ?: return@map null
+                SearchSettings(rankingCriterion, preferredRadius)
             } catch (e: IllegalArgumentException) {
                 null
             }
@@ -39,13 +39,13 @@ class SettingsRepoImpl @Inject constructor(
 
     override suspend fun setSearchSettings(searchSettings: SearchSettings) {
         appContext.dataStore.edit { prefs ->
-            prefs[Keys.RankPreferenceName] = searchSettings.rankPreference.name
-            prefs[Keys.PreferredRadius] = searchSettings.preferredRadius
+            prefs[Keys.RANKING_CRITERION_NAME] = searchSettings.rankingCriterion.name
+            prefs[Keys.PREFERRED_RADIUS] = searchSettings.preferredRadius
         }
     }
 
     private object Keys {
-        val RankPreferenceName: Preferences.Key<String> = stringPreferencesKey(name = "rank_preference_name")
-        val PreferredRadius: Preferences.Key<Double> = doublePreferencesKey(name = "preferred_radius")
+        val RANKING_CRITERION_NAME: Preferences.Key<String> = stringPreferencesKey(name = "ranking_criterion_name")
+        val PREFERRED_RADIUS: Preferences.Key<Double> = doublePreferencesKey(name = "preferred_radius")
     }
 }

@@ -5,11 +5,11 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class SearchSettings(
-    val rankPreference: RankPreference = RankPreference.RELEVANCE,
+    val rankingCriterion: RankingCriterion = RankingCriterion.RELEVANCE,
     val preferredRadius: Double = 10000.0
 ) : Parcelable
 
-enum class RankPreference {
+enum class RankingCriterion {
     RELEVANCE,
     DISTANCE
 }

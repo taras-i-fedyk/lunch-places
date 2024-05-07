@@ -11,7 +11,7 @@ import androidx.compose.ui.unit.dp
 import com.tarasfedyk.lunchplaces.R
 
 object TopBarDefaults {
-    val TonalElevation: Dp = 3.dp
+    val TONAL_ELEVATION: Dp = 3.dp
 }
 
 @Composable

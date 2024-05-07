@@ -14,7 +14,7 @@ import com.google.android.libraries.places.api.net.SearchByTextRequest
 import com.tarasfedyk.lunchplaces.biz.GeoRepo
 import com.tarasfedyk.lunchplaces.biz.data.LunchPlace
 import com.tarasfedyk.lunchplaces.biz.data.MediaLimits
-import com.tarasfedyk.lunchplaces.biz.data.RankPreference
+import com.tarasfedyk.lunchplaces.biz.data.RankingCriterion
 import com.tarasfedyk.lunchplaces.biz.data.SearchFilter
 import com.tarasfedyk.lunchplaces.biz.data.SizeLimit
 import kotlinx.coroutines.Dispatchers
@@ -48,9 +48,9 @@ class GeoRepoImpl @Inject constructor(
             Place.Field.PHOTO_METADATAS
         )
         val placeType = PlaceTypes.RESTAURANT
-        val rankPreference = when (searchFilter.settings.rankPreference) {
-            RankPreference.RELEVANCE -> SearchByTextRequest.RankPreference.RELEVANCE
-            RankPreference.DISTANCE -> SearchByTextRequest.RankPreference.DISTANCE
+        val rankPreference = when (searchFilter.settings.rankingCriterion) {
+            RankingCriterion.RELEVANCE -> SearchByTextRequest.RankPreference.RELEVANCE
+            RankingCriterion.DISTANCE -> SearchByTextRequest.RankPreference.DISTANCE
         }
         val circularBounds = CircularBounds.newInstance(
             searchFilter.originPoint, searchFilter.settings.preferredRadius
