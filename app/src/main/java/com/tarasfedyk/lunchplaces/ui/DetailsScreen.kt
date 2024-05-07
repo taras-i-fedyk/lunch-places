@@ -50,7 +50,7 @@ fun DetailsScreen(
         modifier = Modifier.nestedScroll(topBarScrollBehavior.nestedScrollConnection),
         topBar = {
             LargeTopAppBar(
-                title = { LunchPlaceName(lunchPlace.name, isTextLarge = true) },
+                title = { LunchPlaceName(lunchPlace.name, isTopBarTitle = true) },
                 navigationIcon = { UpNavigationIcon(onNavigateUp) },
                 actions = { ProximityIcon(onExploreProximity) },
                 scrollBehavior = topBarScrollBehavior
