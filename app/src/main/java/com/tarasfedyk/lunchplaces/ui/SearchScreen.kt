@@ -50,6 +50,7 @@ import com.tarasfedyk.lunchplaces.ui.util.PermanentErrorSnackbar
 
 @Composable
 fun SearchScreen(
+    isCurrentDestination: Boolean,
     onSetMapConfig: (MapConfig) -> Unit,
     onSearchLunchPlaces: (SearchInput) -> Unit,
     onDiscardLunchPlaces: () -> Unit,
@@ -70,11 +71,11 @@ fun SearchScreen(
         onNavigateToDetails
     )
 
-    LaunchedEffect(isSearchBarActive, onSetMapConfig) {
-        val isMapVisible = !isSearchBarActive
-        onSetMapConfig(
-            MapConfig(isMapVisible)
-        )
+    LaunchedEffect(isCurrentDestination, isSearchBarActive, onSetMapConfig) {
+        if (!isCurrentDestination) return@LaunchedEffect
+
+        val mapConfig = MapConfig(isMapVisible = !isSearchBarActive)
+        onSetMapConfig(mapConfig)
     }
 }
 

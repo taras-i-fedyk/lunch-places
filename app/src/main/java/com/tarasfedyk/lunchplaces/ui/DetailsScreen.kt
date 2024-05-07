@@ -34,6 +34,7 @@ import com.tarasfedyk.lunchplaces.ui.util.UpNavigationIcon
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DetailsScreen(
+    isCurrentDestination: Boolean,
     onSetMapConfig: (MapConfig) -> Unit,
     lunchPlaceIndex: Int,
     lunchPlace: LunchPlace,
@@ -73,8 +74,11 @@ fun DetailsScreen(
         }
     }
 
-    LaunchedEffect(onSetMapConfig) {
-        onSetMapConfig(MapConfig())
+    LaunchedEffect(isCurrentDestination, onSetMapConfig) {
+        if (!isCurrentDestination) return@LaunchedEffect
+
+        val mapConfig = MapConfig()
+        onSetMapConfig(mapConfig)
     }
 }
 
@@ -93,6 +97,7 @@ fun ProximityIcon(onExploreProximity: () -> Unit) {
 private fun DetailsScreenPreview() {
     AppTheme {
         DetailsScreen(
+            isCurrentDestination = true,
             onSetMapConfig = {},
             lunchPlaceIndex = 0,
             lunchPlace = LunchPlace(

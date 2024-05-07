@@ -17,6 +17,7 @@ private const val DETAILS_ROUTE_BASIS = "details/"
 private const val DETAILS_ROUTE = "$DETAILS_ROUTE_BASIS{$LUNCH_PLACE_INDEX_KEY}"
 
 fun NavGraphBuilder.detailsScreen(
+    onGetCurrentRoute: () -> String?,
     onSetMapConfig: (MapConfig) -> Unit,
     lunchPlacesStatus: Status<SearchFilter, List<LunchPlace>>?,
     onNavigateUp: () -> Unit,
@@ -28,6 +29,8 @@ fun NavGraphBuilder.detailsScreen(
             navArgument(name = LUNCH_PLACE_INDEX_KEY) { type = NavType.IntType }
         )
     ) { backStackEntry ->
+        val isCurrentDestination = onGetCurrentRoute() == DETAILS_ROUTE
+
         val lunchPlaceIndex = backStackEntry.arguments?.getInt(
             LUNCH_PLACE_INDEX_KEY, INVALID_LUNCH_PLACE_INDEX
         )
@@ -44,6 +47,7 @@ fun NavGraphBuilder.detailsScreen(
             error("The $LUNCH_PLACE_INDEX_KEY is out of bounds!")
 
         DetailsScreen(
+            isCurrentDestination,
             onSetMapConfig,
             lunchPlaceIndex,
             lunchPlace,

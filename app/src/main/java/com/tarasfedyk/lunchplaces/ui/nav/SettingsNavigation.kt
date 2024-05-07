@@ -9,11 +9,13 @@ import com.tarasfedyk.lunchplaces.ui.data.MapConfig
 private const val SETTINGS_ROUTE = "settings"
 
 fun NavGraphBuilder.settingsScreen(
+    onGetCurrentRoute: () -> String?,
     onSetMapConfig: (MapConfig) -> Unit,
     onNavigateUp: () -> Unit
 ) {
     composable(SETTINGS_ROUTE) {
-        SettingsScreen(onSetMapConfig, onNavigateUp)
+        val isCurrentDestination = onGetCurrentRoute() == SETTINGS_ROUTE
+        SettingsScreen(isCurrentDestination, onSetMapConfig, onNavigateUp)
     }
 }
 

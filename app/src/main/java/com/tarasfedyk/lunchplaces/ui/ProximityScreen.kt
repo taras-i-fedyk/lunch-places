@@ -28,6 +28,7 @@ import com.tarasfedyk.lunchplaces.ui.util.UpNavigationIcon
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProximityScreen(
+    isCurrentDestination: Boolean,
     onSetMapConfig: (MapConfig) -> Unit,
     originPoint: LatLng,
     lunchPlace: LunchPlace,
@@ -54,17 +55,24 @@ fun ProximityScreen(
         }
     }
 
-    LaunchedEffect(onSetMapConfig, originPoint, lunchPlace.point, surfaceHeight) {
-        onSetMapConfig(
-            MapConfig(
-                isMapVisible = true,
-                mapTopPadding = surfaceHeight,
-                mapViewport = MapViewport(
-                    originPoint = originPoint,
-                    destinationPoint = lunchPlace.point
-                )
+    LaunchedEffect(
+        isCurrentDestination,
+        onSetMapConfig,
+        originPoint,
+        lunchPlace.point,
+        surfaceHeight
+    ) {
+        if (!isCurrentDestination) return@LaunchedEffect
+
+        val mapConfig = MapConfig(
+            isMapVisible = true,
+            mapTopPadding = surfaceHeight,
+            mapViewport = MapViewport(
+                originPoint = originPoint,
+                destinationPoint = lunchPlace.point
             )
         )
+        onSetMapConfig(mapConfig)
     }
 }
 
@@ -73,6 +81,7 @@ fun ProximityScreen(
 private fun ProximityScreenPreview() {
     AppTheme {
         ProximityScreen(
+            isCurrentDestination = true,
             onSetMapConfig = {},
             originPoint = LatLng(0.0, 0.0),
             lunchPlace = LunchPlace(

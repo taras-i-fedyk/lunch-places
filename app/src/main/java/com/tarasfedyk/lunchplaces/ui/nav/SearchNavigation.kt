@@ -12,6 +12,7 @@ import com.tarasfedyk.lunchplaces.ui.data.MapConfig
 const val SEARCH_ROUTE = "search"
 
 fun NavGraphBuilder.searchScreen(
+    onGetCurrentRoute: () -> String?,
     onSetMapConfig: (MapConfig) -> Unit,
     onSearchLunchPlaces: (SearchInput) -> Unit,
     onDiscardLunchPlaces: () -> Unit,
@@ -20,13 +21,15 @@ fun NavGraphBuilder.searchScreen(
     onNavigateToDetails: (Int) -> Unit
 ) {
     composable(SEARCH_ROUTE) {
+        val isCurrentDestination = onGetCurrentRoute() == SEARCH_ROUTE
         SearchScreen(
-            onSetMapConfig,
-            onSearchLunchPlaces,
-            onDiscardLunchPlaces,
-            lunchPlacesStatus,
-            onNavigateToSettings,
-            onNavigateToDetails
+            isCurrentDestination = isCurrentDestination,
+            onSetMapConfig = onSetMapConfig,
+            onSearchLunchPlaces = onSearchLunchPlaces,
+            onDiscardLunchPlaces = onDiscardLunchPlaces,
+            lunchPlacesStatus = lunchPlacesStatus,
+            onNavigateToSettings = onNavigateToSettings,
+            onNavigateToDetails = onNavigateToDetails
         )
     }
 }

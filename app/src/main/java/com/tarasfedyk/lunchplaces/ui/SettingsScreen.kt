@@ -9,12 +9,16 @@ import com.tarasfedyk.lunchplaces.ui.data.MapConfig
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun SettingsScreen(
+    isCurrentDestination: Boolean,
     onSetMapConfig: (MapConfig) -> Unit,
     onNavigateUp: () -> Unit
 ) {
     Scaffold(content = {})
 
-    LaunchedEffect(onSetMapConfig) {
-        onSetMapConfig(MapConfig())
+    LaunchedEffect(isCurrentDestination, onSetMapConfig) {
+        if (!isCurrentDestination) return@LaunchedEffect
+
+        val mapConfig = MapConfig()
+        onSetMapConfig(mapConfig)
     }
 }
