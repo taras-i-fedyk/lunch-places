@@ -81,7 +81,7 @@ fun SearchScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SearchScreenImpl(
+private fun SearchScreenImpl(
     isSearchBarActive: Boolean,
     onSetSearchBarActive: (Boolean) -> Unit,
     onSearchLunchPlaces: (SearchInput) -> Unit,
@@ -90,6 +90,8 @@ fun SearchScreenImpl(
     onNavigateToSettings: () -> Unit,
     onNavigateToDetails: (Int) -> Unit
 ) {
+    val searchBarBottomPadding = if (isSearchBarActive) 0.dp else 16.dp
+
     val focusManager = LocalFocusManager.current
     val searchBarInteractionSource = remember { MutableInteractionSource() }
     val isSearchBarFocused by searchBarInteractionSource.collectIsFocusedAsState()
@@ -141,9 +143,12 @@ fun SearchScreenImpl(
         { onTrySearch(appliedQuery) }
     }
 
-    // TODO: when it becomes possible, set the horizontal padding of an inactive search bar
+    // TODO: when it becomes possible, adjust the horizontal padding in a smooth way
     CompactSearchBar(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            // we're using a bottom padding for a smoother application of the shadow elevation
+            .padding(bottom = searchBarBottomPadding)
+            .fillMaxWidth(),
         shadowElevation = SearchBarDefaults.TonalElevation,
         isActive = isSearchBarActive,
         onActiveChanged = onSetSearchBarActive,
@@ -311,10 +316,20 @@ private fun SearchError(errorType: ErrorType, onRetrySearch: () -> Unit) {
 
 @Preview(showBackground = true)
 @Composable
-private fun SearchScreenPreview() {
+private fun InactiveSearchScreenPreview() {
+    SearchScreenPreview(isSearchBarActive = false)
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun ActiveSearchScreenPreview() {
+    SearchScreenPreview(isSearchBarActive = true)
+}
+@Composable
+private fun SearchScreenPreview(isSearchBarActive: Boolean) {
     AppTheme {
         SearchScreenImpl(
-            isSearchBarActive = true,
+            isSearchBarActive = isSearchBarActive,
             onSetSearchBarActive = {},
             onSearchLunchPlaces = {},
             onDiscardLunchPlaces = {},
