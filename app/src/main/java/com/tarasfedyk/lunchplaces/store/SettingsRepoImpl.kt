@@ -23,18 +23,22 @@ class SettingsRepoImpl @Inject constructor(
 
     private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings_repo_impl")
 
-    override val searchSettingsFlow: Flow<SearchSettings?> =
+    override val searchSettingsFlow: Flow<SearchSettings> =
         appContext.dataStore.data.map { prefs ->
-            try {
-                val rankingCriterion = run {
-                    val rankingCriterionName = prefs[Keys.RANKING_CRITERION_NAME] ?: return@map null
+            val rankingCriterion = run {
+                try {
+                    val rankingCriterionName =
+                        prefs[Keys.RANKING_CRITERION_NAME] ?:
+                        SearchSettings.Defaults.RANKING_CRITERION.name
                     enumValueOf<RankingCriterion>(rankingCriterionName)
+                } catch (e: IllegalArgumentException) {
+                    SearchSettings.Defaults.RANKING_CRITERION
                 }
-                val preferredRadius = prefs[Keys.PREFERRED_RADIUS] ?: return@map null
-                SearchSettings(rankingCriterion, preferredRadius)
-            } catch (e: IllegalArgumentException) {
-                null
             }
+            val preferredRadius =
+                prefs[Keys.PREFERRED_RADIUS] ?:
+                SearchSettings.Defaults.PREFERRED_RADIUS
+            SearchSettings(rankingCriterion, preferredRadius)
         }
 
     override suspend fun setSearchSettings(searchSettings: SearchSettings) {
@@ -45,7 +49,9 @@ class SettingsRepoImpl @Inject constructor(
     }
 
     private object Keys {
-        val RANKING_CRITERION_NAME: Preferences.Key<String> = stringPreferencesKey(name = "ranking_criterion_name")
-        val PREFERRED_RADIUS: Preferences.Key<Double> = doublePreferencesKey(name = "preferred_radius")
+        val RANKING_CRITERION_NAME: Preferences.Key<String> =
+            stringPreferencesKey(name = "ranking_criterion_name")
+        val PREFERRED_RADIUS: Preferences.Key<Double> =
+            doublePreferencesKey(name = "preferred_radius")
     }
 }

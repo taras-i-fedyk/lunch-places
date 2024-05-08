@@ -13,14 +13,17 @@ import com.tarasfedyk.lunchplaces.biz.data.Status
 import com.tarasfedyk.lunchplaces.biz.util.ReplaceableLauncher
 import com.tarasfedyk.lunchplaces.biz.data.LocationPermissionsLevel
 import com.tarasfedyk.lunchplaces.biz.data.SearchInput
+import com.tarasfedyk.lunchplaces.biz.data.SearchSettings
 import com.tarasfedyk.lunchplaces.biz.data.isCoarseOrFine
 import com.tarasfedyk.lunchplaces.biz.data.isFailureDueToLocationPermissions
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.yield
 import java.lang.RuntimeException
@@ -30,17 +33,20 @@ import javax.inject.Inject
 class GeoVM @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val locationController: LocationController,
+    private val settingsRepo: SettingsRepo,
     private val geoRepo: GeoRepo
 ) : ViewModel() {
-
-    private val currentLocationLauncher: ReplaceableLauncher = ReplaceableLauncher(viewModelScope)
-    private val lunchPlacesLauncher: ReplaceableLauncher = ReplaceableLauncher(viewModelScope)
 
     private val _locationPermissionsLevelFlow: MutableStateFlow<LocationPermissionsLevel?> =
         MutableStateFlow(value = null)
     val locationPermissionsLevelFlow: StateFlow<LocationPermissionsLevel?> =
         _locationPermissionsLevelFlow.asStateFlow()
 
+    val searchSettingsFlow: StateFlow<SearchSettings?> = settingsRepo.searchSettingsFlow
+        .stateIn(viewModelScope, SharingStarted.Eagerly, initialValue = null)
+
+    private val currentLocationLauncher: ReplaceableLauncher = ReplaceableLauncher(viewModelScope)
+    private val lunchPlacesLauncher: ReplaceableLauncher = ReplaceableLauncher(viewModelScope)
     val geoStateFlow: StateFlow<GeoState> = savedStateHandle.getStateFlow(
         key = Keys.GEO_STATE,
         initialValue = GeoState()
@@ -104,6 +110,12 @@ class GeoVM @Inject constructor(
         }
     }
 
+    fun setSearchSettings(searchSettings: SearchSettings) {
+        viewModelScope.launch {
+            settingsRepo.setSearchSettings(searchSettings)
+        }
+    }
+
     fun searchLunchPlaces(searchInput: SearchInput) {
         lunchPlacesLauncher.launch {
             searchLunchPlacesImpl(searchInput)
@@ -125,7 +137,8 @@ class GeoVM @Inject constructor(
     }
 
     private suspend fun searchLunchPlacesImpl(searchInput: SearchInput) {
-        var searchFilter = SearchFilter(searchInput)
+        val searchSettings = searchSettingsFlow.filterNotNull().first()
+        var searchFilter = SearchFilter(searchInput, searchSettings)
         updateGeoState { it.copy(lunchPlacesStatus = Status.Pending(searchFilter)) }
 
         safelyDetermineCurrentLocation()
