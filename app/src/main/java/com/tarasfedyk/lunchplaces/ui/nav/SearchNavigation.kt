@@ -4,7 +4,6 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import com.tarasfedyk.lunchplaces.biz.data.LunchPlace
 import com.tarasfedyk.lunchplaces.biz.data.SearchFilter
-import com.tarasfedyk.lunchplaces.biz.data.SearchInput
 import com.tarasfedyk.lunchplaces.biz.data.Status
 import com.tarasfedyk.lunchplaces.ui.SearchScreen
 import com.tarasfedyk.lunchplaces.ui.data.MapConfig
@@ -14,7 +13,7 @@ const val SEARCH_ROUTE = "search"
 fun NavGraphBuilder.searchScreen(
     onGetCurrentRoute: () -> String?,
     onSetMapConfig: (MapConfig) -> Unit,
-    onSearchLunchPlaces: (SearchInput) -> Unit,
+    onSearchLunchPlaces: (String) -> Unit,
     onDiscardLunchPlaces: () -> Unit,
     lunchPlacesStatus: Status<SearchFilter, List<LunchPlace>>?,
     onNavigateToSettings: () -> Unit,

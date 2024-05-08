@@ -29,7 +29,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusManager
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -40,9 +39,7 @@ import com.tarasfedyk.lunchplaces.biz.data.ErrorType
 import com.tarasfedyk.lunchplaces.biz.data.LunchPlace
 import com.tarasfedyk.lunchplaces.biz.data.MediaLimits
 import com.tarasfedyk.lunchplaces.biz.data.SearchFilter
-import com.tarasfedyk.lunchplaces.biz.data.SearchInput
 import com.tarasfedyk.lunchplaces.biz.data.SearchSettings
-import com.tarasfedyk.lunchplaces.biz.data.SizeLimit
 import com.tarasfedyk.lunchplaces.biz.data.Status
 import com.tarasfedyk.lunchplaces.ui.data.MapConfig
 import com.tarasfedyk.lunchplaces.ui.theme.AppTheme
@@ -53,7 +50,7 @@ import com.tarasfedyk.lunchplaces.ui.util.PermanentErrorSnackbar
 fun SearchScreen(
     isCurrentDestination: Boolean,
     onSetMapConfig: (MapConfig) -> Unit,
-    onSearchLunchPlaces: (SearchInput) -> Unit,
+    onSearchLunchPlaces: (String) -> Unit,
     onDiscardLunchPlaces: () -> Unit,
     lunchPlacesStatus: Status<SearchFilter, List<LunchPlace>>?,
     onNavigateToSettings: () -> Unit,
@@ -98,7 +95,7 @@ private fun SearchScreenImpl(
     onSetEnteredQuery: (String) -> Unit,
     appliedQuery: String,
     onSetAppliedQuery: (String) -> Unit,
-    onSearchLunchPlaces: (SearchInput) -> Unit,
+    onSearchLunchPlaces: (String) -> Unit,
     onDiscardLunchPlaces: () -> Unit,
     lunchPlacesStatus: Status<SearchFilter, List<LunchPlace>>?,
     onNavigateToSettings: () -> Unit,
@@ -111,8 +108,6 @@ private fun SearchScreenImpl(
     val isSearchBarFocused by searchBarInteractionSource.collectIsFocusedAsState()
 
     val onClearCurrentQuery = remember(onSetEnteredQuery) { { onSetEnteredQuery("") } }
-
-    val mediaLimits = mediaLimits()
 
     val onNavigateBack = remember(
         onSetSearchBarActive,
@@ -140,7 +135,6 @@ private fun SearchScreenImpl(
         focusManager,
         enteredQuery,
         onSetAppliedQuery,
-        mediaLimits,
         onNavigateBack,
         onSearchLunchPlaces
     ) {
@@ -149,12 +143,12 @@ private fun SearchScreenImpl(
                 focusManager,
                 enteredQuery,
                 onSetAppliedQuery,
-                mediaLimits,
                 onNavigateBack,
                 onSearchLunchPlaces
             )
         }
     }
+
     val onRetrySearch = remember(onTrySearch, appliedQuery) {
         { onTrySearch(appliedQuery) }
     }
@@ -179,18 +173,6 @@ private fun SearchScreenImpl(
     ) {
         SearchStatus(lunchPlacesStatus, onNavigateToDetails, onRetrySearch)
     }
-}
-
-@Composable
-private fun mediaLimits(): MediaLimits {
-    val context = LocalContext.current
-    val thumbnailSize = context.resources.getDimensionPixelSize(R.dimen.thumbnail_size)
-    return MediaLimits(
-        thumbnailSizeLimit = SizeLimit(
-            maxWidth = thumbnailSize,
-            maxHeight = thumbnailSize
-        )
-    )
 }
 
 private fun navigateBack(
@@ -218,16 +200,13 @@ private fun trySearch(
     focusManager: FocusManager,
     enteredQuery: String,
     onSetAppliedQuery: (String) -> Unit,
-    mediaLimits: MediaLimits,
     onNavigateBack: () -> Unit,
-    onSearchLunchPlaces: (SearchInput) -> Unit
+    onSearchLunchPlaces: (String) -> Unit
 ) {
     onSetAppliedQuery(enteredQuery)
     if (enteredQuery.isNotEmpty()) {
         focusManager.clearFocus()
-        onSearchLunchPlaces(
-            SearchInput(enteredQuery, mediaLimits)
-        )
+        onSearchLunchPlaces(enteredQuery)
     } else {
         onNavigateBack()
     }
@@ -367,7 +346,8 @@ private fun SearchScreenPreview(
             onDiscardLunchPlaces = {},
             lunchPlacesStatus = Status.Success(
                 SearchFilter(
-                    SearchInput(appliedQuery),
+                    appliedQuery,
+                    MediaLimits(),
                     SearchSettings()
                 ),
                 result = listOf(

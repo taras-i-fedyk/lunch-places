@@ -58,7 +58,7 @@ class GeoRepoImpl @Inject constructor(
 
         val cancellationTokenSource = CancellationTokenSource()
         val searchByTextRequest = SearchByTextRequest
-            .builder(searchFilter.input.query, placeFields)
+            .builder(searchFilter.query, placeFields)
             .setIncludedType(placeType)
             .setRankPreference(rankPreference)
             .setLocationBias(circularBounds)
@@ -66,7 +66,7 @@ class GeoRepoImpl @Inject constructor(
             .build()
         val searchByTextTask = placesClient.searchByText(searchByTextRequest)
         return searchByTextTask.await(cancellationTokenSource).places
-            .toLunchPlaces(searchFilter.originPoint, searchFilter.input.mediaLimits)
+            .toLunchPlaces(searchFilter.originPoint, searchFilter.mediaLimits)
     }
 
     private suspend fun List<Place>.toLunchPlaces(

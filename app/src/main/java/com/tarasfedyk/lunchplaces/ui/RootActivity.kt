@@ -23,7 +23,6 @@ import com.tarasfedyk.lunchplaces.biz.data.LunchPlace
 import com.tarasfedyk.lunchplaces.biz.data.SearchFilter
 import com.tarasfedyk.lunchplaces.biz.data.Status
 import com.tarasfedyk.lunchplaces.biz.data.LocationPermissionsLevel
-import com.tarasfedyk.lunchplaces.biz.data.SearchInput
 import com.tarasfedyk.lunchplaces.biz.data.isCoarseOrFine
 import com.tarasfedyk.lunchplaces.ui.data.MapConfig
 import com.tarasfedyk.lunchplaces.ui.nav.SEARCH_ROUTE
@@ -79,7 +78,7 @@ class RootActivity : ComponentActivity() {
         areAllLocationPermissionsDenied: Boolean,
         onSetLocationPermissionsLevel: (LocationPermissionsLevel) -> Unit,
         onDetermineCurrentLocation: () -> Unit,
-        onSearchLunchPlaces: (SearchInput) -> Unit,
+        onSearchLunchPlaces: (String) -> Unit,
         onDiscardLunchPlaces: () -> Unit,
         geoState: GeoState
     ) {
@@ -119,7 +118,7 @@ class RootActivity : ComponentActivity() {
     @Composable
     private fun NavGraph(
         onSetMapConfig: (MapConfig) -> Unit,
-        onSearchLunchPlaces: (SearchInput) -> Unit,
+        onSearchLunchPlaces: (String) -> Unit,
         onDiscardLunchPlaces: () -> Unit,
         lunchPlacesStatus: Status<SearchFilter, List<LunchPlace>>?
     ) {

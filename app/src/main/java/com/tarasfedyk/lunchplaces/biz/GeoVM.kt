@@ -12,7 +12,7 @@ import com.tarasfedyk.lunchplaces.biz.data.SearchFilter
 import com.tarasfedyk.lunchplaces.biz.data.Status
 import com.tarasfedyk.lunchplaces.biz.util.ReplaceableLauncher
 import com.tarasfedyk.lunchplaces.biz.data.LocationPermissionsLevel
-import com.tarasfedyk.lunchplaces.biz.data.SearchInput
+import com.tarasfedyk.lunchplaces.biz.data.MediaLimits
 import com.tarasfedyk.lunchplaces.biz.data.SearchSettings
 import com.tarasfedyk.lunchplaces.biz.data.isCoarseOrFine
 import com.tarasfedyk.lunchplaces.biz.data.isFailureDueToLocationPermissions
@@ -32,6 +32,7 @@ import javax.inject.Inject
 @HiltViewModel
 class GeoVM @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
+    private val mediaLimits: MediaLimits,
     private val locationController: LocationController,
     private val settingsRepo: SettingsRepo,
     private val geoRepo: GeoRepo
@@ -116,16 +117,16 @@ class GeoVM @Inject constructor(
         }
     }
 
-    fun searchLunchPlaces(searchInput: SearchInput) {
+    fun searchLunchPlaces(query: String) {
         lunchPlacesLauncher.launch {
-            searchLunchPlacesImpl(searchInput)
+            searchLunchPlacesImpl(query)
         }
     }
 
     private fun refreshLunchPlaces() {
         lunchPlacesLauncher.launch {
             geoStateFlow.first().lunchPlacesStatus?.let { lunchPlacesStatus ->
-                searchLunchPlacesImpl(searchInput = lunchPlacesStatus.arg.input)
+                searchLunchPlacesImpl(lunchPlacesStatus.arg.query)
             }
         }
     }
@@ -136,9 +137,9 @@ class GeoVM @Inject constructor(
         }
     }
 
-    private suspend fun searchLunchPlacesImpl(searchInput: SearchInput) {
+    private suspend fun searchLunchPlacesImpl(query: String) {
         val searchSettings = searchSettingsFlow.filterNotNull().first()
-        var searchFilter = SearchFilter(searchInput, searchSettings)
+        var searchFilter = SearchFilter(query, mediaLimits, searchSettings)
         updateGeoState { it.copy(lunchPlacesStatus = Status.Pending(searchFilter)) }
 
         safelyDetermineCurrentLocation()
