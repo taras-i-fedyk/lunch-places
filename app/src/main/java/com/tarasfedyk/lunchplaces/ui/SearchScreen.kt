@@ -28,7 +28,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -100,26 +99,27 @@ private fun SearchScreenImpl(
 
     val onNavigateBack = remember(focusManager, onDiscardLunchPlaces) {
         {
-            navigateBack(
-                searchBarActivenessState = searchBarActivenessState,
-                focusManager = focusManager,
-                isSearchBarFocused = isSearchBarFocused,
-                enteredQueryState = enteredQueryState,
-                appliedQueryState = appliedQueryState,
-                onDiscardLunchPlaces = onDiscardLunchPlaces
-            )
+            if (isSearchBarFocused && appliedQueryState.value.isNotEmpty()) {
+                enteredQueryState.value = appliedQueryState.value
+                focusManager.clearFocus()
+            } else {
+                appliedQueryState.value = ""
+                enteredQueryState.value = ""
+                searchBarActivenessState.value = false
+                onDiscardLunchPlaces()
+            }
         }
     }
 
     val onTrySearch: (String) -> Unit = remember(focusManager, onNavigateBack, onSearchLunchPlaces) {
-        {
-            trySearch(
-                focusManager = focusManager,
-                enteredQueryState = enteredQueryState,
-                appliedQueryState = appliedQueryState,
-                onNavigateBack = onNavigateBack,
-                onSearchLunchPlaces = onSearchLunchPlaces
-            )
+        { query ->
+            appliedQueryState.value = query
+            if (query.isNotEmpty()) {
+                focusManager.clearFocus()
+                onSearchLunchPlaces(query)
+            } else {
+                onNavigateBack()
+            }
         }
     }
     val onRetrySearch = remember(onTrySearch) {
@@ -144,41 +144,6 @@ private fun SearchScreenImpl(
         onTrySearch = onTrySearch
     ) {
         SearchStatus(lunchPlacesStatus, onNavigateToDetails, onRetrySearch)
-    }
-}
-
-private fun navigateBack(
-    searchBarActivenessState: MutableState<Boolean>,
-    focusManager: FocusManager,
-    isSearchBarFocused: Boolean,
-    enteredQueryState: MutableState<String>,
-    appliedQueryState: MutableState<String>,
-    onDiscardLunchPlaces: () -> Unit
-) {
-    if (isSearchBarFocused && appliedQueryState.value.isNotEmpty()) {
-        enteredQueryState.value = appliedQueryState.value
-        focusManager.clearFocus()
-    } else {
-        appliedQueryState.value = ""
-        enteredQueryState.value = ""
-        searchBarActivenessState.value = false
-        onDiscardLunchPlaces()
-    }
-}
-
-private fun trySearch(
-    focusManager: FocusManager,
-    enteredQueryState: MutableState<String>,
-    appliedQueryState: MutableState<String>,
-    onNavigateBack: () -> Unit,
-    onSearchLunchPlaces: (String) -> Unit
-) {
-    appliedQueryState.value = enteredQueryState.value
-    if (enteredQueryState.value.isNotEmpty()) {
-        focusManager.clearFocus()
-        onSearchLunchPlaces(enteredQueryState.value)
-    } else {
-        onNavigateBack()
     }
 }
 
