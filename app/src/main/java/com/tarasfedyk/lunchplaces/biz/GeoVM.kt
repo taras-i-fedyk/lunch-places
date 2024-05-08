@@ -173,8 +173,8 @@ class GeoVM @Inject constructor(
 
     @MainThread
     private suspend fun updateGeoState(function: (GeoState) -> GeoState) {
-        val currentGeoState = geoStateFlow.first()
-        val newGeoState = function(currentGeoState)
+        val geoState = geoStateFlow.first()
+        val newGeoState = function(geoState)
         savedStateHandle[Keys.GEO_STATE] = newGeoState
         yield()
     }

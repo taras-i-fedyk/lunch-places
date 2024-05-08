@@ -21,8 +21,8 @@
     <string name="lunch_place_photo_description">Lunch place photo</string>
 
     <string name="location_permissions_error_message">Current location unknown because of denied location permissions</string>
-    <string name="location_error_message">Current location unknown</string>
-    <string name="search_location_permissions_error_message">Search failed because of denied location permissions</string>
+    <string name="current_location_error_message">Current location unknown</string>
+    <string name="search_permissions_error_message">Search failed because of denied location permissions</string>
     <string name="search_location_error_message">Search failed because of unknown current location</string>
     <string name="search_connection_error_message">Search failed due to no internet connection</string>
     <string name="search_error_message">Search failed</string>

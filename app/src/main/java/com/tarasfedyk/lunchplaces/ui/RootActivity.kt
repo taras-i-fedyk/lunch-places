@@ -57,11 +57,12 @@ class RootActivity : ComponentActivity() {
         val locationPermissionsLevel by geoVM.locationPermissionsLevelFlow.collectAsStateWithLifecycle()
         val areAllLocationPermissionsDenied = !locationPermissionsLevel.isCoarseOrFine
 
-        val geoState by geoVM.geoStateFlow.collectAsStateWithLifecycle()
         val onSetLocationPermissionsLevel = remember(geoVM) { geoVM::setLocationPermissionsLevel }
         val onDetermineCurrentLocation = remember(geoVM) { geoVM::determineCurrentLocation }
         val onSearchLunchPlaces = remember(geoVM) { geoVM::searchLunchPlaces }
         val onDiscardLunchPlaces = remember(geoVM) { geoVM::discardLunchPlaces }
+
+        val geoState by geoVM.geoStateFlow.collectAsStateWithLifecycle()
 
         RootContentImpl(
             areAllLocationPermissionsDenied = areAllLocationPermissionsDenied,

@@ -62,16 +62,16 @@ fun SearchScreen(
     var isSearchBarActive by rememberSaveable { mutableStateOf(false) }
     val onSetSearchBarActive: (Boolean) -> Unit = remember { { isSearchBarActive = it } }
 
-    var currentQuery by rememberSaveable { mutableStateOf("") }
-    val onSetCurrentQuery: (String) -> Unit = remember { { currentQuery = it } }
+    var enteredQuery by rememberSaveable { mutableStateOf("") }
+    val onSetEnteredQuery: (String) -> Unit = remember { { enteredQuery = it } }
     var appliedQuery by rememberSaveable { mutableStateOf("") }
     val onSetAppliedQuery: (String) -> Unit = remember { { appliedQuery = it } }
 
     SearchScreenImpl(
         isSearchBarActive = isSearchBarActive,
         onSetSearchBarActive = onSetSearchBarActive,
-        currentQuery = currentQuery,
-        onSetCurrentQuery = onSetCurrentQuery,
+        enteredQuery = enteredQuery,
+        onSetEnteredQuery = onSetEnteredQuery,
         appliedQuery = appliedQuery,
         onSetAppliedQuery = onSetAppliedQuery,
         onSearchLunchPlaces = onSearchLunchPlaces,
@@ -94,8 +94,8 @@ fun SearchScreen(
 private fun SearchScreenImpl(
     isSearchBarActive: Boolean,
     onSetSearchBarActive: (Boolean) -> Unit,
-    currentQuery: String,
-    onSetCurrentQuery: (String) -> Unit,
+    enteredQuery: String,
+    onSetEnteredQuery: (String) -> Unit,
     appliedQuery: String,
     onSetAppliedQuery: (String) -> Unit,
     onSearchLunchPlaces: (SearchInput) -> Unit,
@@ -110,14 +110,14 @@ private fun SearchScreenImpl(
     val searchBarInteractionSource = remember { MutableInteractionSource() }
     val isSearchBarFocused by searchBarInteractionSource.collectIsFocusedAsState()
 
-    val onClearCurrentQuery = remember(onSetCurrentQuery) { { onSetCurrentQuery("") } }
+    val onClearCurrentQuery = remember(onSetEnteredQuery) { { onSetEnteredQuery("") } }
 
     val mediaLimits = mediaLimits()
 
     val onNavigateBack = remember(
         onSetSearchBarActive,
         focusManager,
-        onSetCurrentQuery,
+        onSetEnteredQuery,
         appliedQuery,
         onSetAppliedQuery,
         onDiscardLunchPlaces
@@ -127,7 +127,7 @@ private fun SearchScreenImpl(
                 onSetSearchBarActive = onSetSearchBarActive,
                 focusManager = focusManager,
                 isSearchBarFocused = isSearchBarFocused,
-                onSetCurrentQuery = onSetCurrentQuery,
+                onSetEnteredQuery = onSetEnteredQuery,
                 onClearCurrentQuery = onClearCurrentQuery,
                 appliedQuery = appliedQuery,
                 onSetAppliedQuery = onSetAppliedQuery,
@@ -138,7 +138,7 @@ private fun SearchScreenImpl(
 
     val onTrySearch: (String) -> Unit = remember(
         focusManager,
-        currentQuery,
+        enteredQuery,
         onSetAppliedQuery,
         mediaLimits,
         onNavigateBack,
@@ -147,7 +147,7 @@ private fun SearchScreenImpl(
         {
             trySearch(
                 focusManager,
-                currentQuery,
+                enteredQuery,
                 onSetAppliedQuery,
                 mediaLimits,
                 onNavigateBack,
@@ -170,8 +170,8 @@ private fun SearchScreenImpl(
         onActiveChanged = onSetSearchBarActive,
         interactionSource = searchBarInteractionSource,
         hint = stringResource(R.string.search_hint),
-        query = currentQuery,
-        onQueryChanged = onSetCurrentQuery,
+        query = enteredQuery,
+        onQueryChanged = onSetEnteredQuery,
         onClearQuery = onClearCurrentQuery,
         onNavigateBack = onNavigateBack,
         onNavigateToSettings = onNavigateToSettings,
@@ -197,14 +197,14 @@ private fun navigateBack(
     onSetSearchBarActive: (Boolean) -> Unit,
     focusManager: FocusManager,
     isSearchBarFocused: Boolean,
-    onSetCurrentQuery: (String) -> Unit,
+    onSetEnteredQuery: (String) -> Unit,
     onClearCurrentQuery: () -> Unit,
     appliedQuery: String,
     onSetAppliedQuery: (String) -> Unit,
     onDiscardLunchPlaces: () -> Unit
 ) {
     if (isSearchBarFocused && appliedQuery.isNotEmpty()) {
-        onSetCurrentQuery(appliedQuery)
+        onSetEnteredQuery(appliedQuery)
         focusManager.clearFocus()
     } else {
         onSetAppliedQuery("")
@@ -216,17 +216,17 @@ private fun navigateBack(
 
 private fun trySearch(
     focusManager: FocusManager,
-    currentQuery: String,
+    enteredQuery: String,
     onSetAppliedQuery: (String) -> Unit,
     mediaLimits: MediaLimits,
     onNavigateBack: () -> Unit,
     onSearchLunchPlaces: (SearchInput) -> Unit
 ) {
-    onSetAppliedQuery(currentQuery)
-    if (currentQuery.isNotEmpty()) {
+    onSetAppliedQuery(enteredQuery)
+    if (enteredQuery.isNotEmpty()) {
         focusManager.clearFocus()
         onSearchLunchPlaces(
-            SearchInput(currentQuery, mediaLimits)
+            SearchInput(enteredQuery, mediaLimits)
         )
     } else {
         onNavigateBack()
@@ -310,7 +310,7 @@ private fun SearchError(errorType: ErrorType, onRetrySearch: () -> Unit) {
 
     val isAppSettingsError = errorType == ErrorType.LOCATION_PERMISSIONS
     val errorMessage = when (errorType) {
-        ErrorType.LOCATION_PERMISSIONS -> stringResource(R.string.search_location_permissions_error_message)
+        ErrorType.LOCATION_PERMISSIONS -> stringResource(R.string.search_permissions_error_message)
         ErrorType.CURRENT_LOCATION -> stringResource(R.string.search_location_error_message)
         ErrorType.INTERNET_CONNECTION -> stringResource(R.string.search_connection_error_message)
         else -> stringResource(R.string.search_error_message)
@@ -335,7 +335,7 @@ private fun SearchError(errorType: ErrorType, onRetrySearch: () -> Unit) {
 private fun InactiveSearchScreenPreview() {
     SearchScreenPreview(
         isSearchBarActive = false,
-        currentQuery = "",
+        enteredQuery = "",
         appliedQuery = ""
     )
 }
@@ -345,22 +345,22 @@ private fun InactiveSearchScreenPreview() {
 private fun ActiveSearchScreenPreview() {
     SearchScreenPreview(
         isSearchBarActive = true,
-        currentQuery = "pizza",
+        enteredQuery = "pizza",
         appliedQuery = "pizza"
     )
 }
 @Composable
 private fun SearchScreenPreview(
     isSearchBarActive: Boolean,
-    currentQuery: String,
+    enteredQuery: String,
     appliedQuery: String
 ) {
     AppTheme {
         SearchScreenImpl(
             isSearchBarActive = isSearchBarActive,
             onSetSearchBarActive = {},
-            currentQuery = currentQuery,
-            onSetCurrentQuery = {},
+            enteredQuery = enteredQuery,
+            onSetEnteredQuery = {},
             appliedQuery = appliedQuery,
             onSetAppliedQuery = {},
             onSearchLunchPlaces = {},

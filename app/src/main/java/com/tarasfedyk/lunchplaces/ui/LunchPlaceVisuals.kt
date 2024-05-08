@@ -82,12 +82,12 @@ private fun photoCornerRadius(isThumbnail: Boolean = false): Int {
 @Composable
 private fun photoPlaceholderDrawable(): Drawable? {
     val context = LocalContext.current
-    val inactiveColor = MaterialTheme.colorScheme.secondary
+    val tintColor = MaterialTheme.colorScheme.secondary
 
     val rawDrawable = context.getDrawable(R.drawable.ic_photo_placeholder)
     return rawDrawable?.apply {
         mutate()
-        colorFilter = PorterDuffColorFilter(inactiveColor.toArgb(), PorterDuff.Mode.SRC_IN)
+        colorFilter = PorterDuffColorFilter(tintColor.toArgb(), PorterDuff.Mode.SRC_IN)
     }
 }
 
