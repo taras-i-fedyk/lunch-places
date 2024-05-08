@@ -15,7 +15,10 @@ import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
@@ -27,22 +30,26 @@ import com.tarasfedyk.lunchplaces.R
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CompactSearchBar(
-    isActive: Boolean,
-    onActiveChanged: (Boolean) -> Unit,
+    activenessState: MutableState<Boolean>,
     interactionSource: MutableInteractionSource,
-    hint: String,
-    query: String,
-    onQueryChanged: (String) -> Unit,
-    onClearQuery: () -> Unit,
+    queryState: MutableState<String>,
     onNavigateBack: () -> Unit,
     onNavigateToSettings: () -> Unit,
     onTrySearch: (String) -> Unit,
     modifier: Modifier = Modifier,
     tonalElevation: Dp = SearchBarDefaults.TonalElevation,
     shadowElevation: Dp = SearchBarDefaults.ShadowElevation,
+    hint: String = "",
     searchStatusContent: @Composable ColumnScope.() -> Unit
 ) {
+    var isActive by activenessState
+    val onSetActive: (Boolean) -> Unit = remember { { isActive = it } }
+
     val isFocused by interactionSource.collectIsFocusedAsState()
+
+    var query by queryState
+    val onSetQuery: (String) -> Unit = remember { { query = it } }
+    val onClearQuery: () -> Unit = remember { { query = "" } }
 
     SearchBar(
         modifier = modifier,
@@ -66,10 +73,10 @@ fun CompactSearchBar(
             }
         },
         active = isActive,
-        onActiveChange = onActiveChanged,
+        onActiveChange = onSetActive,
         interactionSource = interactionSource,
         query = query,
-        onQueryChange = onQueryChanged,
+        onQueryChange = onSetQuery,
         onSearch = onTrySearch
     ) {
         if (!isFocused) {
