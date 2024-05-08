@@ -20,12 +20,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.onPlaced
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.LatLngBounds
 import com.google.maps.android.compose.CameraMoveStartedReason
@@ -59,13 +58,15 @@ fun MapScreen(
     onDetermineCurrentLocation: () -> Unit,
     currentLocationStatus: Status<Unit, LocationSnapshot>?
 ) {
+    val density = LocalDensity.current
+
     val mapAlpha = if (mapConfig.isMapVisible) 1f else 0f
-    val mapTopPadding = mapTopPadding(mapConfig.mapTopPadding)
+    val mapTopPadding = with (density) { mapConfig.mapTopPadding.toDp() }
 
     val cameraPositionState = rememberCameraPositionState()
 
     val coroutineScope = rememberCoroutineScope()
-    val mapViewportPadding = mapViewportPadding()
+    val mapViewportPadding = with (density) { 48.dp.roundToPx() }
     var isMapViewportFocused by remember { mutableStateOf(false) }
     val onSetMapViewportFocused: (Boolean) -> Unit = remember { { isMapViewportFocused = it } }
     val onExploreProximity: () -> Unit = remember(mapConfig.mapViewport, mapViewportPadding) {
@@ -126,18 +127,6 @@ fun MapScreen(
     LaunchedEffect(mapConfig.mapViewport) {
         isMapViewportFocused = false
     }
-}
-
-@Composable
-private fun mapTopPadding(mapTopPadding: Int): Dp {
-    val density = LocalDensity.current
-    return with (density) { mapTopPadding.toDp() }
-}
-
-@Composable
-private fun mapViewportPadding(): Int {
-    val context = LocalContext.current
-    return context.resources.getDimensionPixelSize(R.dimen.map_viewport_padding)
 }
 
 @Composable
@@ -296,9 +285,9 @@ private fun CurrentLocationError(
 ) {
     val isAppSettingsError = errorType == ErrorType.LOCATION_PERMISSIONS
     val errorMessage = if (errorType == ErrorType.LOCATION_PERMISSIONS) {
-        stringResource(R.string.location_permissions_error_message)
+        stringResource(R.string.map_permissions_error_message)
     } else {
-        stringResource(R.string.current_location_error_message)
+        stringResource(R.string.map_location_error_message)
     }
 
     PermanentErrorSnackbar(
