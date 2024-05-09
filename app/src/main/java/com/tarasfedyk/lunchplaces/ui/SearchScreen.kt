@@ -49,9 +49,9 @@ import com.tarasfedyk.lunchplaces.ui.util.PermanentErrorSnackbar
 fun SearchScreen(
     isCurrentDestination: Boolean,
     onSetMapConfig: (MapConfig) -> Unit,
+    lunchPlacesStatus: Status<SearchFilter, List<LunchPlace>>?,
     onSearchLunchPlaces: (String) -> Unit,
     onDiscardLunchPlaces: () -> Unit,
-    lunchPlacesStatus: Status<SearchFilter, List<LunchPlace>>?,
     onNavigateToSettings: () -> Unit,
     onNavigateToDetails: (Int) -> Unit
 ) {
@@ -85,9 +85,9 @@ private fun SearchScreenImpl(
     searchBarActivenessState: MutableState<Boolean>,
     enteredQueryState: MutableState<String>,
     appliedQueryState: MutableState<String>,
+    lunchPlacesStatus: Status<SearchFilter, List<LunchPlace>>?,
     onSearchLunchPlaces: (String) -> Unit,
     onDiscardLunchPlaces: () -> Unit,
-    lunchPlacesStatus: Status<SearchFilter, List<LunchPlace>>?,
     onNavigateToSettings: () -> Unit,
     onNavigateToDetails: (Int) -> Unit
 ) {
@@ -274,8 +274,6 @@ private fun SearchScreenPreview(
             searchBarActivenessState = remember { mutableStateOf(isSearchBarActive) },
             enteredQueryState = remember { mutableStateOf(enteredQuery) },
             appliedQueryState = remember { mutableStateOf(appliedQuery) },
-            onSearchLunchPlaces = {},
-            onDiscardLunchPlaces = {},
             lunchPlacesStatus = Status.Success(
                 SearchFilter(
                     appliedQuery,
@@ -296,6 +294,8 @@ private fun SearchScreenPreview(
                     )
                 )
             ),
+            onSearchLunchPlaces = {},
+            onDiscardLunchPlaces = {},
             onNavigateToSettings = {},
             onNavigateToDetails = {}
         )

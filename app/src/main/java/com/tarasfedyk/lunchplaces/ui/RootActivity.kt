@@ -23,6 +23,7 @@ import com.tarasfedyk.lunchplaces.biz.data.LunchPlace
 import com.tarasfedyk.lunchplaces.biz.data.SearchFilter
 import com.tarasfedyk.lunchplaces.biz.data.Status
 import com.tarasfedyk.lunchplaces.biz.data.LocationPermissionsLevel
+import com.tarasfedyk.lunchplaces.biz.data.SearchSettings
 import com.tarasfedyk.lunchplaces.biz.data.isCoarseOrFine
 import com.tarasfedyk.lunchplaces.ui.data.MapConfig
 import com.tarasfedyk.lunchplaces.ui.nav.SEARCH_ROUTE
@@ -54,22 +55,25 @@ class RootActivity : ComponentActivity() {
         geoVM: GeoVM = hiltViewModel()
     ) {
         val locationPermissionsLevel by geoVM.locationPermissionsLevelFlow.collectAsStateWithLifecycle()
-        val areAllLocationPermissionsDenied = !locationPermissionsLevel.isCoarseOrFine
-
         val onSetLocationPermissionsLevel = remember(geoVM) { geoVM::setLocationPermissionsLevel }
+
+        val searchSettings by geoVM.searchSettingsFlow.collectAsStateWithLifecycle()
+        val onSetSearchSettings = remember(geoVM) { geoVM::setSearchSettings }
+
+        val geoState by geoVM.geoStateFlow.collectAsStateWithLifecycle()
         val onDetermineCurrentLocation = remember(geoVM) { geoVM::determineCurrentLocation }
         val onSearchLunchPlaces = remember(geoVM) { geoVM::searchLunchPlaces }
         val onDiscardLunchPlaces = remember(geoVM) { geoVM::discardLunchPlaces }
 
-        val geoState by geoVM.geoStateFlow.collectAsStateWithLifecycle()
-
         RootContentImpl(
-            areAllLocationPermissionsDenied = areAllLocationPermissionsDenied,
+            areAllLocationPermissionsDenied = !locationPermissionsLevel.isCoarseOrFine,
             onSetLocationPermissionsLevel = onSetLocationPermissionsLevel,
+            searchSettings = searchSettings,
+            onSetSearchSettings = onSetSearchSettings,
+            geoState = geoState,
             onDetermineCurrentLocation = onDetermineCurrentLocation,
             onSearchLunchPlaces = onSearchLunchPlaces,
-            onDiscardLunchPlaces = onDiscardLunchPlaces,
-            geoState = geoState
+            onDiscardLunchPlaces = onDiscardLunchPlaces
         )
     }
 
@@ -77,10 +81,12 @@ class RootActivity : ComponentActivity() {
     private fun RootContentImpl(
         areAllLocationPermissionsDenied: Boolean,
         onSetLocationPermissionsLevel: (LocationPermissionsLevel) -> Unit,
+        searchSettings: SearchSettings?,
+        onSetSearchSettings: (SearchSettings) -> Unit,
+        geoState: GeoState,
         onDetermineCurrentLocation: () -> Unit,
         onSearchLunchPlaces: (String) -> Unit,
-        onDiscardLunchPlaces: () -> Unit,
-        geoState: GeoState
+        onDiscardLunchPlaces: () -> Unit
     ) {
         var mapConfig by rememberSaveable { mutableStateOf(MapConfig()) }
         val onSetMapConfig: (MapConfig) -> Unit = remember { { mapConfig = it } }
@@ -88,14 +94,16 @@ class RootActivity : ComponentActivity() {
             MapScreen(
                 mapConfig = mapConfig,
                 areAllLocationPermissionsDenied = areAllLocationPermissionsDenied,
-                onDetermineCurrentLocation = onDetermineCurrentLocation,
-                currentLocationStatus = geoState.currentLocationStatus
+                currentLocationStatus = geoState.currentLocationStatus,
+                onDetermineCurrentLocation = onDetermineCurrentLocation
             )
             NavGraph(
                 onSetMapConfig = onSetMapConfig,
+                searchSettings = searchSettings,
+                onSetSearchSettings = onSetSearchSettings,
+                lunchPlacesStatus = geoState.lunchPlacesStatus,
                 onSearchLunchPlaces = onSearchLunchPlaces,
-                onDiscardLunchPlaces = onDiscardLunchPlaces,
-                lunchPlacesStatus = geoState.lunchPlacesStatus
+                onDiscardLunchPlaces = onDiscardLunchPlaces
             )
         }
 
@@ -118,9 +126,11 @@ class RootActivity : ComponentActivity() {
     @Composable
     private fun NavGraph(
         onSetMapConfig: (MapConfig) -> Unit,
+        searchSettings: SearchSettings?,
+        onSetSearchSettings: (SearchSettings) -> Unit,
+        lunchPlacesStatus: Status<SearchFilter, List<LunchPlace>>?,
         onSearchLunchPlaces: (String) -> Unit,
-        onDiscardLunchPlaces: () -> Unit,
-        lunchPlacesStatus: Status<SearchFilter, List<LunchPlace>>?
+        onDiscardLunchPlaces: () -> Unit
     ) {
         val navController = rememberNavController()
         val onGetCurrentRoute: () -> String? = remember {
@@ -135,13 +145,19 @@ class RootActivity : ComponentActivity() {
             searchScreen(
                 onGetCurrentRoute,
                 onSetMapConfig,
+                lunchPlacesStatus,
                 onSearchLunchPlaces,
                 onDiscardLunchPlaces,
-                lunchPlacesStatus,
                 onNavigateToSettings,
                 onNavigateToDetails
             )
-            settingsScreen(onGetCurrentRoute, onSetMapConfig, onNavigateUp)
+            settingsScreen(
+                onGetCurrentRoute,
+                onSetMapConfig,
+                searchSettings,
+                onSetSearchSettings,
+                onNavigateUp
+            )
             detailsScreen(
                 onGetCurrentRoute,
                 onSetMapConfig,
@@ -160,10 +176,12 @@ class RootActivity : ComponentActivity() {
             RootContentImpl(
                 areAllLocationPermissionsDenied = false,
                 onSetLocationPermissionsLevel = {},
+                searchSettings = null,
+                onSetSearchSettings = {},
+                geoState = GeoState(),
                 onDetermineCurrentLocation = {},
                 onSearchLunchPlaces = {},
-                onDiscardLunchPlaces = {},
-                geoState = GeoState()
+                onDiscardLunchPlaces = {}
             )
         }
     }

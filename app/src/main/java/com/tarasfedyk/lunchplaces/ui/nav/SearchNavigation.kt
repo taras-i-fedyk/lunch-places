@@ -13,9 +13,9 @@ const val SEARCH_ROUTE = "search"
 fun NavGraphBuilder.searchScreen(
     onGetCurrentRoute: () -> String?,
     onSetMapConfig: (MapConfig) -> Unit,
+    lunchPlacesStatus: Status<SearchFilter, List<LunchPlace>>?,
     onSearchLunchPlaces: (String) -> Unit,
     onDiscardLunchPlaces: () -> Unit,
-    lunchPlacesStatus: Status<SearchFilter, List<LunchPlace>>?,
     onNavigateToSettings: () -> Unit,
     onNavigateToDetails: (Int) -> Unit
 ) {
@@ -24,9 +24,9 @@ fun NavGraphBuilder.searchScreen(
         SearchScreen(
             isCurrentDestination = isCurrentDestination,
             onSetMapConfig = onSetMapConfig,
+            lunchPlacesStatus = lunchPlacesStatus,
             onSearchLunchPlaces = onSearchLunchPlaces,
             onDiscardLunchPlaces = onDiscardLunchPlaces,
-            lunchPlacesStatus = lunchPlacesStatus,
             onNavigateToSettings = onNavigateToSettings,
             onNavigateToDetails = onNavigateToDetails
         )

@@ -55,8 +55,8 @@ private const val MAX_LOCATION_ACCURACY: Float = 4f
 fun MapScreen(
     mapConfig: MapConfig,
     areAllLocationPermissionsDenied: Boolean,
-    onDetermineCurrentLocation: () -> Unit,
-    currentLocationStatus: Status<Unit, LocationSnapshot>?
+    currentLocationStatus: Status<Unit, LocationSnapshot>?,
+    onDetermineCurrentLocation: () -> Unit
 ) {
     val density = LocalDensity.current
 
@@ -305,8 +305,8 @@ private fun MapScreenPreview() {
         MapScreen(
             mapConfig = MapConfig(),
             areAllLocationPermissionsDenied = false,
-            onDetermineCurrentLocation = {},
-            currentLocationStatus = null
+            currentLocationStatus = null,
+            onDetermineCurrentLocation = {}
         )
     }
 }
