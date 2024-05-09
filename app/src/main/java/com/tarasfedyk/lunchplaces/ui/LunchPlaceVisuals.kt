@@ -6,6 +6,7 @@ import android.graphics.drawable.Drawable
 import android.net.Uri
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
@@ -29,7 +30,6 @@ import com.bumptech.glide.integration.compose.GlideImage
 import com.bumptech.glide.integration.compose.placeholder
 import com.bumptech.glide.load.MultiTransformation
 import com.bumptech.glide.load.resource.bitmap.CenterCrop
-import com.bumptech.glide.load.resource.bitmap.FitCenter
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.tarasfedyk.lunchplaces.R
 import com.tarasfedyk.lunchplaces.biz.util.roundToDecimalPlaces
@@ -48,9 +48,11 @@ fun LunchPlacePhoto(
 
     GlideImage(
         modifier = if (isThumbnail) {
-            modifier.size(dimensionResource(R.dimen.thumbnail_size))
+            modifier.size(dimensionResource(R.dimen.thumbnail_display_size))
         } else {
-            modifier.fillMaxWidth()
+            modifier
+                .fillMaxWidth()
+                .height(dimensionResource(R.dimen.photo_display_height))
         },
         model = uri,
         loading = placeholder(placeholderDrawable),
@@ -64,7 +66,7 @@ fun LunchPlacePhoto(
     ) {
         it.transform(
             MultiTransformation(
-                if (isThumbnail) CenterCrop() else FitCenter(),
+                CenterCrop(),
                 RoundedCorners(cornerRadius)
             )
         )

@@ -16,11 +16,13 @@ object MediaLimitsModule {
 
     @Provides
     fun provideMediaLimits(@ApplicationContext appContext: Context): MediaLimits {
-        val thumbnailSize = appContext.resources.getDimensionPixelSize(R.dimen.thumbnail_size)
+        val thumbnailDisplaySize = appContext.resources.getDimensionPixelSize(
+            R.dimen.thumbnail_display_size
+        )
         return MediaLimits(
             thumbnailSizeLimit = SizeLimit(
-                maxWidth = thumbnailSize,
-                maxHeight = thumbnailSize
+                maxWidth = thumbnailDisplaySize,
+                maxHeight = thumbnailDisplaySize
             )
         )
     }
