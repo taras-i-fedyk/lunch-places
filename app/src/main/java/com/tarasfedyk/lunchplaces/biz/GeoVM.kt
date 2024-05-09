@@ -56,22 +56,47 @@ class GeoVM @Inject constructor(
     init {
         viewModelScope.launch {
             locationPermissionsLevelFlow.filterNotNull().collect { locationPermissionsLevel ->
-                safelyDetermineCurrentLocation()
-
-                val lunchPlacesStatus = geoStateFlow.first().lunchPlacesStatus
-                if (
-                    lunchPlacesStatus is Status.Pending ||
-                    (lunchPlacesStatus.isFailureDueToLocationPermissions &&
-                    locationPermissionsLevel.isCoarseOrFine)
-                ) {
-                    refreshLunchPlaces()
-                }
+                onLocationPermissionsLevelChanged(locationPermissionsLevel)
             }
+        }
+
+        viewModelScope.launch {
+            searchSettingsFlow.filterNotNull().collect {
+                onSearchSettingsChanged()
+            }
+        }
+    }
+
+    private suspend fun onLocationPermissionsLevelChanged(
+        locationPermissionsLevel: LocationPermissionsLevel
+    ) {
+        safelyDetermineCurrentLocation()
+
+        val lunchPlacesStatus = geoStateFlow.first().lunchPlacesStatus
+        if (
+            lunchPlacesStatus is Status.Pending ||
+            (lunchPlacesStatus.isFailureDueToLocationPermissions &&
+            locationPermissionsLevel.isCoarseOrFine)
+        ) {
+            refreshLunchPlaces()
+        }
+    }
+
+    private suspend fun onSearchSettingsChanged() {
+        val lunchPlacesStatus = geoStateFlow.first().lunchPlacesStatus
+        if (lunchPlacesStatus != null) {
+            refreshLunchPlaces()
         }
     }
 
     fun setLocationPermissionsLevel(locationPermissionsLevel: LocationPermissionsLevel) {
         _locationPermissionsLevelFlow.value = locationPermissionsLevel
+    }
+
+    fun setSearchSettings(searchSettings: SearchSettings) {
+        viewModelScope.launch {
+            settingsRepo.setSearchSettings(searchSettings)
+        }
     }
 
     private suspend fun safelyDetermineCurrentLocation() {
@@ -108,12 +133,6 @@ class GeoVM @Inject constructor(
             } else {
                 throw e
             }
-        }
-    }
-
-    fun setSearchSettings(searchSettings: SearchSettings) {
-        viewModelScope.launch {
-            settingsRepo.setSearchSettings(searchSettings)
         }
     }
 

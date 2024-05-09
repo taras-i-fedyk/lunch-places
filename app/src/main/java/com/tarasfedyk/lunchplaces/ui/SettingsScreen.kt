@@ -37,7 +37,9 @@ fun SettingsScreen(
     val onSaveSearchSettings = remember(searchSettings, onSetSearchSettings) {
         {
             // TODO: replace this with meaningful logic
-            searchSettings?.let { onSetSearchSettings(it) }
+            if (searchSettings != null) {
+                onSetSearchSettings(searchSettings)
+            }
         }
     }
     val currentOnSaveSearchSettings by rememberUpdatedState(onSaveSearchSettings)
