@@ -15,7 +15,7 @@ data class SearchSettings(
     }
 }
 
-enum class RankingCriterion {
-    RELEVANCE,
-    DISTANCE
+enum class RankingCriterion(val displayName: String) {
+    RELEVANCE(displayName = "Relevance"),
+    DISTANCE(displayName = "Distance")
 }

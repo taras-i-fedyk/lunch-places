@@ -2,11 +2,9 @@ package com.tarasfedyk.lunchplaces.ui
 
 import android.net.Uri
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -50,7 +48,7 @@ fun DetailsScreen(
         modifier = Modifier.nestedScroll(topBarScrollBehavior.nestedScrollConnection),
         topBar = {
             LargeTopAppBar(
-                title = { LunchPlaceName(lunchPlace.name, isTopBarTitle = true) },
+                title = { LunchPlaceName(lunchPlace.name, isForTopBar = true) },
                 navigationIcon = { UpNavigationIcon(onNavigateUp) },
                 actions = { ProximityIcon(onExploreProximity) },
                 scrollBehavior = topBarScrollBehavior
@@ -65,12 +63,13 @@ fun DetailsScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp)
         ) {
-            LunchPlacePhoto(lunchPlace.photoUri)
-            Spacer(modifier = Modifier.size(16.dp))
-            LunchPlaceRating(lunchPlace.rating)
-            LunchPlaceDistance(lunchPlace.distance)
-            LunchPlaceAddress(lunchPlace.address)
-            LunchPlaceOpenness(lunchPlace.isOpen, shouldShowText = true)
+            LunchPlacePhoto(lunchPlace.photoUri, modifier = Modifier.padding(bottom = 16.dp))
+
+            val isForLargeBody = true
+            LunchPlaceRating(lunchPlace.rating, isForLargeBody = isForLargeBody)
+            LunchPlaceDistance(lunchPlace.distance, isForLargeBody = isForLargeBody)
+            LunchPlaceAddress(lunchPlace.address, isForLargeBody = isForLargeBody)
+            LunchPlaceOpenness(lunchPlace.isOpen, isForLargeBody = isForLargeBody)
         }
     }
 

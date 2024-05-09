@@ -4,6 +4,7 @@
 
     <string name="search_hint">Search lunch places</string>
     <string name="search_settings_title">Search settings</string>
+    <string name="ranking_criterion_caption">Rank by</string>
     <string name="meters_distance_template">%d m</string>
     <string name="kilometers_distance_template">%s km</string>
     <string name="closedness_label">Closed</string>

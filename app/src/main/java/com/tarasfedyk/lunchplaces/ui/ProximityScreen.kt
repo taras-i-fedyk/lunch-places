@@ -51,10 +51,14 @@ fun ProximityScreen(
     ) {
         Column {
             TopAppBar(
-                title = { LunchPlaceName(lunchPlace.name, isTopBarTitle = true) },
+                title = { LunchPlaceName(lunchPlace.name, isForTopBar = true) },
                 navigationIcon = { UpNavigationIcon(onNavigateUp) }
             )
-            LunchPlaceDistance(lunchPlace.distance, modifier = Modifier.padding(16.dp))
+            LunchPlaceDistance(
+                lunchPlace.distance,
+                isForLargeBody = true,
+                modifier = Modifier.padding(16.dp)
+            )
         }
     }
 

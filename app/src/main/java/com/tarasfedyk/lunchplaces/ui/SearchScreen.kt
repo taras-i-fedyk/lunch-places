@@ -201,15 +201,17 @@ private fun SearchResultItem(
         verticalAlignment = Alignment.CenterVertically
     ) {
         LunchPlacePhoto(lunchPlace.photoUri, isThumbnail = true)
-        Column(
-            modifier = Modifier.padding(start = 16.dp)
-        ) {
-            LunchPlaceName(lunchPlace.name)
-            LunchPlaceRating(lunchPlace.rating)
+
+        Column(modifier = Modifier.padding(start = 16.dp)) {
+            LunchPlaceName(lunchPlace.name, isForTopBar = false)
+
+            val isForLargeBody = false
+            LunchPlaceRating(lunchPlace.rating, isForLargeBody = isForLargeBody)
             Row(verticalAlignment = Alignment.CenterVertically) {
-                LunchPlaceDistance(lunchPlace.distance)
+                LunchPlaceDistance(lunchPlace.distance, isForLargeBody = isForLargeBody)
                 LunchPlaceOpenness(
                     lunchPlace.isOpen,
+                    isForLargeBody = isForLargeBody,
                     modifier = Modifier.padding(start = 1.dp)
                 )
             }

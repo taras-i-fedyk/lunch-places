@@ -36,6 +36,129 @@ import com.tarasfedyk.lunchplaces.biz.util.roundToDecimalPlaces
 import com.tarasfedyk.lunchplaces.ui.util.SmallRatingIndicator
 import kotlin.math.roundToInt
 
+@Composable
+fun titleTextStyle(isForTopBar: Boolean): TextStyle =
+    if (isForTopBar) {
+        LocalTextStyle.current
+    } else {
+        MaterialTheme.typography.bodyLarge
+    }
+
+@Composable
+fun bodyTextStyle(isForLargeBody: Boolean): TextStyle =
+    if (isForLargeBody) {
+        MaterialTheme.typography.bodyLarge
+    } else {
+        MaterialTheme.typography.bodyMedium
+    }
+
+@Composable
+fun LunchPlaceName(
+    name: String,
+    isForTopBar: Boolean,
+    modifier: Modifier = Modifier
+) {
+    Text(
+        modifier = modifier,
+        maxLines = if (isForTopBar) 2 else 1,
+        overflow = TextOverflow.Ellipsis,
+        style = titleTextStyle(isForTopBar),
+        text = name
+    )
+}
+
+@Composable
+fun LunchPlaceRating(
+    rating: Double?,
+    isForLargeBody: Boolean,
+    modifier: Modifier = Modifier
+) {
+    if (rating == null) return
+
+    val roundedRating = rating.roundToDecimalPlaces(decimalPlaceCount = 1)
+
+    Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
+        Text(
+            style = bodyTextStyle(isForLargeBody),
+            text = roundedRating.toString(),
+        )
+        SmallRatingIndicator(
+            modifier = Modifier.padding(start = 2.dp, bottom = 2.dp),
+            rating = roundedRating.toFloat()
+        )
+    }
+}
+
+@Composable
+fun LunchPlaceDistance(
+    distance: Float,
+    isForLargeBody: Boolean,
+    modifier: Modifier = Modifier
+) {
+    val distanceAccuracy = 5
+    val roundedDistance = (distance / distanceAccuracy).roundToInt() * distanceAccuracy
+
+    val kilometer = 1000
+
+    val distanceText = if (roundedDistance < kilometer) {
+        stringResource(R.string.meters_distance_template, roundedDistance)
+    } else {
+        val kilometersDistance = roundedDistance.toFloat() / kilometer
+        val roundedKilometersDistance = kilometersDistance.roundToDecimalPlaces(
+            decimalPlaceCount = 1
+        )
+
+        stringResource(R.string.kilometers_distance_template, roundedKilometersDistance)
+    }
+
+    Text(
+        modifier = modifier,
+        style = bodyTextStyle(isForLargeBody),
+        text = distanceText
+    )
+}
+
+@Composable
+fun LunchPlaceAddress(
+    address: String?,
+    isForLargeBody: Boolean,
+    modifier: Modifier = Modifier
+) {
+    if (address == null) return
+
+    Text(
+        modifier = modifier,
+        style = bodyTextStyle(isForLargeBody),
+        text = address
+    )
+}
+
+@Composable
+fun LunchPlaceOpenness(
+    isOpen: Boolean?,
+    isForLargeBody: Boolean,
+    modifier: Modifier = Modifier
+) {
+    if (isOpen != false) return
+
+    val tintColor = MaterialTheme.colorScheme.error
+    if (isForLargeBody) {
+        Text(
+            modifier = modifier,
+            style = bodyTextStyle(isForLargeBody = true),
+            color = tintColor,
+            text = stringResource(R.string.closedness_label)
+        )
+    } else {
+        Icon(
+            modifier = modifier,
+            painter = painterResource(R.drawable.ic_closedness),
+            tint = tintColor,
+            contentDescription = stringResource(R.string.closedness_icon_description)
+        )
+    }
+}
+
 @OptIn(ExperimentalGlideComposeApi::class)
 @Composable
 fun LunchPlacePhoto(
@@ -92,118 +215,3 @@ private fun photoPlaceholderDrawable(): Drawable? {
         colorFilter = PorterDuffColorFilter(tintColor.toArgb(), PorterDuff.Mode.SRC_IN)
     }
 }
-
-@Composable
-fun LunchPlaceName(
-    name: String,
-    modifier: Modifier = Modifier,
-    isTopBarTitle: Boolean = false
-) {
-    Text(
-        modifier = modifier,
-        maxLines = if (isTopBarTitle) 2 else 1,
-        overflow = TextOverflow.Ellipsis,
-        style = titleTextStyle(isTopBarTitle),
-        text = name
-    )
-}
-
-@Composable
-fun LunchPlaceRating(
-    rating: Double?,
-    modifier: Modifier = Modifier
-) {
-    if (rating == null) return
-
-    val roundedRating = rating.roundToDecimalPlaces(decimalPlaceCount = 1)
-
-    Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
-        Text(
-            style = bodyTextStyle(),
-            text = roundedRating.toString(),
-        )
-        SmallRatingIndicator(
-            modifier = Modifier.padding(start = 2.dp, bottom = 2.dp),
-            rating = roundedRating.toFloat()
-        )
-    }
-}
-
-@Composable
-fun LunchPlaceDistance(
-    distance: Float,
-    modifier: Modifier = Modifier
-) {
-    val distanceAccuracy = 5
-    val roundedDistance = (distance / distanceAccuracy).roundToInt() * distanceAccuracy
-
-    val kilometer = 1000
-
-    val distanceText = if (roundedDistance < kilometer) {
-        stringResource(R.string.meters_distance_template, roundedDistance)
-    } else {
-        val kilometersDistance = roundedDistance.toFloat() / kilometer
-        val roundedKilometersDistance = kilometersDistance.roundToDecimalPlaces(
-            decimalPlaceCount = 1
-        )
-
-        stringResource(R.string.kilometers_distance_template, roundedKilometersDistance)
-    }
-
-    Text(
-        modifier = modifier,
-        style = bodyTextStyle(),
-        text = distanceText
-    )
-}
-
-@Composable
-fun LunchPlaceAddress(
-    address: String?,
-    modifier: Modifier = Modifier
-) {
-    if (address == null) return
-
-    Text(
-        modifier = modifier,
-        style = bodyTextStyle(),
-        text = address
-    )
-}
-
-@Composable
-fun LunchPlaceOpenness(
-    isOpen: Boolean?,
-    modifier: Modifier = Modifier,
-    shouldShowText: Boolean = false
-) {
-    if (isOpen != false) return
-
-    val tintColor = MaterialTheme.colorScheme.error
-    if (shouldShowText) {
-        Text(
-            modifier = modifier,
-            style = bodyTextStyle(),
-            color = tintColor,
-            text = stringResource(R.string.closedness_label)
-        )
-    } else {
-        Icon(
-            modifier = modifier,
-            painter = painterResource(R.drawable.ic_closedness),
-            tint = tintColor,
-            contentDescription = stringResource(R.string.closedness_icon_description)
-        )
-    }
-}
-
-@Composable
-private fun titleTextStyle(isTopBarTitle: Boolean): TextStyle =
-    if (isTopBarTitle) {
-        LocalTextStyle.current
-    } else {
-        MaterialTheme.typography.bodyLarge
-    }
-
-@Composable
-private fun bodyTextStyle(): TextStyle = MaterialTheme.typography.bodyMedium

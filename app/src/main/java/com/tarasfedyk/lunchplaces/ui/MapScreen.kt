@@ -24,6 +24,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.LatLngBounds
@@ -51,6 +52,8 @@ private const val MAX_ZOOM_LEVEL: Float = 21f
 // the higher the location accuracy, the smaller the value of this constant as a radius in meters
 private const val MAX_LOCATION_ACCURACY: Float = 4f
 
+private val MAP_VIEWPORT_PADDING: Dp = 48.dp
+
 @Composable
 fun MapScreen(
     mapConfig: MapConfig,
@@ -66,7 +69,7 @@ fun MapScreen(
     val cameraPositionState = rememberCameraPositionState()
 
     val coroutineScope = rememberCoroutineScope()
-    val mapViewportPadding = with (density) { 48.dp.roundToPx() }
+    val mapViewportPadding = with (density) { MAP_VIEWPORT_PADDING.roundToPx() }
     var isMapViewportFocused by remember { mutableStateOf(false) }
     val onSetMapViewportFocused: (Boolean) -> Unit = remember { { isMapViewportFocused = it } }
     val onExploreProximity: () -> Unit = remember(mapConfig.mapViewport, mapViewportPadding) {
