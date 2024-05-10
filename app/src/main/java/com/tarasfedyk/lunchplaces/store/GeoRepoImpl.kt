@@ -53,7 +53,7 @@ class GeoRepoImpl @Inject constructor(
             RankingCriterion.DISTANCE -> SearchByTextRequest.RankPreference.DISTANCE
         }
         val circularBounds = CircularBounds.newInstance(
-            searchFilter.originPoint, searchFilter.settings.preferredRadius
+            searchFilter.originPoint, searchFilter.settings.preferredRadius.toDouble()
         )
 
         val cancellationTokenSource = CancellationTokenSource()

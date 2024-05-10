@@ -3,8 +3,8 @@ package com.tarasfedyk.lunchplaces.store
 import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.doublePreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.tarasfedyk.lunchplaces.biz.SettingsRepo
@@ -29,15 +29,15 @@ class SettingsRepoImpl @Inject constructor(
                 try {
                     val rankingCriterionName =
                         prefs[Keys.RANKING_CRITERION_NAME] ?:
-                        SearchSettings.Defaults.RANKING_CRITERION.name
+                        SearchSettings.DEFAULT_RANKING_CRITERION.name
                     enumValueOf<RankingCriterion>(rankingCriterionName)
                 } catch (e: IllegalArgumentException) {
-                    SearchSettings.Defaults.RANKING_CRITERION
+                    SearchSettings.DEFAULT_RANKING_CRITERION
                 }
             }
             val preferredRadius =
                 prefs[Keys.PREFERRED_RADIUS] ?:
-                SearchSettings.Defaults.PREFERRED_RADIUS
+                SearchSettings.DEFAULT_PREFERRED_RADIUS
             SearchSettings(rankingCriterion, preferredRadius)
         }
 
@@ -51,7 +51,7 @@ class SettingsRepoImpl @Inject constructor(
     private object Keys {
         val RANKING_CRITERION_NAME: Preferences.Key<String> =
             stringPreferencesKey(name = "ranking_criterion_name")
-        val PREFERRED_RADIUS: Preferences.Key<Double> =
-            doublePreferencesKey(name = "preferred_radius")
+        val PREFERRED_RADIUS: Preferences.Key<Float> =
+            floatPreferencesKey(name = "preferred_radius")
     }
 }

@@ -5,13 +5,16 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class SearchSettings(
-    val rankingCriterion: RankingCriterion = Defaults.RANKING_CRITERION,
-    val preferredRadius: Double = Defaults.PREFERRED_RADIUS
+    val rankingCriterion: RankingCriterion = DEFAULT_RANKING_CRITERION,
+    val preferredRadius: Float = DEFAULT_PREFERRED_RADIUS
 ) : Parcelable {
 
-    object Defaults {
-        val RANKING_CRITERION: RankingCriterion = RankingCriterion.RELEVANCE
-        const val PREFERRED_RADIUS: Double = 10000.0
+    companion object {
+        val DEFAULT_RANKING_CRITERION: RankingCriterion = RankingCriterion.RELEVANCE
+
+        const val MIN_PREFERRED_RADIUS: Float = 0f
+        const val MAX_PREFERRED_RADIUS: Float = 50000f
+        const val DEFAULT_PREFERRED_RADIUS: Float = 10000f
     }
 }
 

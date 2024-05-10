@@ -36,6 +36,9 @@ import com.tarasfedyk.lunchplaces.biz.util.roundToDecimalPlaces
 import com.tarasfedyk.lunchplaces.ui.util.SmallRatingIndicator
 import kotlin.math.roundToInt
 
+private const val METERS_IN_KILOMETER: Int = 1000
+private const val DISTANCE_METERS_ACCURACY: Int = 5
+
 @Composable
 fun titleTextStyle(isForTopBar: Boolean): TextStyle =
     if (isForTopBar) {
@@ -95,20 +98,18 @@ fun LunchPlaceDistance(
     isForLargeBody: Boolean,
     modifier: Modifier = Modifier
 ) {
-    val distanceAccuracy = 5
-    val roundedDistance = (distance / distanceAccuracy).roundToInt() * distanceAccuracy
+    val roundedDistanceMeters =
+        (distance / DISTANCE_METERS_ACCURACY).roundToInt() * DISTANCE_METERS_ACCURACY
 
-    val kilometer = 1000
-
-    val distanceText = if (roundedDistance < kilometer) {
-        stringResource(R.string.meters_distance_template, roundedDistance)
+    val distanceText = if (roundedDistanceMeters < METERS_IN_KILOMETER) {
+        stringResource(R.string.distance_meters_template, roundedDistanceMeters)
     } else {
-        val kilometersDistance = roundedDistance.toFloat() / kilometer
-        val roundedKilometersDistance = kilometersDistance.roundToDecimalPlaces(
+        val distanceKilometers = roundedDistanceMeters.toFloat() / METERS_IN_KILOMETER
+        val roundedDistanceKilometers = distanceKilometers.roundToDecimalPlaces(
             decimalPlaceCount = 1
         )
 
-        stringResource(R.string.kilometers_distance_template, roundedKilometersDistance)
+        stringResource(R.string.distance_kilometers_template, roundedDistanceKilometers)
     }
 
     Text(

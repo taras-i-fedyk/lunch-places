@@ -15,8 +15,10 @@ import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -27,6 +29,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -40,6 +43,7 @@ import com.tarasfedyk.lunchplaces.biz.data.SearchSettings
 import com.tarasfedyk.lunchplaces.ui.data.MapConfig
 import com.tarasfedyk.lunchplaces.ui.theme.AppTheme
 import com.tarasfedyk.lunchplaces.ui.util.UpNavigationIcon
+import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -52,25 +56,32 @@ fun SettingsScreen(
 ) {
     val topBarScrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
-    val (configuredSearchSettings, onSetConfiguredSearchSettings) = remember(searchSettings) {
-        mutableStateOf(searchSettings)
+    var configuredSearchSettings by remember(searchSettings) { mutableStateOf(searchSettings) }
+    val onSetConfiguredSearchSettings: (SearchSettings) -> Unit = remember {
+        {
+            configuredSearchSettings = it
+        }
     }
-    val onSetConfiguredRankingCriterion: (RankingCriterion) -> Unit = remember(
-        configuredSearchSettings, onSetConfiguredSearchSettings
-    ) {
+
+    val onSetConfiguredRankingCriterion: (RankingCriterion) -> Unit = remember {
         { selectedRankingCriterion ->
             onSetConfiguredSearchSettings(
-                configuredSearchSettings?.copy(rankingCriterion = selectedRankingCriterion)
+                configuredSearchSettings!!.copy(rankingCriterion = selectedRankingCriterion)
+            )
+        }
+    }
+    val onSetConfiguredPreferredRadius: (Float) -> Unit = remember {
+        { selectedPreferredRadius ->
+            onSetConfiguredSearchSettings(
+                configuredSearchSettings!!.copy(preferredRadius = selectedPreferredRadius)
             )
         }
     }
 
-    val onSaveConfiguredSearchSettings = remember(
-        configuredSearchSettings, searchSettings, onSetSearchSettings
-    ) {
+    val onSaveConfiguredSearchSettings = remember(searchSettings, onSetSearchSettings) {
         {
-            if (configuredSearchSettings != null && configuredSearchSettings != searchSettings) {
-                onSetSearchSettings(configuredSearchSettings)
+            configuredSearchSettings?.let {
+                if (it != searchSettings) onSetSearchSettings(it)
             }
         }
     }
@@ -96,9 +107,20 @@ fun SettingsScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(vertical = 16.dp)
         ) {
+            val isForLargeBody = true
+
             RankingCriterionSelector(
-                selectedRankingCriterion = configuredSearchSettings.rankingCriterion,
-                onSetSelectedRankingCriterion = onSetConfiguredRankingCriterion
+                selectedRankingCriterion = configuredSearchSettings!!.rankingCriterion,
+                onSetSelectedRankingCriterion = onSetConfiguredRankingCriterion,
+                isForLargeBody
+            )
+
+            HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
+
+            PreferredRadiusSelector(
+                selectedPreferredRadius = configuredSearchSettings!!.preferredRadius,
+                onSetSelectedPreferredRadius = onSetConfiguredPreferredRadius,
+                isForLargeBody
             )
         }
     }
@@ -120,46 +142,112 @@ fun SettingsScreen(
 @Composable
 private fun RankingCriterionSelector(
     selectedRankingCriterion: RankingCriterion,
-    onSetSelectedRankingCriterion: (RankingCriterion) -> Unit
+    onSetSelectedRankingCriterion: (RankingCriterion) -> Unit,
+    isForLargeBody: Boolean
 ) {
-    val isForLargeBody = true
-    Column(modifier = Modifier.selectableGroup()) {
-        Text(
-            text = stringResource(R.string.ranking_criterion_caption),
-            style = bodyTextStyle(isForLargeBody),
-            modifier = Modifier.padding(start = 16.dp)
+    Column {
+        Caption(
+            CaptionType.RANKING_CRITERION,
+            isForLargeBody,
+            modifier = Modifier.padding(horizontal = 16.dp)
         )
 
-        Spacer(modifier = Modifier.size(12.dp))
+        Spacer(modifier = Modifier.size(8.dp))
 
-        RankingCriterion.entries.forEach { rankingCriterion ->
-            val isRankingCriterionSelected = (rankingCriterion == selectedRankingCriterion)
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(48.dp)
-                    .selectable(
-                        role = Role.RadioButton,
+        Column(modifier = Modifier.selectableGroup()) {
+            RankingCriterion.entries.forEach { rankingCriterion ->
+                val isRankingCriterionSelected = (rankingCriterion == selectedRankingCriterion)
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(40.dp)
+                        .selectable(
+                            role = Role.RadioButton,
+                            selected = isRankingCriterionSelected,
+                            onClick = { onSetSelectedRankingCriterion(rankingCriterion) }
+                        )
+                        .padding(horizontal = 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    RadioButton(
                         selected = isRankingCriterionSelected,
-                        onClick = { onSetSelectedRankingCriterion(rankingCriterion) }
+                        onClick = null
                     )
-                    .padding(horizontal = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                RadioButton(
-                    selected = isRankingCriterionSelected,
-                    onClick = null
-                )
-                Text(
-                    text = rankingCriterion.displayName,
-                    style = bodyTextStyle(isForLargeBody)
-                )
+                    Text(
+                        text = rankingCriterion.displayName,
+                        style = bodyTextStyle(isForLargeBody)
+                    )
+                }
             }
         }
-
-        Spacer(modifier = Modifier.size(12.dp))
     }
+}
+
+@Composable
+private fun PreferredRadiusSelector(
+    selectedPreferredRadius: Float,
+    onSetSelectedPreferredRadius: (Float) -> Unit,
+    isForLargeBody: Boolean
+) {
+    Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+        Caption(CaptionType.PREFERRED_RADIUS, isForLargeBody)
+
+        Spacer(modifier = Modifier.size(2.dp))
+
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = stringResource(
+                    R.string.preferred_radius_meters_template,
+                    SearchSettings.MIN_PREFERRED_RADIUS.roundToInt()
+                ),
+                style = bodyTextStyle(isForLargeBody)
+            )
+            Slider(
+                modifier = Modifier
+                    .padding(horizontal = 8.dp)
+                    .weight(1f),
+                valueRange = SearchSettings.MIN_PREFERRED_RADIUS ..SearchSettings.MAX_PREFERRED_RADIUS,
+                value = selectedPreferredRadius,
+                onValueChange = onSetSelectedPreferredRadius
+            )
+            Text(
+                text = stringResource(
+                    R.string.preferred_radius_meters_template,
+                    SearchSettings.MAX_PREFERRED_RADIUS.roundToInt()
+                ),
+                style = bodyTextStyle(isForLargeBody)
+            )
+        }
+
+        Spacer(modifier = Modifier.size(2.dp))
+
+        Text(
+            text = stringResource(
+                R.string.preferred_radius_meters_template,
+                selectedPreferredRadius.roundToInt()
+            ),
+            style = bodyTextStyle(isForLargeBody)
+        )
+    }
+}
+
+@Composable
+private fun Caption(
+    captionType: CaptionType,
+    isForLargeBody: Boolean,
+    modifier: Modifier = Modifier
+) {
+    Text(
+        text = stringResource(
+            when (captionType) {
+                CaptionType.RANKING_CRITERION -> R.string.ranking_criterion_caption
+                CaptionType.PREFERRED_RADIUS -> R.string.preferred_radius_caption
+            }
+        ),
+        style = bodyTextStyle(isForLargeBody),
+        modifier = modifier
+    )
 }
 
 @Preview(showBackground = true)
@@ -174,4 +262,9 @@ private fun SettingsScreenPreview() {
             onNavigateUp = {}
         )
     }
+}
+
+private enum class CaptionType {
+    RANKING_CRITERION,
+    PREFERRED_RADIUS
 }
