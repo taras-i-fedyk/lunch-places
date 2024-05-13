@@ -2,7 +2,6 @@
 <resources>
     <string name="app_name">Lunch Places</string>
 
-    <string name="search_hint">Search lunch places</string>
     <string name="search_settings_title">Search settings</string>
     <string name="ranking_criterion_caption">Rank by</string>
     <string name="preferred_radius_caption">Preferred radius</string>
@@ -10,9 +9,20 @@
     <string name="distance_meters_template">%d m</string>
     <string name="distance_kilometers_template">%s km</string>
     <string name="closedness_label">Closed</string>
-    <string name="save_action_label">Save</string>
-    <string name="resolution_action_label">Resolve</string>
-    <string name="retry_action_label">Retry</string>
+    <string name="save_label">Save</string>
+    <string name="cancel_label">Cancel</string>
+    <string name="discard_label">Discard</string>
+    <string name="resolve_label">Resolve</string>
+    <string name="retry_label">Retry</string>
+    <string name="search_hint">Search lunch places</string>
+
+    <string name="closure_confirmation_message">Discard changes?</string>
+    <string name="map_permissions_error_message">Current location unknown because of denied location permissions</string>
+    <string name="map_location_error_message">Current location unknown</string>
+    <string name="search_permissions_error_message">Search failed because of denied location permissions</string>
+    <string name="search_location_error_message">Search failed because of unknown current location</string>
+    <string name="search_connection_error_message">Search failed due to no internet connection</string>
+    <string name="search_error_message">Search failed</string>
 
     <string name="map_description">Map</string>
     <string name="current_location_button_description">Current location button</string>
@@ -26,11 +36,4 @@
     <string name="proximity_icon_description">Proximity icon</string>
     <string name="lunch_place_thumbnail_description">Lunch place thumbnail</string>
     <string name="lunch_place_photo_description">Lunch place photo</string>
-
-    <string name="map_permissions_error_message">Current location unknown because of denied location permissions</string>
-    <string name="map_location_error_message">Current location unknown</string>
-    <string name="search_permissions_error_message">Search failed because of denied location permissions</string>
-    <string name="search_location_error_message">Search failed because of unknown current location</string>
-    <string name="search_connection_error_message">Search failed due to no internet connection</string>
-    <string name="search_error_message">Search failed</string>
 </resources>

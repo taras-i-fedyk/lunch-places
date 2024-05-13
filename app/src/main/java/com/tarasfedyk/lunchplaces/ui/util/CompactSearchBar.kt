@@ -30,22 +30,22 @@ import com.tarasfedyk.lunchplaces.R
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CompactSearchBar(
+    interactionSource: MutableInteractionSource,
     activenessState: MutableState<Boolean>,
     queryState: MutableState<String>,
-    interactionSource: MutableInteractionSource,
     onNavigateBack: () -> Unit,
-    onNavigateToSettings: () -> Unit,
     onTrySearch: (String) -> Unit,
+    onNavigateToSettings: () -> Unit,
     modifier: Modifier = Modifier,
     tonalElevation: Dp = SearchBarDefaults.TonalElevation,
     shadowElevation: Dp = SearchBarDefaults.ShadowElevation,
     hint: String = "",
     searchStatusContent: @Composable ColumnScope.() -> Unit
 ) {
+    val isFocused by interactionSource.collectIsFocusedAsState()
+
     var isActive by activenessState
     val onSetActive: (Boolean) -> Unit = remember { { isActive = it } }
-
-    val isFocused by interactionSource.collectIsFocusedAsState()
 
     var query by queryState
     val onSetQuery: (String) -> Unit = remember { { query = it } }

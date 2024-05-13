@@ -28,7 +28,8 @@ fun NavGraphBuilder.proximityScreen(
             navArgument(name = LUNCH_PLACE_INDEX_KEY) { type = NavType.IntType }
         )
     ) { backStackEntry ->
-        val isCurrentDestination = onGetCurrentRoute() == PROXIMITY_ROUTE
+        val currentRoute = onGetCurrentRoute()
+        val isCurrentDestination = currentRoute == PROXIMITY_ROUTE
 
         val lunchPlaceIndex = backStackEntry.arguments?.getInt(
             LUNCH_PLACE_INDEX_KEY, INVALID_LUNCH_PLACE_INDEX

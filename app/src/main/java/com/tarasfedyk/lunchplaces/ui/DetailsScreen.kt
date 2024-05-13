@@ -82,7 +82,7 @@ fun DetailsScreen(
 }
 
 @Composable
-fun ProximityIcon(onExploreProximity: () -> Unit) {
+private fun ProximityIcon(onExploreProximity: () -> Unit) {
     IconButton(onClick = onExploreProximity) {
         Icon(
             painterResource(R.drawable.ic_proximity),

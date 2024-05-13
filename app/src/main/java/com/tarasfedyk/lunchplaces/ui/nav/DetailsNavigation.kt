@@ -29,7 +29,8 @@ fun NavGraphBuilder.detailsScreen(
             navArgument(name = LUNCH_PLACE_INDEX_KEY) { type = NavType.IntType }
         )
     ) { backStackEntry ->
-        val isCurrentDestination = onGetCurrentRoute() == DETAILS_ROUTE
+        val currentRoute = onGetCurrentRoute()
+        val isCurrentDestination = currentRoute == DETAILS_ROUTE
 
         val lunchPlaceIndex = backStackEntry.arguments?.getInt(
             LUNCH_PLACE_INDEX_KEY, INVALID_LUNCH_PLACE_INDEX

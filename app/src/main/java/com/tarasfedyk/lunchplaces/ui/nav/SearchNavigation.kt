@@ -16,19 +16,21 @@ fun NavGraphBuilder.searchScreen(
     lunchPlacesStatus: Status<SearchFilter, List<LunchPlace>>?,
     onSearchLunchPlaces: (String) -> Unit,
     onDiscardLunchPlaces: () -> Unit,
-    onNavigateToSettings: () -> Unit,
-    onNavigateToDetails: (Int) -> Unit
+    onNavigateToDetails: (Int) -> Unit,
+    onNavigateToSettings: () -> Unit
 ) {
     composable(SEARCH_ROUTE) {
-        val isCurrentDestination = onGetCurrentRoute() == SEARCH_ROUTE
+        val currentRoute = onGetCurrentRoute()
+        val isCurrentDestination = currentRoute == SEARCH_ROUTE
+
         SearchScreen(
             isCurrentDestination = isCurrentDestination,
             onSetMapConfig = onSetMapConfig,
             lunchPlacesStatus = lunchPlacesStatus,
             onSearchLunchPlaces = onSearchLunchPlaces,
             onDiscardLunchPlaces = onDiscardLunchPlaces,
-            onNavigateToSettings = onNavigateToSettings,
-            onNavigateToDetails = onNavigateToDetails
+            onNavigateToDetails = onNavigateToDetails,
+            onNavigateToSettings = onNavigateToSettings
         )
     }
 }

@@ -17,7 +17,9 @@ fun NavGraphBuilder.settingsScreen(
     onNavigateUp: () -> Unit
 ) {
     composable(SETTINGS_ROUTE) {
-        val isCurrentDestination = onGetCurrentRoute() == SETTINGS_ROUTE
+        val currentRoute = onGetCurrentRoute()
+        val isCurrentDestination = currentRoute == SETTINGS_ROUTE
+
         SettingsScreen(
             isCurrentDestination,
             onSetMapConfig,

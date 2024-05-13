@@ -133,9 +133,13 @@ class RootActivity : ComponentActivity() {
         onDiscardLunchPlaces: () -> Unit
     ) {
         val navController = rememberNavController()
+
         val onGetCurrentRoute: () -> String? = remember {
-            { navController.currentDestination?.route }
+            {
+                navController.currentDestination?.route
+            }
         }
+
         val onNavigateUp: () -> Unit = remember { { navController.navigateUp() } }
         val onNavigateToSettings = remember { navController::navigateToSettings }
         val onNavigateToDetails = remember { navController::navigateToDetails }
@@ -143,13 +147,13 @@ class RootActivity : ComponentActivity() {
 
         NavHost(navController, startDestination = SEARCH_ROUTE) {
             searchScreen(
-                onGetCurrentRoute,
-                onSetMapConfig,
-                lunchPlacesStatus,
-                onSearchLunchPlaces,
-                onDiscardLunchPlaces,
-                onNavigateToSettings,
-                onNavigateToDetails
+                onGetCurrentRoute = onGetCurrentRoute,
+                onSetMapConfig = onSetMapConfig,
+                lunchPlacesStatus = lunchPlacesStatus,
+                onSearchLunchPlaces = onSearchLunchPlaces,
+                onDiscardLunchPlaces = onDiscardLunchPlaces,
+                onNavigateToDetails = onNavigateToDetails,
+                onNavigateToSettings = onNavigateToSettings
             )
             settingsScreen(
                 onGetCurrentRoute,

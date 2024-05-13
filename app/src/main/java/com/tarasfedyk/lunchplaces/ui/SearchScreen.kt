@@ -52,8 +52,8 @@ fun SearchScreen(
     lunchPlacesStatus: Status<SearchFilter, List<LunchPlace>>?,
     onSearchLunchPlaces: (String) -> Unit,
     onDiscardLunchPlaces: () -> Unit,
-    onNavigateToSettings: () -> Unit,
-    onNavigateToDetails: (Int) -> Unit
+    onNavigateToDetails: (Int) -> Unit,
+    onNavigateToSettings: () -> Unit
 ) {
     val searchBarActivenessState = rememberSaveable { mutableStateOf(false) }
 
@@ -64,11 +64,11 @@ fun SearchScreen(
         searchBarActivenessState = searchBarActivenessState,
         enteredQueryState = enteredQueryState,
         appliedQueryState = appliedQueryState,
+        lunchPlacesStatus = lunchPlacesStatus,
         onSearchLunchPlaces = onSearchLunchPlaces,
         onDiscardLunchPlaces = onDiscardLunchPlaces,
-        lunchPlacesStatus = lunchPlacesStatus,
-        onNavigateToSettings = onNavigateToSettings,
-        onNavigateToDetails = onNavigateToDetails
+        onNavigateToDetails = onNavigateToDetails,
+        onNavigateToSettings = onNavigateToSettings
     )
 
     LaunchedEffect(isCurrentDestination, searchBarActivenessState.value, onSetMapConfig) {
@@ -88,8 +88,8 @@ private fun SearchScreenImpl(
     lunchPlacesStatus: Status<SearchFilter, List<LunchPlace>>?,
     onSearchLunchPlaces: (String) -> Unit,
     onDiscardLunchPlaces: () -> Unit,
-    onNavigateToSettings: () -> Unit,
-    onNavigateToDetails: (Int) -> Unit
+    onNavigateToDetails: (Int) -> Unit,
+    onNavigateToSettings: () -> Unit
 ) {
     val searchBarBottomPadding = if (searchBarActivenessState.value) 0.dp else 16.dp
 
@@ -136,12 +136,12 @@ private fun SearchScreenImpl(
             .fillMaxWidth(),
         shadowElevation = SearchBarDefaults.TonalElevation,
         hint = stringResource(R.string.search_hint),
+        interactionSource = searchBarInteractionSource,
         activenessState = searchBarActivenessState,
         queryState = enteredQueryState,
-        interactionSource = searchBarInteractionSource,
         onNavigateBack = onNavigateBack,
-        onNavigateToSettings = onNavigateToSettings,
-        onTrySearch = onTrySearch
+        onTrySearch = onTrySearch,
+        onNavigateToSettings = onNavigateToSettings
     ) {
         SearchStatus(lunchPlacesStatus, onNavigateToDetails, onRetrySearch)
     }
@@ -298,8 +298,8 @@ private fun SearchScreenPreview(
             ),
             onSearchLunchPlaces = {},
             onDiscardLunchPlaces = {},
-            onNavigateToSettings = {},
-            onNavigateToDetails = {}
+            onNavigateToDetails = {},
+            onNavigateToSettings = {}
         )
     }
 }

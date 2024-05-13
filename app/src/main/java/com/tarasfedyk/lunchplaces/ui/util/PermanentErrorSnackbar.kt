@@ -27,9 +27,9 @@ fun PermanentErrorSnackbar(
     var snackbarAppearanceId by remember { mutableStateOf(UByte.MIN_VALUE) }
 
     val actionLabel = if (isAppSettingsError) {
-        stringResource(R.string.resolution_action_label)
+        stringResource(R.string.resolve_label)
     } else {
-        stringResource(R.string.retry_action_label)
+        stringResource(R.string.retry_label)
     }
 
     val onPerformAction = remember(context, isAppSettingsError, onRetry) {
