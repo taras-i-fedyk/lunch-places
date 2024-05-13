@@ -10,6 +10,9 @@
     <string name="distance_meters_template">%d m</string>
     <string name="distance_kilometers_template">%s km</string>
     <string name="closedness_label">Closed</string>
+    <string name="save_action_label">Save</string>
+    <string name="resolution_action_label">Resolve</string>
+    <string name="retry_action_label">Retry</string>
 
     <string name="map_description">Map</string>
     <string name="current_location_button_description">Current location button</string>
@@ -19,6 +22,7 @@
     <string name="settings_icon_description">Settings icon</string>
     <string name="query_clearance_icon_description">Query clearance icon</string>
     <string name="closedness_icon_description">Closedness icon</string>
+    <string name="closure_icon_description">Closure icon</string>
     <string name="proximity_icon_description">Proximity icon</string>
     <string name="lunch_place_thumbnail_description">Lunch place thumbnail</string>
     <string name="lunch_place_photo_description">Lunch place photo</string>
@@ -29,7 +33,4 @@
     <string name="search_location_error_message">Search failed because of unknown current location</string>
     <string name="search_connection_error_message">Search failed due to no internet connection</string>
     <string name="search_error_message">Search failed</string>
-
-    <string name="resolution_action_label">Resolve</string>
-    <string name="retry_action_label">Retry</string>
 </resources>

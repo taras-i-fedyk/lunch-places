@@ -137,8 +137,8 @@ private fun SearchScreenImpl(
         shadowElevation = SearchBarDefaults.TonalElevation,
         hint = stringResource(R.string.search_hint),
         activenessState = searchBarActivenessState,
-        interactionSource = searchBarInteractionSource,
         queryState = enteredQueryState,
+        interactionSource = searchBarInteractionSource,
         onNavigateBack = onNavigateBack,
         onNavigateToSettings = onNavigateToSettings,
         onTrySearch = onTrySearch

@@ -31,8 +31,8 @@ import com.tarasfedyk.lunchplaces.R
 @Composable
 fun CompactSearchBar(
     activenessState: MutableState<Boolean>,
-    interactionSource: MutableInteractionSource,
     queryState: MutableState<String>,
+    interactionSource: MutableInteractionSource,
     onNavigateBack: () -> Unit,
     onNavigateToSettings: () -> Unit,
     onTrySearch: (String) -> Unit,

@@ -14,21 +14,24 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -42,7 +45,6 @@ import com.tarasfedyk.lunchplaces.biz.data.RankingCriterion
 import com.tarasfedyk.lunchplaces.biz.data.SearchSettings
 import com.tarasfedyk.lunchplaces.ui.data.MapConfig
 import com.tarasfedyk.lunchplaces.ui.theme.AppTheme
-import com.tarasfedyk.lunchplaces.ui.util.UpNavigationIcon
 import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -57,42 +59,35 @@ fun SettingsScreen(
     val topBarScrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
     var configuredSearchSettings by remember(searchSettings) { mutableStateOf(searchSettings) }
-    val onSetConfiguredSearchSettings: (SearchSettings) -> Unit = remember {
-        {
-            configuredSearchSettings = it
-        }
-    }
-
     val onSetConfiguredRankingCriterion: (RankingCriterion) -> Unit = remember {
-        { selectedRankingCriterion ->
-            onSetConfiguredSearchSettings(
-                configuredSearchSettings!!.copy(rankingCriterion = selectedRankingCriterion)
+        { configuredRankingCriterion ->
+            configuredSearchSettings = configuredSearchSettings!!.copy(
+                rankingCriterion = configuredRankingCriterion
             )
         }
     }
     val onSetConfiguredPreferredRadius: (Float) -> Unit = remember {
-        { selectedPreferredRadius ->
-            onSetConfiguredSearchSettings(
-                configuredSearchSettings!!.copy(preferredRadius = selectedPreferredRadius)
+        { configuredPreferredRadius ->
+            configuredSearchSettings = configuredSearchSettings!!.copy(
+                preferredRadius = configuredPreferredRadius
             )
         }
     }
 
-    val onSaveConfiguredSearchSettings = remember(searchSettings, onSetSearchSettings) {
+    val onSaveConfiguredSearchSettings: () -> Unit = remember(onSetSearchSettings, onNavigateUp) {
         {
-            configuredSearchSettings?.let {
-                if (it != searchSettings) onSetSearchSettings(it)
-            }
+            configuredSearchSettings?.let { onSetSearchSettings(it) }
+            onNavigateUp()
         }
     }
-    val currentOnSaveConfiguredSearchSettings by rememberUpdatedState(onSaveConfiguredSearchSettings)
 
     Scaffold(
         modifier = Modifier.nestedScroll(topBarScrollBehavior.nestedScrollConnection),
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(R.string.search_settings_title)) },
-                navigationIcon = { UpNavigationIcon(onNavigateUp) },
+                navigationIcon = { ClosureIcon(onClose = onNavigateUp) },
+                actions = { SaveButton(onSave = onSaveConfiguredSearchSettings) },
                 scrollBehavior = topBarScrollBehavior
             )
         }
@@ -131,11 +126,22 @@ fun SettingsScreen(
         val mapConfig = MapConfig()
         onSetMapConfig(mapConfig)
     }
+}
 
-    DisposableEffect(Unit) {
-        onDispose {
-            currentOnSaveConfiguredSearchSettings()
-        }
+@Composable
+fun ClosureIcon(onClose: () -> Unit) {
+    IconButton(onClick = onClose) {
+        Icon(
+            imageVector = Icons.Default.Close,
+            contentDescription = stringResource(R.string.closure_icon_description)
+        )
+    }
+}
+
+@Composable
+fun SaveButton(onSave: () -> Unit) {
+    TextButton(onClick = onSave) {
+        Text(stringResource(R.string.save_action_label))
     }
 }
 
