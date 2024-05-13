@@ -61,8 +61,9 @@ fun SettingsScreen(
 ) {
     if (searchSettings == null)  return
 
-    val initialSearchSettings = rememberSaveable { searchSettings }
+    val topBarScrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
+    val initialSearchSettings = rememberSaveable { searchSettings }
     var pendingSearchSettings by rememberSaveable { mutableStateOf(initialSearchSettings) }
     val onSetPendingRankingCriterion: (RankingCriterion) -> Unit = remember {
         { pendingRankingCriterion ->
@@ -112,8 +113,6 @@ fun SettingsScreen(
             onNavigateUp()
         }
     }
-
-    val topBarScrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
     Scaffold(
         modifier = Modifier.nestedScroll(topBarScrollBehavior.nestedScrollConnection),
@@ -175,27 +174,6 @@ private fun ClosureIcon(onClose: () -> Unit) {
             contentDescription = stringResource(R.string.closure_icon_description)
         )
     }
-}
-
-@Composable
-private fun ClosureConfirmationDialog(
-    onClosureDismissed: () -> Unit,
-    onClosureConfirmed: () -> Unit
-) {
-    AlertDialog(
-        text = { Text(stringResource(R.string.closure_confirmation_message)) },
-        onDismissRequest = onClosureDismissed,
-        dismissButton = {
-            TextButton(onClick = onClosureDismissed) {
-                Text(stringResource(R.string.cancel_label))
-            }
-        },
-        confirmButton = {
-            TextButton(onClick = onClosureConfirmed) {
-                Text(stringResource(R.string.discard_label))
-            }
-        }
-    )
 }
 
 @Composable
@@ -313,6 +291,27 @@ private fun Caption(
         ),
         style = bodyTextStyle(isForLargeBody),
         modifier = modifier
+    )
+}
+
+@Composable
+private fun ClosureConfirmationDialog(
+    onClosureDismissed: () -> Unit,
+    onClosureConfirmed: () -> Unit
+) {
+    AlertDialog(
+        text = { Text(stringResource(R.string.closure_confirmation_message)) },
+        onDismissRequest = onClosureDismissed,
+        dismissButton = {
+            TextButton(onClick = onClosureDismissed) {
+                Text(stringResource(R.string.cancel_label))
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onClosureConfirmed) {
+                Text(stringResource(R.string.discard_label))
+            }
+        }
     )
 }
 

@@ -112,11 +112,11 @@ private fun SearchScreenImpl(
     }
 
     val onTrySearch: (String) -> Unit = remember(focusManager, onNavigateBack, onSearchLunchPlaces) {
-        { query ->
-            appliedQueryState.value = query
-            if (query.isNotEmpty()) {
+        { enteredQuery ->
+            appliedQueryState.value = enteredQuery
+            if (enteredQuery.isNotEmpty()) {
                 focusManager.clearFocus()
-                onSearchLunchPlaces(query)
+                onSearchLunchPlaces(enteredQuery)
             } else {
                 onNavigateBack()
             }

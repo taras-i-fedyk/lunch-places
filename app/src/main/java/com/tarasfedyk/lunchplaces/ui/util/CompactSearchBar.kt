@@ -72,9 +72,9 @@ fun CompactSearchBar(
                 SettingsIcon(onNavigateToSettings)
             }
         },
+        interactionSource = interactionSource,
         active = isActive,
         onActiveChange = onSetActive,
-        interactionSource = interactionSource,
         query = query,
         onQueryChange = onSetQuery,
         onSearch = onTrySearch
