@@ -53,17 +53,10 @@ class GeoVM @Inject constructor(
         initialValue = GeoState()
     )
 
-    init {
+    fun setLocationPermissionsLevel(locationPermissionsLevel: LocationPermissionsLevel) {
         viewModelScope.launch {
-            locationPermissionsLevelFlow.filterNotNull().collect { locationPermissionsLevel ->
-                onLocationPermissionsLevelChanged(locationPermissionsLevel)
-            }
-        }
-
-        viewModelScope.launch {
-            searchSettingsFlow.filterNotNull().collect {
-                onSearchSettingsChanged()
-            }
+            _locationPermissionsLevelFlow.value = locationPermissionsLevel
+            onLocationPermissionsLevelChanged(locationPermissionsLevel)
         }
     }
 
@@ -82,21 +75,15 @@ class GeoVM @Inject constructor(
         }
     }
 
-    private suspend fun onSearchSettingsChanged() {
-        val lunchPlacesStatus = geoStateFlow.first().lunchPlacesStatus
-        if (lunchPlacesStatus != null) {
-            refreshLunchPlaces()
-        }
-    }
-
-    fun setLocationPermissionsLevel(locationPermissionsLevel: LocationPermissionsLevel) {
-        _locationPermissionsLevelFlow.value = locationPermissionsLevel
-    }
-
     fun setSearchSettings(searchSettings: SearchSettings) {
         viewModelScope.launch {
             settingsRepo.setSearchSettings(searchSettings)
+            onSearchSettingsChanged()
         }
+    }
+
+    private fun onSearchSettingsChanged() {
+        refreshLunchPlaces()
     }
 
     private suspend fun safelyDetermineCurrentLocation() {
@@ -144,7 +131,8 @@ class GeoVM @Inject constructor(
 
     private fun refreshLunchPlaces() {
         lunchPlacesLauncher.launch {
-            geoStateFlow.first().lunchPlacesStatus?.let { lunchPlacesStatus ->
+            val lunchPlacesStatus = geoStateFlow.first().lunchPlacesStatus
+            if (lunchPlacesStatus != null) {
                 searchLunchPlacesImpl(lunchPlacesStatus.arg.query)
             }
         }
