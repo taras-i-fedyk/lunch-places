@@ -14,8 +14,6 @@ import com.tarasfedyk.lunchplaces.biz.util.ReplaceableLauncher
 import com.tarasfedyk.lunchplaces.biz.data.LocationPermissionsLevel
 import com.tarasfedyk.lunchplaces.biz.data.MediaLimits
 import com.tarasfedyk.lunchplaces.biz.data.SearchSettings
-import com.tarasfedyk.lunchplaces.biz.data.isCoarseOrFine
-import com.tarasfedyk.lunchplaces.biz.data.isFailureDueToLocationPermissions
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -53,26 +51,18 @@ class GeoVM @Inject constructor(
         initialValue = GeoState()
     )
 
-    fun setLocationPermissionsLevel(locationPermissionsLevel: LocationPermissionsLevel) {
-        viewModelScope.launch {
-            _locationPermissionsLevelFlow.value = locationPermissionsLevel
-            onLocationPermissionsLevelChanged(locationPermissionsLevel)
-        }
+    init {
+        refreshLunchPlaces(RefreshApplicability.PENDING_ITEMS)
     }
 
-    private suspend fun onLocationPermissionsLevelChanged(
-        locationPermissionsLevel: LocationPermissionsLevel
-    ) {
-        safelyDetermineCurrentLocation()
+    fun setLocationPermissionsLevel(locationPermissionsLevel: LocationPermissionsLevel) {
+        _locationPermissionsLevelFlow.value = locationPermissionsLevel
+        onLocationPermissionsLevelChanged()
+    }
 
-        val lunchPlacesStatus = geoStateFlow.first().lunchPlacesStatus
-        if (
-            lunchPlacesStatus is Status.Pending ||
-            (lunchPlacesStatus.isFailureDueToLocationPermissions &&
-            locationPermissionsLevel.isCoarseOrFine)
-        ) {
-            refreshLunchPlaces()
-        }
+    private fun onLocationPermissionsLevelChanged() {
+        determineCurrentLocation()
+        refreshLunchPlaces(RefreshApplicability.FAILED_ITEMS)
     }
 
     fun setSearchSettings(searchSettings: SearchSettings) {
@@ -83,7 +73,7 @@ class GeoVM @Inject constructor(
     }
 
     private fun onSearchSettingsChanged() {
-        refreshLunchPlaces()
+        refreshLunchPlaces(RefreshApplicability.ANY_ITEMS)
     }
 
     private suspend fun safelyDetermineCurrentLocation() {
@@ -129,10 +119,17 @@ class GeoVM @Inject constructor(
         }
     }
 
-    private fun refreshLunchPlaces() {
+    private fun refreshLunchPlaces(refreshApplicability: RefreshApplicability) {
         lunchPlacesLauncher.launch {
-            val lunchPlacesStatus = geoStateFlow.first().lunchPlacesStatus
-            if (lunchPlacesStatus != null) {
+            val lunchPlacesStatus = geoStateFlow.first().lunchPlacesStatus ?: return@launch
+
+            val shouldPerformRefresh = when (refreshApplicability) {
+                RefreshApplicability.PENDING_ITEMS -> lunchPlacesStatus is Status.Pending
+                RefreshApplicability.FAILED_ITEMS -> lunchPlacesStatus is Status.Failure
+                RefreshApplicability.ANY_ITEMS -> true
+            }
+
+            if (shouldPerformRefresh) {
                 searchLunchPlacesImpl(lunchPlacesStatus.arg.query)
             }
         }
@@ -150,6 +147,7 @@ class GeoVM @Inject constructor(
         updateGeoState { it.copy(lunchPlacesStatus = Status.Pending(searchFilter)) }
 
         safelyDetermineCurrentLocation()
+        yield()
         val currentLocationTerminalStatus = geoStateFlow
             .first { it.currentLocationStatus is Status.Terminal }
             .currentLocationStatus
@@ -189,5 +187,11 @@ class GeoVM @Inject constructor(
 
     private object Keys {
         const val GEO_STATE: String = "geo_state"
+    }
+
+    private enum class RefreshApplicability {
+        PENDING_ITEMS,
+        FAILED_ITEMS,
+        ANY_ITEMS
     }
 }

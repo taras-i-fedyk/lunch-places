@@ -130,6 +130,3 @@ private enum class StatusType {
     SUCCESS,
     FAILURE
 }
-
-val Status<SearchFilter, List<LunchPlace>>?.isFailureDueToLocationPermissions: Boolean
-    get() = (this is Status.Failure && errorType == ErrorType.LOCATION_PERMISSIONS)
