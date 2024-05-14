@@ -47,7 +47,7 @@ class GeoVM @Inject constructor(
     private val currentLocationLauncher: ReplaceableLauncher = ReplaceableLauncher(viewModelScope)
     private val lunchPlacesLauncher: ReplaceableLauncher = ReplaceableLauncher(viewModelScope)
     val geoStateFlow: StateFlow<GeoState> = savedStateHandle.getStateFlow(
-        key = Keys.GEO_STATE,
+        key = GEO_STATE_KEY,
         initialValue = GeoState()
     )
 
@@ -176,16 +176,16 @@ class GeoVM @Inject constructor(
     private suspend fun updateGeoState(function: (GeoState) -> GeoState) {
         val geoState = geoStateFlow.first()
         val newGeoState = function(geoState)
-        savedStateHandle[Keys.GEO_STATE] = newGeoState
-    }
-
-    private object Keys {
-        const val GEO_STATE: String = "geo_state"
+        savedStateHandle[GEO_STATE_KEY] = newGeoState
     }
 
     private enum class RefreshApplicability {
         PENDING_ITEMS,
         FAILED_ITEMS,
         ANY_ITEMS
+    }
+
+    companion object {
+        private const val GEO_STATE_KEY: String = "geo_state"
     }
 }
