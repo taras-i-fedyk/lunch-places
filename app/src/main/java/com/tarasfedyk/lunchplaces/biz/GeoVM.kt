@@ -76,11 +76,6 @@ class GeoVM @Inject constructor(
         refreshLunchPlaces(RefreshApplicability.ANY_ITEMS)
     }
 
-    private suspend fun safelyDetermineCurrentLocation() {
-        determineCurrentLocation()
-        yield()
-    }
-
     fun determineCurrentLocation() {
         currentLocationLauncher.launch {
             determineCurrentLocationImpl()
@@ -146,7 +141,7 @@ class GeoVM @Inject constructor(
         var searchFilter = SearchFilter(query, mediaLimits, searchSettings)
         updateGeoState { it.copy(lunchPlacesStatus = Status.Pending(searchFilter)) }
 
-        safelyDetermineCurrentLocation()
+        determineCurrentLocation()
         yield()
         val currentLocationTerminalStatus = geoStateFlow
             .first { it.currentLocationStatus is Status.Terminal }
@@ -182,7 +177,6 @@ class GeoVM @Inject constructor(
         val geoState = geoStateFlow.first()
         val newGeoState = function(geoState)
         savedStateHandle[Keys.GEO_STATE] = newGeoState
-        yield()
     }
 
     private object Keys {
