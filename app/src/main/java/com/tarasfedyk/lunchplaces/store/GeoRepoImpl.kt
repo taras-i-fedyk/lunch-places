@@ -120,13 +120,16 @@ class GeoRepoImpl @Inject constructor(
 
     @OptIn(ExperimentalCoroutinesApi::class)
     private suspend fun Place.determineIfOpen(): Boolean? {
-        val cancellationTokenSource = CancellationTokenSource()
+        /*val cancellationTokenSource = CancellationTokenSource()
         val isOpenRequest = IsOpenRequest
             .builder(this)
             .setCancellationToken(cancellationTokenSource.token)
             .build()
         val isOpenTask = placesClient.isOpen(isOpenRequest)
-        return isOpenTask.await(cancellationTokenSource).isOpen
+        return isOpenTask.await(cancellationTokenSource).isOpen*/
+
+        // we're replacing the above logic with this line to reduce the cost of using the Places API
+        return null
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
