@@ -12,8 +12,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
@@ -36,6 +39,7 @@ import com.tarasfedyk.lunchplaces.ui.nav.searchScreen
 import com.tarasfedyk.lunchplaces.ui.nav.settingsScreen
 import com.tarasfedyk.lunchplaces.ui.theme.AppTheme
 import com.tarasfedyk.lunchplaces.ui.util.LocationPermissionsTracker
+import com.tarasfedyk.lunchplaces.ui.util.isGooglePlayServicesAvailable
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -54,6 +58,10 @@ class RootActivity : ComponentActivity() {
     private fun RootContent(
         geoVM: GeoVM = hiltViewModel()
     ) {
+        val context = LocalContext.current
+
+        var isGooglePlayServicesAvailable by remember { mutableStateOf(false) }
+
         val locationPermissionsLevel by geoVM.locationPermissionsLevelFlow.collectAsStateWithLifecycle()
         val isNoLocationPermissionGranted = !locationPermissionsLevel.isCoarseOrFine
         val onSetLocationPermissionsLevel = remember(geoVM) { geoVM::setLocationPermissionsLevel }
@@ -67,6 +75,7 @@ class RootActivity : ComponentActivity() {
         val onDiscardLunchPlaces = remember(geoVM) { geoVM::discardLunchPlaces }
 
         RootContentImpl(
+            isGooglePlayServicesAvailable= isGooglePlayServicesAvailable,
             isNoLocationPermissionGranted = isNoLocationPermissionGranted,
             onSetLocationPermissionsLevel = onSetLocationPermissionsLevel,
             searchSettings = searchSettings,
@@ -76,10 +85,15 @@ class RootActivity : ComponentActivity() {
             onSearchLunchPlaces = onSearchLunchPlaces,
             onDiscardLunchPlaces = onDiscardLunchPlaces
         )
+
+        LifecycleEventEffect(Lifecycle.Event.ON_START) {
+            isGooglePlayServicesAvailable = context.isGooglePlayServicesAvailable()
+        }
     }
 
     @Composable
     private fun RootContentImpl(
+        isGooglePlayServicesAvailable: Boolean,
         isNoLocationPermissionGranted: Boolean,
         onSetLocationPermissionsLevel: (LocationPermissionsLevel) -> Unit,
         searchSettings: SearchSettings?,
@@ -92,12 +106,14 @@ class RootActivity : ComponentActivity() {
         var mapConfig by rememberSaveable { mutableStateOf(MapConfig()) }
         val onSetMapConfig: (MapConfig) -> Unit = remember { { mapConfig = it } }
         Box(modifier = Modifier.fillMaxSize()) {
-            MapScreen(
-                mapConfig = mapConfig,
-                isNoLocationPermissionGranted = isNoLocationPermissionGranted,
-                currentLocationStatus = geoState.currentLocationStatus,
-                onDetermineCurrentLocation = onDetermineCurrentLocation
-            )
+            if (isGooglePlayServicesAvailable) {
+                MapScreen(
+                    mapConfig = mapConfig,
+                    isNoLocationPermissionGranted = isNoLocationPermissionGranted,
+                    currentLocationStatus = geoState.currentLocationStatus,
+                    onDetermineCurrentLocation = onDetermineCurrentLocation
+                )
+            }
             NavGraph(
                 onSetMapConfig = onSetMapConfig,
                 searchSettings = searchSettings,
@@ -179,6 +195,7 @@ class RootActivity : ComponentActivity() {
     private fun RootContentPreview() {
         AppTheme {
             RootContentImpl(
+                isGooglePlayServicesAvailable = true,
                 isNoLocationPermissionGranted = false,
                 onSetLocationPermissionsLevel = {},
                 searchSettings = null,
