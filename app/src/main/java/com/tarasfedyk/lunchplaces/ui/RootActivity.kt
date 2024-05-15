@@ -55,6 +55,7 @@ class RootActivity : ComponentActivity() {
         geoVM: GeoVM = hiltViewModel()
     ) {
         val locationPermissionsLevel by geoVM.locationPermissionsLevelFlow.collectAsStateWithLifecycle()
+        val isNoLocationPermissionGranted = !locationPermissionsLevel.isCoarseOrFine
         val onSetLocationPermissionsLevel = remember(geoVM) { geoVM::setLocationPermissionsLevel }
 
         val searchSettings by geoVM.searchSettingsFlow.collectAsStateWithLifecycle()
@@ -66,7 +67,7 @@ class RootActivity : ComponentActivity() {
         val onDiscardLunchPlaces = remember(geoVM) { geoVM::discardLunchPlaces }
 
         RootContentImpl(
-            areAllLocationPermissionsDenied = !locationPermissionsLevel.isCoarseOrFine,
+            isNoLocationPermissionGranted = isNoLocationPermissionGranted,
             onSetLocationPermissionsLevel = onSetLocationPermissionsLevel,
             searchSettings = searchSettings,
             onSetSearchSettings = onSetSearchSettings,
@@ -79,7 +80,7 @@ class RootActivity : ComponentActivity() {
 
     @Composable
     private fun RootContentImpl(
-        areAllLocationPermissionsDenied: Boolean,
+        isNoLocationPermissionGranted: Boolean,
         onSetLocationPermissionsLevel: (LocationPermissionsLevel) -> Unit,
         searchSettings: SearchSettings?,
         onSetSearchSettings: (SearchSettings) -> Unit,
@@ -93,7 +94,7 @@ class RootActivity : ComponentActivity() {
         Box(modifier = Modifier.fillMaxSize()) {
             MapScreen(
                 mapConfig = mapConfig,
-                areAllLocationPermissionsDenied = areAllLocationPermissionsDenied,
+                isNoLocationPermissionGranted = isNoLocationPermissionGranted,
                 currentLocationStatus = geoState.currentLocationStatus,
                 onDetermineCurrentLocation = onDetermineCurrentLocation
             )
@@ -107,7 +108,7 @@ class RootActivity : ComponentActivity() {
             )
         }
 
-        val onAllLocationPermissionsDenied = remember(onSetLocationPermissionsLevel) {
+        val onNoLocationPermissionGranted = remember(onSetLocationPermissionsLevel) {
             { onSetLocationPermissionsLevel(LocationPermissionsLevel.NONE) }
         }
         val onSolelyCoarseLocationPermissionGranted = remember(onSetLocationPermissionsLevel) {
@@ -117,7 +118,7 @@ class RootActivity : ComponentActivity() {
             { onSetLocationPermissionsLevel(LocationPermissionsLevel.FINE) }
         }
         LocationPermissionsTracker(
-            onAllLocationPermissionsDenied = onAllLocationPermissionsDenied,
+            onNoLocationPermissionGranted = onNoLocationPermissionGranted,
             onSolelyCoarseLocationPermissionGranted = onSolelyCoarseLocationPermissionGranted,
             onFineLocationPermissionGranted = onFineLocationPermissionGranted
         )
@@ -178,7 +179,7 @@ class RootActivity : ComponentActivity() {
     private fun RootContentPreview() {
         AppTheme {
             RootContentImpl(
-                areAllLocationPermissionsDenied = false,
+                isNoLocationPermissionGranted = false,
                 onSetLocationPermissionsLevel = {},
                 searchSettings = null,
                 onSetSearchSettings = {},

@@ -55,7 +55,7 @@ private val MAP_VIEWPORT_PADDING: Dp = 48.dp
 @Composable
 fun MapScreen(
     mapConfig: MapConfig,
-    areAllLocationPermissionsDenied: Boolean,
+    isNoLocationPermissionGranted: Boolean,
     currentLocationStatus: Status<Unit, LocationSnapshot>?,
     onDetermineCurrentLocation: () -> Unit
 ) {
@@ -110,7 +110,7 @@ fun MapScreen(
             mapViewport = mapConfig.mapViewport,
             mapViewportPadding = mapViewportPadding,
             onSetMapViewportFocused = onSetMapViewportFocused,
-            areAllLocationPermissionsDenied = areAllLocationPermissionsDenied,
+            isNoLocationPermissionGranted = isNoLocationPermissionGranted,
             currentLocationStatus = currentLocationStatus
         )
 
@@ -135,7 +135,7 @@ private fun DynamicMap(
     mapViewport: MapViewport?,
     mapViewportPadding: Int,
     onSetMapViewportFocused: (Boolean) -> Unit,
-    areAllLocationPermissionsDenied: Boolean,
+    isNoLocationPermissionGranted: Boolean,
     currentLocationStatus: Status<Unit, LocationSnapshot>?,
     modifier: Modifier = Modifier
 ) {
@@ -151,7 +151,7 @@ private fun DynamicMap(
         ),
         properties = MapProperties(
             maxZoomPreference = MAX_ZOOM_LEVEL,
-            isMyLocationEnabled = !areAllLocationPermissionsDenied
+            isMyLocationEnabled = !isNoLocationPermissionGranted
         ),
         cameraPositionState = cameraPositionState,
         contentDescription = stringResource(R.string.map_description)
@@ -293,7 +293,7 @@ private fun MapScreenPreview() {
     AppTheme {
         MapScreen(
             mapConfig = MapConfig(),
-            areAllLocationPermissionsDenied = false,
+            isNoLocationPermissionGranted = false,
             currentLocationStatus = null,
             onDetermineCurrentLocation = {}
         )

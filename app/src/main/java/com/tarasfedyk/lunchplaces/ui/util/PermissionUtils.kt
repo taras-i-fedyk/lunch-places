@@ -14,7 +14,7 @@ import com.google.accompanist.permissions.rememberMultiplePermissionsState
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun LocationPermissionsTracker(
-    onAllLocationPermissionsDenied: () -> Unit,
+    onNoLocationPermissionGranted: () -> Unit,
     onSolelyCoarseLocationPermissionGranted: () -> Unit,
     onFineLocationPermissionGranted: () -> Unit
 ) {
@@ -23,7 +23,7 @@ fun LocationPermissionsTracker(
         permissions = listOf(ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION)
     )
 
-    val areAllLocationPermissionsDenied =
+    val isNoLocationPermissionGranted =
         !locationPermissionsState.isPermissionGranted(ACCESS_COARSE_LOCATION) &&
         !locationPermissionsState.isPermissionGranted(ACCESS_FINE_LOCATION)
     val isSolelyCoarseLocationPermissionGranted =
@@ -32,9 +32,9 @@ fun LocationPermissionsTracker(
     val isFineLocationPermissionGranted =
         locationPermissionsState.isPermissionGranted(ACCESS_FINE_LOCATION)
 
-    LaunchedEffect(areAllLocationPermissionsDenied, onAllLocationPermissionsDenied) {
-        if (areAllLocationPermissionsDenied) {
-            onAllLocationPermissionsDenied()
+    LaunchedEffect(isNoLocationPermissionGranted, onNoLocationPermissionGranted) {
+        if (isNoLocationPermissionGranted) {
+            onNoLocationPermissionGranted()
         }
     }
     LaunchedEffect(isSolelyCoarseLocationPermissionGranted, onSolelyCoarseLocationPermissionGranted) {
