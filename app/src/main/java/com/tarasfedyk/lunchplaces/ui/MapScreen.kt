@@ -18,8 +18,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.layout.LayoutCoordinates
-import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -96,9 +94,7 @@ fun MapScreen(
                     ProximityButton(onExploreProximity)
                 }
             } else {
-                if (!areAllLocationPermissionsDenied) {
-                    CurrentLocationButton(onDetermineCurrentLocation)
-                }
+                CurrentLocationButton(onDetermineCurrentLocation)
             }
         },
         snackbarHost = {
@@ -143,11 +139,12 @@ private fun DynamicMap(
     currentLocationStatus: Status<Unit, LocationSnapshot>?,
     modifier: Modifier = Modifier
 ) {
-    var isMapLayoutCompleted by remember { mutableStateOf(false) }
-    val onMapPlaced: (LayoutCoordinates) -> Unit = remember { { isMapLayoutCompleted = true } }
+    var isMapLoaded by remember { mutableStateOf(false) }
+    val onMapLoaded = remember { { isMapLoaded = true } }
 
     GoogleMap(
-        modifier = modifier.onPlaced(onMapPlaced),
+        modifier = modifier,
+        onMapLoaded = onMapLoaded,
         uiSettings = MapUiSettings(
             myLocationButtonEnabled = false,
             zoomControlsEnabled = false
@@ -165,24 +162,22 @@ private fun DynamicMap(
     }
 
     DynamicCameraPosition(
-        isMapLayoutCompleted = isMapLayoutCompleted,
+        isMapLoaded = isMapLoaded,
         cameraPositionState = cameraPositionState,
         mapViewport = mapViewport,
         mapViewportPadding = mapViewportPadding,
         onSetMapViewportFocused = onSetMapViewportFocused,
-        areAllLocationPermissionsDenied = areAllLocationPermissionsDenied,
         currentLocationStatus = currentLocationStatus
     )
 }
 
 @Composable
 private fun DynamicCameraPosition(
-    isMapLayoutCompleted: Boolean,
+    isMapLoaded: Boolean,
     cameraPositionState: CameraPositionState,
     mapViewport: MapViewport?,
     mapViewportPadding: Int,
     onSetMapViewportFocused: (Boolean) -> Unit,
-    areAllLocationPermissionsDenied: Boolean,
     currentLocationStatus: Status<Unit, LocationSnapshot>?
 ) {
     val wasCameraMovedNotByDeveloper by remember {
@@ -199,29 +194,24 @@ private fun DynamicCameraPosition(
     }
 
     LaunchedEffect(
-        isMapLayoutCompleted,
+        isMapLoaded,
         cameraPositionState,
         mapViewport,
         mapViewportPadding,
         onSetMapViewportFocused,
-        areAllLocationPermissionsDenied,
         currentLocationStatus
     ) {
-        if (!isMapLayoutCompleted) return@LaunchedEffect
+        if (!isMapLoaded) return@LaunchedEffect
 
         if (mapViewport != null) {
             cameraPositionState.animateToMapViewport(
                 mapViewport.bounds, mapViewportPadding, onSetMapViewportFocused
             )
-        } else {
-            if (areAllLocationPermissionsDenied) {
-                cameraPositionState.animateToDefaultCameraPosition(onSetMapViewportFocused)
-            } else if (currentLocationStatus is Status.Success<*, LocationSnapshot>) {
-                cameraPositionState.animateToCurrentLocation(
-                    currentLocation = currentLocationStatus.result,
-                    onSetMapViewportFocused
-                )
-            }
+        } else if (currentLocationStatus is Status.Success<*, LocationSnapshot>) {
+            cameraPositionState.animateToCurrentLocation(
+                currentLocation = currentLocationStatus.result,
+                onSetMapViewportFocused
+            )
         }
     }
 }
@@ -231,18 +221,10 @@ private suspend fun CameraPositionState.animateToMapViewport(
     mapViewportPadding: Int,
     onSetMapViewportFocused: (Boolean) -> Unit
 ) {
-    onSetMapViewportFocused(true)
     val cameraUpdate = CameraUpdateFactory.newLatLngBounds(mapViewportBounds, mapViewportPadding)
     animate(cameraUpdate)
-}
 
-private suspend fun CameraPositionState.animateToDefaultCameraPosition(
-    onSetMapViewportFocused: (Boolean) -> Unit
-) {
-    onSetMapViewportFocused(false)
-    val defaultCameraPosition = CameraPositionState().position
-    val cameraUpdate = CameraUpdateFactory.newCameraPosition(defaultCameraPosition)
-    animate(cameraUpdate)
+    onSetMapViewportFocused(true)
 }
 
 private suspend fun CameraPositionState.animateToCurrentLocation(
@@ -250,6 +232,7 @@ private suspend fun CameraPositionState.animateToCurrentLocation(
     onSetMapViewportFocused: (Boolean) -> Unit
 ) {
     onSetMapViewportFocused(false)
+
     val currentPoint = currentLocation.point
     val currentZoomLevel = calculateZoomLevel(currentLocation.accuracy)
     val cameraUpdate = CameraUpdateFactory.newLatLngZoom(currentPoint, currentZoomLevel)
