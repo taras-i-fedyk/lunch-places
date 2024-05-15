@@ -17,11 +17,15 @@
     <string name="search_hint">Search lunch places</string>
 
     <string name="closure_confirmation_message">Discard changes?</string>
-    <string name="map_permissions_error_message">Current location unknown because of denied location permissions</string>
+    <string name="map_services_error_message">Current location unknown because of location services unavailability</string>
+    <string name="map_permissions_error_message">Current location unknown because of missing location permissions</string>
     <string name="map_location_error_message">Current location unknown</string>
-    <string name="search_permissions_error_message">Search failed because of denied location permissions</string>
+    <string name="search_config_error_message">Search failed because of invalid app configuration</string>
+    <string name="search_services_error_message">Search failed because of location services unavailability</string>
+    <string name="search_permissions_error_message">Search failed because of missing location permissions</string>
     <string name="search_location_error_message">Search failed because of unknown current location</string>
     <string name="search_connection_error_message">Search failed due to no internet connection</string>
+    <string name="search_query_error_message">Search failed due to exceeding query limits</string>
     <string name="search_error_message">Search failed</string>
 
     <string name="map_description">Map</string>

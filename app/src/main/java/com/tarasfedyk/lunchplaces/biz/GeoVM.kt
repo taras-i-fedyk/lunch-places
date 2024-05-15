@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.common.api.CommonStatusCodes
+import com.google.android.libraries.places.api.net.PlacesStatusCodes
 import com.tarasfedyk.lunchplaces.biz.data.ErrorType
 import com.tarasfedyk.lunchplaces.biz.data.GeoState
 import com.tarasfedyk.lunchplaces.biz.data.SearchFilter
@@ -100,10 +101,12 @@ class GeoVM @Inject constructor(
             updateGeoState { it.copy(currentLocationStatus = currentLocationStatus) }
         } catch (e: Exception) {
             if (e !is RuntimeException || e is SecurityException) {
-                val errorType = if (e is SecurityException) {
-                    ErrorType.LOCATION_PERMISSIONS
-                } else {
-                    ErrorType.CURRENT_LOCATION
+                val errorType = when {
+                    e is ApiException && e.statusCode == CommonStatusCodes.API_NOT_CONNECTED -> {
+                        ErrorType.LOCATION_SERVICES
+                    }
+                    e is SecurityException -> ErrorType.LOCATION_PERMISSIONS
+                    else -> ErrorType.CURRENT_LOCATION
                 }
                 updateGeoState {
                     it.copy(currentLocationStatus = currentLocationStatusFailure(errorType))
@@ -172,10 +175,17 @@ class GeoVM @Inject constructor(
             }
         } catch (e: Exception) {
             if (e !is RuntimeException) {
-                val errorType = if (e is ApiException && e.statusCode == CommonStatusCodes.NETWORK_ERROR) {
-                    ErrorType.INTERNET_CONNECTION
-                } else {
-                    ErrorType.UNKNOWN
+                val errorType = when {
+                    e is ApiException && e.statusCode == PlacesStatusCodes.INVALID_REQUEST -> {
+                        ErrorType.INVALID_CONFIG
+                    }
+                    e is ApiException && e.statusCode == CommonStatusCodes.NETWORK_ERROR -> {
+                        ErrorType.INTERNET_CONNECTION
+                    }
+                    e is ApiException && e.statusCode == PlacesStatusCodes.OVER_QUERY_LIMIT -> {
+                        ErrorType.QUERY_LIMIT
+                    }
+                    else -> ErrorType.UNKNOWN
                 }
                 updateGeoState {
                     it.copy(lunchPlacesStatus = lunchPlacesStatusFailure(searchFilter, errorType))

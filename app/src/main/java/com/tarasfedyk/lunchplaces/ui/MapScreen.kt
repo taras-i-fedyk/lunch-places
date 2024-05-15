@@ -272,10 +272,10 @@ private fun CurrentLocationError(
     onDetermineCurrentLocation: () -> Unit
 ) {
     val isAppSettingsError = errorType == ErrorType.LOCATION_PERMISSIONS
-    val errorMessage = if (errorType == ErrorType.LOCATION_PERMISSIONS) {
-        stringResource(R.string.map_permissions_error_message)
-    } else {
-        stringResource(R.string.map_location_error_message)
+    val errorMessage = when (errorType) {
+        ErrorType.LOCATION_SERVICES -> stringResource(R.string.map_services_error_message)
+        ErrorType.LOCATION_PERMISSIONS -> stringResource(R.string.map_permissions_error_message)
+        else -> stringResource(R.string.map_location_error_message)
     }
 
     PermanentErrorSnackbar(
