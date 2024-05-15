@@ -121,6 +121,7 @@ fun MapScreen(
         if (currentLocationStatus is Status.Failure) {
             CurrentLocationError(
                 snackbarHostState = snackbarHostState,
+                errorId = currentLocationStatus.id,
                 errorType = currentLocationStatus.errorType,
                 onDetermineCurrentLocation = onDetermineCurrentLocation
             )
@@ -283,6 +284,7 @@ private fun CurrentLocationButton(onDetermineCurrentLocation: () -> Unit) {
 @Composable
 private fun CurrentLocationError(
     snackbarHostState: SnackbarHostState,
+    errorId: Int,
     errorType: ErrorType,
     onDetermineCurrentLocation: () -> Unit
 ) {
@@ -296,6 +298,7 @@ private fun CurrentLocationError(
     PermanentErrorSnackbar(
         snackbarHostState = snackbarHostState,
         isAppSettingsError = isAppSettingsError,
+        errorId = errorId,
         errorMessage = errorMessage,
         onRetry = onDetermineCurrentLocation
     )

@@ -12,6 +12,8 @@ import com.tarasfedyk.lunchplaces.biz.data.SearchFilter
 import com.tarasfedyk.lunchplaces.biz.data.Status
 import com.tarasfedyk.lunchplaces.biz.util.ReplaceableLauncher
 import com.tarasfedyk.lunchplaces.biz.data.LocationPermissionsLevel
+import com.tarasfedyk.lunchplaces.biz.data.LocationSnapshot
+import com.tarasfedyk.lunchplaces.biz.data.LunchPlace
 import com.tarasfedyk.lunchplaces.biz.data.MediaLimits
 import com.tarasfedyk.lunchplaces.biz.data.SearchSettings
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -44,6 +46,8 @@ class GeoVM @Inject constructor(
     val searchSettingsFlow: StateFlow<SearchSettings?> = settingsRepo.searchSettingsFlow
         .stateIn(viewModelScope, SharingStarted.Eagerly, initialValue = null)
 
+    private var currentLocationStatusId: Int = 0
+    private var lunchPlacesStatusId: Int = 0
     private val currentLocationLauncher: ReplaceableLauncher = ReplaceableLauncher(viewModelScope)
     private val lunchPlacesLauncher: ReplaceableLauncher = ReplaceableLauncher(viewModelScope)
     val geoStateFlow: StateFlow<GeoState> = savedStateHandle.getStateFlow(
@@ -83,15 +87,15 @@ class GeoVM @Inject constructor(
     }
 
     private suspend fun determineCurrentLocationImpl() {
-        updateGeoState { it.copy(currentLocationStatus = Status.Pending(Unit)) }
+        updateGeoState { it.copy(currentLocationStatus = currentLocationStatusPending()) }
 
         try {
             val currentLocation = locationController.determineCurrentLocation()
 
             val currentLocationStatus = if (currentLocation != null) {
-                Status.Success(Unit, currentLocation)
+                currentLocationStatusSuccess(currentLocation)
             } else {
-                Status.Failure(Unit, ErrorType.CURRENT_LOCATION)
+                currentLocationStatusFailure(ErrorType.CURRENT_LOCATION)
             }
             updateGeoState { it.copy(currentLocationStatus = currentLocationStatus) }
         } catch (e: Exception) {
@@ -101,7 +105,9 @@ class GeoVM @Inject constructor(
                 } else {
                     ErrorType.CURRENT_LOCATION
                 }
-                updateGeoState { it.copy(currentLocationStatus = Status.Failure(Unit, errorType)) }
+                updateGeoState {
+                    it.copy(currentLocationStatus = currentLocationStatusFailure(errorType))
+                }
             } else {
                 throw e
             }
@@ -139,7 +145,9 @@ class GeoVM @Inject constructor(
     private suspend fun searchLunchPlacesImpl(query: String) {
         val searchSettings = searchSettingsFlow.filterNotNull().first()
         var searchFilter = SearchFilter(query, mediaLimits, searchSettings)
-        updateGeoState { it.copy(lunchPlacesStatus = Status.Pending(searchFilter)) }
+        updateGeoState {
+            it.copy(lunchPlacesStatus = lunchPlacesStatusPending(searchFilter))
+        }
 
         determineCurrentLocation()
         yield()
@@ -153,10 +161,14 @@ class GeoVM @Inject constructor(
                 searchFilter = searchFilter.copy(originPoint = currentPoint)
                 val lunchPlaces = geoRepo.searchLunchPlaces(searchFilter)
 
-                updateGeoState { it.copy(lunchPlacesStatus = Status.Success(searchFilter, lunchPlaces)) }
+                updateGeoState {
+                    it.copy(lunchPlacesStatus = lunchPlacesStatusSuccess(searchFilter, lunchPlaces))
+                }
             } else {
                 val errorType = (currentLocationTerminalStatus as Status.Failure).errorType
-                updateGeoState { it.copy(lunchPlacesStatus = Status.Failure(searchFilter, errorType)) }
+                updateGeoState {
+                    it.copy(lunchPlacesStatus = lunchPlacesStatusFailure(searchFilter, errorType))
+                }
             }
         } catch (e: Exception) {
             if (e !is RuntimeException) {
@@ -165,7 +177,9 @@ class GeoVM @Inject constructor(
                 } else {
                     ErrorType.UNKNOWN
                 }
-                updateGeoState { it.copy(lunchPlacesStatus = Status.Failure(searchFilter, errorType)) }
+                updateGeoState {
+                    it.copy(lunchPlacesStatus = lunchPlacesStatusFailure(searchFilter, errorType))
+                }
             } else {
                 throw e
             }
@@ -177,6 +191,46 @@ class GeoVM @Inject constructor(
         val geoState = geoStateFlow.first()
         val newGeoState = function(geoState)
         savedStateHandle[GEO_STATE_KEY] = newGeoState
+    }
+
+    private fun currentLocationStatusPending(): Status<Unit, Nothing> {
+        ++currentLocationStatusId
+        return Status.Pending(id = currentLocationStatusId, arg = Unit)
+    }
+
+    private fun currentLocationStatusSuccess(
+        currentLocation: LocationSnapshot
+    ): Status<Unit, LocationSnapshot> {
+        ++currentLocationStatusId
+        return Status.Success(id = currentLocationStatusId, arg = Unit, result = currentLocation)
+    }
+
+    private fun currentLocationStatusFailure(errorType: ErrorType): Status<Unit, Nothing> {
+        ++currentLocationStatusId
+        return Status.Failure(id = currentLocationStatusId, arg = Unit, errorType = errorType)
+    }
+
+    private fun lunchPlacesStatusPending(
+        searchFilter: SearchFilter
+    ): Status<SearchFilter, Nothing> {
+        ++lunchPlacesStatusId
+        return Status.Pending(id = lunchPlacesStatusId, arg = searchFilter)
+    }
+
+    private fun lunchPlacesStatusSuccess(
+        searchFilter: SearchFilter,
+        lunchPlaces: List<LunchPlace>
+    ): Status<SearchFilter, List<LunchPlace>> {
+        ++lunchPlacesStatusId
+        return Status.Success(id = lunchPlacesStatusId, arg = searchFilter, result = lunchPlaces)
+    }
+
+    private fun lunchPlacesStatusFailure(
+        searchFilter: SearchFilter,
+        errorType: ErrorType
+    ): Status<SearchFilter, Nothing> {
+        ++lunchPlacesStatusId
+        return Status.Failure(id = lunchPlacesStatusId, arg = searchFilter, errorType = errorType)
     }
 
     private enum class RefreshApplicability {

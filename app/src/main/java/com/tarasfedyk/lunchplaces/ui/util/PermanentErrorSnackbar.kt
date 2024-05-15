@@ -13,11 +13,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import com.tarasfedyk.lunchplaces.R
-import com.tarasfedyk.lunchplaces.biz.util.circularInc
 
 @Composable
 fun PermanentErrorSnackbar(
     snackbarHostState: SnackbarHostState,
+    errorId: Int,
     errorMessage: String,
     onRetry: () -> Unit,
     isAppSettingsError: Boolean = false
@@ -35,7 +35,7 @@ fun PermanentErrorSnackbar(
     val onPerformAction = remember(context, isAppSettingsError, onRetry) {
         {
             if (isAppSettingsError) {
-                snackbarAppearanceId = snackbarAppearanceId.circularInc()
+                ++snackbarAppearanceId
                 context.goToAppSettings()
             } else {
                 onRetry()
@@ -44,7 +44,7 @@ fun PermanentErrorSnackbar(
     }
     val currentOnPerformAction by rememberUpdatedState(onPerformAction)
 
-    LaunchedEffect(snackbarHostState, snackbarAppearanceId, errorMessage, actionLabel) {
+    LaunchedEffect(snackbarHostState, snackbarAppearanceId, errorId, errorMessage, actionLabel) {
         val snackbarResult = snackbarHostState.showSnackbar(
             message = errorMessage,
             actionLabel = actionLabel,

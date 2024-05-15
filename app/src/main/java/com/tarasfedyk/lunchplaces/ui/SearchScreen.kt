@@ -158,11 +158,12 @@ private fun SearchStatus(
         is Status.Pending -> SearchProgress()
         is Status.Success -> SearchResult(
             lunchPlaces = lunchPlacesStatus.result,
-            onNavigateToDetails
+            onNavigateToDetails = onNavigateToDetails
         )
         is Status.Failure -> SearchError(
+            errorId = lunchPlacesStatus.id,
             errorType = lunchPlacesStatus.errorType,
-            onRetrySearch
+            onRetrySearch = onRetrySearch
         )
     }
 }
@@ -221,7 +222,7 @@ private fun SearchResultItem(
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-private fun SearchError(errorType: ErrorType, onRetrySearch: () -> Unit) {
+private fun SearchError(errorId: Int, errorType: ErrorType, onRetrySearch: () -> Unit) {
     val snackbarHostState = remember { SnackbarHostState() }
 
     val isAppSettingsError = errorType == ErrorType.LOCATION_PERMISSIONS
@@ -240,6 +241,7 @@ private fun SearchError(errorType: ErrorType, onRetrySearch: () -> Unit) {
         PermanentErrorSnackbar(
             snackbarHostState = snackbarHostState,
             isAppSettingsError = isAppSettingsError,
+            errorId = errorId,
             errorMessage = errorMessage,
             onRetry = onRetrySearch
         )
@@ -277,7 +279,8 @@ private fun SearchScreenPreview(
             enteredQueryState = remember { mutableStateOf(enteredQuery) },
             appliedQueryState = remember { mutableStateOf(appliedQuery) },
             lunchPlacesStatus = Status.Success(
-                SearchFilter(
+                id = 0,
+                arg = SearchFilter(
                     appliedQuery,
                     MediaLimits(),
                     SearchSettings()

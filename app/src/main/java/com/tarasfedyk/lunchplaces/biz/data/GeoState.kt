@@ -23,16 +23,20 @@ data class GeoState(
             val isCurrentLocationStatusNull = currentLocationStatus == null
             parcel.writeBool(isCurrentLocationStatusNull)
             if (currentLocationStatus != null) {
+                val onWriteId = { parcel.writeInt(currentLocationStatus.id) }
                 when (currentLocationStatus) {
                     is Status.Pending -> {
                         parcel.writeSerializable(StatusType.PENDING)
+                        onWriteId()
                     }
                     is Status.Success -> {
                         parcel.writeSerializable(StatusType.SUCCESS)
+                        onWriteId()
                         parcel.writeParcelable(currentLocationStatus.result, flags)
                     }
                     is Status.Failure -> {
                         parcel.writeSerializable(StatusType.FAILURE)
+                        onWriteId()
                         parcel.writeSerializable(currentLocationStatus.errorType)
                     }
                 }
@@ -43,20 +47,24 @@ data class GeoState(
             val isLunchPlacesStatusNull = lunchPlacesStatus == null
             parcel.writeBool(isLunchPlacesStatusNull)
             if (lunchPlacesStatus != null) {
-                val writeArg = { parcel.writeParcelable(lunchPlacesStatus.arg, flags) }
+                val onWriteId = { parcel.writeInt(lunchPlacesStatus.id) }
+                val onWriteArg = { parcel.writeParcelable(lunchPlacesStatus.arg, flags) }
                 when (lunchPlacesStatus) {
                     is Status.Pending -> {
                         parcel.writeSerializable(StatusType.PENDING)
-                        writeArg()
+                        onWriteId()
+                        onWriteArg()
                     }
                     is Status.Success -> {
                         parcel.writeSerializable(StatusType.SUCCESS)
-                        writeArg()
+                        onWriteId()
+                        onWriteArg()
                         parcel.writeParcelableArray(lunchPlacesStatus.result.toTypedArray(), flags)
                     }
                     is Status.Failure -> {
                         parcel.writeSerializable(StatusType.FAILURE)
-                        writeArg()
+                        onWriteId()
+                        onWriteArg()
                         parcel.writeSerializable(lunchPlacesStatus.errorType)
                     }
                 }
@@ -75,18 +83,19 @@ data class GeoState(
                 return null
             } else {
                 val statusType = parcel.readSerializable() as StatusType
+                val id = parcel.readInt()
                 return when (statusType) {
                     StatusType.PENDING -> {
-                        Status.Pending(Unit)
+                        Status.Pending(id, Unit)
                     }
                     StatusType.SUCCESS -> {
                         val classLoader = LocationSnapshot::class.java.classLoader
                         val result = parcel.readParcelable<LocationSnapshot>(classLoader)!!
-                        Status.Success(Unit, result)
+                        Status.Success(id, Unit, result)
                     }
                     StatusType.FAILURE -> {
                         val errorType = parcel.readSerializable() as ErrorType
-                        Status.Failure(Unit, errorType)
+                        Status.Failure(id, Unit, errorType)
                     }
                 }
             }
@@ -98,13 +107,14 @@ data class GeoState(
                 return null
             } else {
                 val statusType = parcel.readSerializable() as StatusType
+                val id = parcel.readInt()
                 val arg = run {
                     val classLoader = SearchFilter::class.java.classLoader
                     parcel.readParcelable<SearchFilter>(classLoader)!!
                 }
                 return when (statusType) {
                     StatusType.PENDING -> {
-                        Status.Pending(arg)
+                        Status.Pending(id, arg)
                     }
                     StatusType.SUCCESS -> {
                         val result = run {
@@ -113,11 +123,11 @@ data class GeoState(
                                 .map { it as LunchPlace }
                                 .toList()
                         }
-                        Status.Success(arg, result)
+                        Status.Success(id, arg, result)
                     }
                     StatusType.FAILURE -> {
                         val errorType = parcel.readSerializable() as ErrorType
-                        Status.Failure(arg, errorType)
+                        Status.Failure(id, arg, errorType)
                     }
                 }
             }
