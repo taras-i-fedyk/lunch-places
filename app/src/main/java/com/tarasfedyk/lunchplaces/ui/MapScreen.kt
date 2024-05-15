@@ -157,7 +157,9 @@ private fun DynamicMap(
         contentDescription = stringResource(R.string.map_description)
     ) {
         if (mapViewport != null) {
-            Marker(state = MarkerState(position = mapViewport.destinationPoint))
+            Marker(
+                state = MarkerState(position = mapViewport.destinationPoint)
+            )
         }
     }
 
