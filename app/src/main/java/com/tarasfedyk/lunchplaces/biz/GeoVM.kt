@@ -56,7 +56,7 @@ class GeoVM @Inject constructor(
     )
 
     init {
-        refreshLunchPlaces(RefreshApplicability.PENDING_ITEMS)
+        refreshLunchPlaces(RefreshFilter.PENDING_DATA)
     }
 
     fun setLocationPermissionsLevel(locationPermissionsLevel: LocationPermissionsLevel) {
@@ -66,7 +66,7 @@ class GeoVM @Inject constructor(
 
     private fun onLocationPermissionsLevelChanged() {
         determineCurrentLocation()
-        refreshLunchPlaces(RefreshApplicability.FAILED_ITEMS)
+        refreshLunchPlaces(RefreshFilter.FAILED_DATA)
     }
 
     fun setSearchSettings(searchSettings: SearchSettings) {
@@ -77,7 +77,7 @@ class GeoVM @Inject constructor(
     }
 
     private fun onSearchSettingsChanged() {
-        refreshLunchPlaces(RefreshApplicability.ANY_ITEMS)
+        refreshLunchPlaces(RefreshFilter.NONE)
     }
 
     fun determineCurrentLocation() {
@@ -120,14 +120,14 @@ class GeoVM @Inject constructor(
         }
     }
 
-    private fun refreshLunchPlaces(refreshApplicability: RefreshApplicability) {
+    private fun refreshLunchPlaces(refreshFilter: RefreshFilter) {
         lunchPlacesLauncher.launch {
             val lunchPlacesStatus = geoStateFlow.first().lunchPlacesStatus ?: return@launch
 
-            val shouldPerformRefresh = when (refreshApplicability) {
-                RefreshApplicability.PENDING_ITEMS -> lunchPlacesStatus is Status.Pending
-                RefreshApplicability.FAILED_ITEMS -> lunchPlacesStatus is Status.Failure
-                RefreshApplicability.ANY_ITEMS -> true
+            val shouldPerformRefresh = when (refreshFilter) {
+                RefreshFilter.PENDING_DATA -> lunchPlacesStatus is Status.Pending
+                RefreshFilter.FAILED_DATA -> lunchPlacesStatus is Status.Failure
+                RefreshFilter.NONE -> true
             }
 
             if (shouldPerformRefresh) {
@@ -233,10 +233,10 @@ class GeoVM @Inject constructor(
         return Status.Failure(id = lunchPlacesStatusId, arg = searchFilter, errorType = errorType)
     }
 
-    private enum class RefreshApplicability {
-        PENDING_ITEMS,
-        FAILED_ITEMS,
-        ANY_ITEMS
+    private enum class RefreshFilter {
+        NONE,
+        PENDING_DATA,
+        FAILED_DATA,
     }
 
     companion object {
