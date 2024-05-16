@@ -110,12 +110,12 @@ dependencies {
     // permission handling
     implementation(libs.accompanist.permissions)
 
-    // location, places, and map
+    // map, location, and places
+    implementation(libs.maps.compose)
     implementation(libs.kotlinx.coroutines.play.services)
     implementation(libs.play.services.location)
     implementation(libs.places)
     implementation(libs.places.ktx)
-    implementation(libs.maps.compose)
 
     // image loading
     implementation(libs.glide)
