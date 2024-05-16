@@ -111,7 +111,7 @@ private fun SearchScreenImpl(
         }
     }
 
-    val onTrySearch: (String) -> Unit = remember(focusManager, onNavigateBack, onSearchLunchPlaces) {
+    val onSearch: (String) -> Unit = remember(focusManager, onNavigateBack, onSearchLunchPlaces) {
         { enteredQuery ->
             appliedQueryState.value = enteredQuery
             if (enteredQuery.isNotEmpty()) {
@@ -122,9 +122,9 @@ private fun SearchScreenImpl(
             }
         }
     }
-    val onRetrySearch = remember(onTrySearch) {
+    val onRetrySearch = remember(onSearch) {
         {
-            onTrySearch(appliedQueryState.value)
+            onSearch(appliedQueryState.value)
         }
     }
 
@@ -140,7 +140,7 @@ private fun SearchScreenImpl(
         activenessState = searchBarActivenessState,
         queryState = enteredQueryState,
         onNavigateBack = onNavigateBack,
-        onTrySearch = onTrySearch,
+        onSearch = onSearch,
         onNavigateToSettings = onNavigateToSettings
     ) {
         SearchStatus(lunchPlacesStatus, onNavigateToDetails, onRetrySearch)

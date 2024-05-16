@@ -34,7 +34,7 @@ fun CompactSearchBar(
     activenessState: MutableState<Boolean>,
     queryState: MutableState<String>,
     onNavigateBack: () -> Unit,
-    onTrySearch: (String) -> Unit,
+    onSearch: (String) -> Unit,
     onNavigateToSettings: () -> Unit,
     modifier: Modifier = Modifier,
     tonalElevation: Dp = SearchBarDefaults.TonalElevation,
@@ -77,7 +77,7 @@ fun CompactSearchBar(
         onActiveChange = onSetActive,
         query = query,
         onQueryChange = onSetQuery,
-        onSearch = onTrySearch
+        onSearch = onSearch
     ) {
         if (!isFocused) {
             searchStatusContent()
