@@ -14,7 +14,7 @@
     <string name="discard_label">Discard</string>
     <string name="resolve_label">Resolve</string>
     <string name="retry_label">Retry</string>
-    <string name="search_hint">Search lunch places</string>
+    <string name="search_hint">Search for lunch places</string>
 
     <string name="closure_confirmation_message">Discard changes?</string>
     <string name="map_services_error_message">Current location unknown because of location services unavailability</string>
