@@ -48,7 +48,7 @@ The app has been created for experimental and educational purposes within Harvar
 
 ### Key files overview
 
-#### business logic
+#### the business logic layer
 
 * __biz/data/GeoState__ - a global state to be shared between any interested parties across the app. It consists of two elements: the status of determining the current location and the status of searching for lunch places. The above statuses include all the relevant information like arguments, results, and error types.
 
@@ -64,13 +64,13 @@ The app has been created for experimental and educational purposes within Harvar
 
   The above two interfaces are related to storage. However, since those interfaces are used by the GeoVM belonging to the business logic layer of the app, they have been defined in the business logic layer as well. While their implementations have been defined in the storage layer as expected. (That way, we ensure the business logic layer is independent from the storage layer, in line with the Clean Architecture paradigm.)
 
-#### storage
+#### the storage layer
 
 * __store/SettingsRepoImpl__ - the default implementation of the biz/SettingsRepo interface, as a follow-up to the above. This implementation is based on using the Jetpack Preferences DataStore.
 
 * __store/PlacesRepoImpl__ - the default implementation of the biz/PlacesRepo interface, as a follow-up to the above. This implementation is based on using the Google Places SDK (New).
 
-#### UI
+#### the UI layer
 
 * __ui/RootActivity__ - the app’s entry point and the container of its UI:
 
@@ -88,7 +88,7 @@ The app has been created for experimental and educational purposes within Harvar
 
   * allow the user to determine the current location ad hoc.
 
-  * display a destination on the map, without displaying an origin on it.
+  * display the destination on the map, without displaying the origin on it.
 
   * automatically or per the user’s request, position the map’s camera so that the current location is in the center of the screen or so that the distance between the origin and the destination is fully visible.
 
@@ -96,7 +96,7 @@ The app has been created for experimental and educational purposes within Harvar
 
   The user can navigate to the Details screen by clicking a search results item. Also, the user can navigate to the Settings screen by clicking a corresponding icon in the search bar.
 
-  When no search is underway, this screen consists of a search bar only. In such a case, the Map screen is visible behind this screen and has all the features related to the current location enabled. Otherwise, the Map screen is not visible behind this screen.
+  When no search is underway, this screen consists of a search bar only. In such a case, the Map screen is visible behind this screen and supports all the features related to the current location. Otherwise, the Map screen is not visible behind this screen.
 
 * __ui/SettingsScreen__ - a screen allowing the user to configure search settings like the ranking criterion and the preferred radius.
 
@@ -108,9 +108,9 @@ The app has been created for experimental and educational purposes within Harvar
 
   The Map screen is not visible behind this screen.
 
-* __ui/ProximityScreen__ - a screen allowing the user to view the distance between the location at which the search has been performed (serving as the origin) and a found lunch place (serving as the destination).
+* __ui/ProximityScreen__ - a screen allowing the user to view the distance between the location at which the search has been performed (the origin) and a found lunch place (the destination).
 
-  This screen consists of a top bar only. The Map screen is visible behind this screen, displays the current location on the map, and has all the features related to the destination enabled.
+  This screen consists of a top bar only. The Map screen is visible behind this screen and is characterized by the following: it displays the current location on the map and supports all the features related to the destination.
 
 ### Prerequisites
 
