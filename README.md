@@ -42,7 +42,7 @@ The app has been created for experimental and educational purposes within Harvar
 
 * The MVVM pattern is used to further organize efficient relationships between different layers and sublayers of the app. 
 
-* Also, the Hilt dependency injection framework is used to facilitate loose coupling and cohesiveness of different entities all over the app.
+* The Hilt dependency injection framework is applied to facilitate loose coupling and cohesiveness of different entities all over the app.
 
 * Internally, the app relies on the Google Places API (New) to accomplish searches for lunch places.
 
