@@ -116,9 +116,9 @@ The app has been created for experimental and educational purposes within Harvar
 
 ### Prerequisites
 
-* It will be possible to generate debug and release builds of the app as long as they are signed with valid certificates. Currently, debug and release builds are signed with certificates valid until "Fri Jul 28 01:36:43 EEST 2051" and "Mon Oct 02 14:33:44 EEST 2051", respectively.
+* It will be possible to generate debug and release builds of the app as long as they are signed with valid certificates. Currently, debug and release builds are signed with certificates valid until the following dates: Fri Jul 28 01:36:43 EEST 2051 and Mon Oct 02 14:33:44 EEST 2051, respectively.
 
-  After those deadlines, you can obtain the new certificates if any. To do that, you’d have to redownload the app’s source code.
+  After those dates, you can obtain the new certificates if any. To do that, you’d have to redownload the app’s source code.
 
 * The app can be installed on devices carrying Android 7 or later.
 
