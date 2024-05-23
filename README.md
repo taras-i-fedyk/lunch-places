@@ -42,7 +42,7 @@ The app has been created for experimental and educational purposes within Harvar
 
 * The MVVM pattern is used to further organize efficient relationships between different layers and sublayers of the app. 
 
-* Also, the Hilt dependency injection framework is applied to facilitate loose coupling and cohesiveness of different entities all over the app.
+* Also, the Hilt dependency injection framework is used to facilitate loose coupling and cohesiveness of different entities all over the app.
 
 * Internally, the app relies on the Google Places API (New) to accomplish searches for lunch places.
 
@@ -146,7 +146,7 @@ The app has been created for experimental and educational purposes within Harvar
 
 * The app’s Details screen contains a fairly limited amount of information. Also, the Proximity screen only shows how close the found lunch place is, without suggesting routes to get there.
 
-* The app’s UI has been optimized only for phones, not tablets.
+* The app’s UI has been optimized only for phones, not for tablets.
 
 * In its current state, the app doesn't fully comply with the Terms of Service of the Google Maps API and the Google Places API (for example, in the context of familiarizing the user with the text of those Terms of Service and in the context of ensuring the required attributions are displayed).
 
