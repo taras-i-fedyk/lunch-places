@@ -80,7 +80,7 @@ The app has been created for experimental and educational purposes within Harvar
 
   * last but not least, this entity monitors if the location permissions have been granted to the app and assists the user in granting them when needed.
 
-* __ui/MapScreen__ - a screen displaying the map. Depending on its parameters that are changed dynamically, this screen has the following extra features:
+* __ui/MapScreen.kt__ - a screen displaying the map. Depending on its parameters that are changed dynamically, this screen has the following extra features:
 
   * be visible or not.
 
@@ -92,23 +92,23 @@ The app has been created for experimental and educational purposes within Harvar
 
   * automatically or per the user’s request, position the map’s camera so that the current location is in the center of the screen or so that the distance between the origin and the destination is fully visible.
 
-* __ui/SearchScreen__ - a screen allowing the user to search for lunch places by any text query and view the search results as a list.
+* __ui/SearchScreen.kt__ - a screen allowing the user to search for lunch places by any text query and view the search results as a list.
 
   The user can navigate to the Details screen by clicking a search results item. Also, the user can navigate to the Settings screen by clicking a corresponding icon in the search bar.
 
   When no search is underway, this screen consists of a search bar only. In such a case, the Map screen is visible behind this screen and supports all the features related to the current location. Otherwise, the Map screen is not visible behind this screen.
 
-* __ui/SettingsScreen__ - a screen allowing the user to configure search settings like the ranking criterion and the preferred radius.
+* __ui/SettingsScreen.kt__ - a screen allowing the user to configure search settings like the ranking criterion and the preferred radius.
 
   The Map screen is not visible behind this screen.
 
-* __ui/DetailsScreen__ - a screen allowing the user to view the details of a found lunch place.
+* __ui/DetailsScreen.kt__ - a screen allowing the user to view the details of a found lunch place.
 
   The user can navigate to the Proximity screen by clicking a corresponding icon in the top bar.
 
   The Map screen is not visible behind this screen.
 
-* __ui/ProximityScreen__ - a screen allowing the user to view the distance between the location at which the search has been performed (the origin) and a found lunch place (the destination).
+* __ui/ProximityScreen.kt__ - a screen allowing the user to view the distance between the location at which the search has been performed (the origin) and a found lunch place (the destination).
 
   This screen consists of a top bar only. The Map screen is visible behind this screen and is characterized by the following: it displays the current location on the map and supports all the features related to the destination.
 
