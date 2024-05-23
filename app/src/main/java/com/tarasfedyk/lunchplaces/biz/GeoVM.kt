@@ -33,10 +33,10 @@ import javax.inject.Inject
 @HiltViewModel
 class GeoVM @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
-    private val mediaLimits: MediaLimits,
     private val locationController: LocationController,
+    private val mediaLimits: MediaLimits,
     private val settingsRepo: SettingsRepo,
-    private val geoRepo: GeoRepo
+    private val placesRepo: PlacesRepo
 ) : ViewModel() {
 
     private val _locationPermissionsLevelFlow: MutableStateFlow<LocationPermissionsLevel?> =
@@ -47,10 +47,10 @@ class GeoVM @Inject constructor(
     val searchSettingsFlow: StateFlow<SearchSettings?> = settingsRepo.searchSettingsFlow
         .stateIn(viewModelScope, SharingStarted.Eagerly, initialValue = null)
 
-    private var currentLocationStatusId: Int = 0
-    private var lunchPlacesStatusId: Int = 0
     private val currentLocationLauncher: ReplaceableLauncher = ReplaceableLauncher(viewModelScope)
     private val lunchPlacesLauncher: ReplaceableLauncher = ReplaceableLauncher(viewModelScope)
+    private var currentLocationStatusId: Int = 0
+    private var lunchPlacesStatusId: Int = 0
     val geoStateFlow: StateFlow<GeoState> = savedStateHandle.getStateFlow(
         key = GEO_STATE_KEY,
         initialValue = GeoState()
@@ -117,9 +117,9 @@ class GeoVM @Inject constructor(
         }
     }
 
-    fun searchLunchPlaces(query: String) {
+    fun searchForLunchPlaces(query: String) {
         lunchPlacesLauncher.launch {
-            searchLunchPlacesImpl(query)
+            searchForLunchPlacesImpl(query)
         }
     }
 
@@ -134,7 +134,7 @@ class GeoVM @Inject constructor(
             }
 
             if (shouldPerformRefresh) {
-                searchLunchPlacesImpl(lunchPlacesStatus.arg.query)
+                searchForLunchPlacesImpl(lunchPlacesStatus.arg.query)
             }
         }
     }
@@ -145,7 +145,7 @@ class GeoVM @Inject constructor(
         }
     }
 
-    private suspend fun searchLunchPlacesImpl(query: String) {
+    private suspend fun searchForLunchPlacesImpl(query: String) {
         val searchSettings = searchSettingsFlow.filterNotNull().first()
         var searchFilter = SearchFilter(query, mediaLimits, searchSettings)
         updateGeoState {
@@ -162,7 +162,7 @@ class GeoVM @Inject constructor(
             if (currentLocationTerminalStatus is Status.Success) {
                 val currentPoint = currentLocationTerminalStatus.result.point
                 searchFilter = searchFilter.copy(originPoint = currentPoint)
-                val lunchPlaces = geoRepo.searchLunchPlaces(searchFilter)
+                val lunchPlaces = placesRepo.searchForLunchPlaces(searchFilter)
 
                 updateGeoState {
                     it.copy(lunchPlacesStatus = lunchPlacesStatusSuccess(searchFilter, lunchPlaces))

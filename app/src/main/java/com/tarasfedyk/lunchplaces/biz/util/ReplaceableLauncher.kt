@@ -8,7 +8,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
 /**
- * Launches coroutines in such a way that
+ * A utility for launching coroutines in such a way that
  * a newly launched coroutine gracefully replaces the previously launched one.
  *
  * @property scope the scope in which to launch coroutines

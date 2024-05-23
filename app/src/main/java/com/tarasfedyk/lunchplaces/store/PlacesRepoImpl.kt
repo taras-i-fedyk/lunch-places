@@ -8,10 +8,9 @@ import com.google.android.libraries.places.api.model.CircularBounds
 import com.google.android.libraries.places.api.model.Place
 import com.google.android.libraries.places.api.model.PlaceTypes
 import com.google.android.libraries.places.api.net.FetchResolvedPhotoUriRequest
-import com.google.android.libraries.places.api.net.IsOpenRequest
 import com.google.android.libraries.places.api.net.PlacesClient
 import com.google.android.libraries.places.api.net.SearchByTextRequest
-import com.tarasfedyk.lunchplaces.biz.GeoRepo
+import com.tarasfedyk.lunchplaces.biz.PlacesRepo
 import com.tarasfedyk.lunchplaces.biz.data.LunchPlace
 import com.tarasfedyk.lunchplaces.biz.data.MediaLimits
 import com.tarasfedyk.lunchplaces.biz.data.RankingCriterion
@@ -29,12 +28,12 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class GeoRepoImpl @Inject constructor(
+class PlacesRepoImpl @Inject constructor(
     private val placesClient: PlacesClient
-) : GeoRepo {
+) : PlacesRepo {
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    override suspend fun searchLunchPlaces(searchFilter: SearchFilter): List<LunchPlace> {
+    override suspend fun searchForLunchPlaces(searchFilter: SearchFilter): List<LunchPlace> {
         val placeFields = listOf(
             Place.Field.ID,
             Place.Field.NAME,

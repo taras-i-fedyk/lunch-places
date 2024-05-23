@@ -71,7 +71,7 @@ class RootActivity : ComponentActivity() {
 
         val geoState by geoVM.geoStateFlow.collectAsStateWithLifecycle()
         val onDetermineCurrentLocation = remember(geoVM) { geoVM::determineCurrentLocation }
-        val onSearchLunchPlaces = remember(geoVM) { geoVM::searchLunchPlaces }
+        val onSearchForLunchPlaces = remember(geoVM) { geoVM::searchForLunchPlaces }
         val onDiscardLunchPlaces = remember(geoVM) { geoVM::discardLunchPlaces }
 
         RootContentImpl(
@@ -82,7 +82,7 @@ class RootActivity : ComponentActivity() {
             onSetSearchSettings = onSetSearchSettings,
             geoState = geoState,
             onDetermineCurrentLocation = onDetermineCurrentLocation,
-            onSearchLunchPlaces = onSearchLunchPlaces,
+            onSearchForLunchPlaces = onSearchForLunchPlaces,
             onDiscardLunchPlaces = onDiscardLunchPlaces
         )
 
@@ -100,7 +100,7 @@ class RootActivity : ComponentActivity() {
         onSetSearchSettings: (SearchSettings) -> Unit,
         geoState: GeoState,
         onDetermineCurrentLocation: () -> Unit,
-        onSearchLunchPlaces: (String) -> Unit,
+        onSearchForLunchPlaces: (String) -> Unit,
         onDiscardLunchPlaces: () -> Unit
     ) {
         var mapConfig by rememberSaveable { mutableStateOf(MapConfig()) }
@@ -119,7 +119,7 @@ class RootActivity : ComponentActivity() {
                 searchSettings = searchSettings,
                 onSetSearchSettings = onSetSearchSettings,
                 lunchPlacesStatus = geoState.lunchPlacesStatus,
-                onSearchLunchPlaces = onSearchLunchPlaces,
+                onSearchForLunchPlaces = onSearchForLunchPlaces,
                 onDiscardLunchPlaces = onDiscardLunchPlaces
             )
         }
@@ -146,7 +146,7 @@ class RootActivity : ComponentActivity() {
         searchSettings: SearchSettings?,
         onSetSearchSettings: (SearchSettings) -> Unit,
         lunchPlacesStatus: Status<SearchFilter, List<LunchPlace>>?,
-        onSearchLunchPlaces: (String) -> Unit,
+        onSearchForLunchPlaces: (String) -> Unit,
         onDiscardLunchPlaces: () -> Unit
     ) {
         val navController = rememberNavController()
@@ -167,7 +167,7 @@ class RootActivity : ComponentActivity() {
                 onGetCurrentRoute = onGetCurrentRoute,
                 onSetMapConfig = onSetMapConfig,
                 lunchPlacesStatus = lunchPlacesStatus,
-                onSearchLunchPlaces = onSearchLunchPlaces,
+                onSearchForLunchPlaces = onSearchForLunchPlaces,
                 onDiscardLunchPlaces = onDiscardLunchPlaces,
                 onNavigateToDetails = onNavigateToDetails,
                 onNavigateToSettings = onNavigateToSettings
@@ -202,7 +202,7 @@ class RootActivity : ComponentActivity() {
                 onSetSearchSettings = {},
                 geoState = GeoState(),
                 onDetermineCurrentLocation = {},
-                onSearchLunchPlaces = {},
+                onSearchForLunchPlaces = {},
                 onDiscardLunchPlaces = {}
             )
         }

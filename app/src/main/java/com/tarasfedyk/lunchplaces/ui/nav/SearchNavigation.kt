@@ -14,7 +14,7 @@ fun NavGraphBuilder.searchScreen(
     onGetCurrentRoute: () -> String?,
     onSetMapConfig: (MapConfig) -> Unit,
     lunchPlacesStatus: Status<SearchFilter, List<LunchPlace>>?,
-    onSearchLunchPlaces: (String) -> Unit,
+    onSearchForLunchPlaces: (String) -> Unit,
     onDiscardLunchPlaces: () -> Unit,
     onNavigateToDetails: (Int) -> Unit,
     onNavigateToSettings: () -> Unit
@@ -27,7 +27,7 @@ fun NavGraphBuilder.searchScreen(
             isCurrentDestination = isCurrentDestination,
             onSetMapConfig = onSetMapConfig,
             lunchPlacesStatus = lunchPlacesStatus,
-            onSearchLunchPlaces = onSearchLunchPlaces,
+            onSearchForLunchPlaces = onSearchForLunchPlaces,
             onDiscardLunchPlaces = onDiscardLunchPlaces,
             onNavigateToDetails = onNavigateToDetails,
             onNavigateToSettings = onNavigateToSettings

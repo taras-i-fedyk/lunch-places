@@ -50,7 +50,7 @@ fun SearchScreen(
     isCurrentDestination: Boolean,
     onSetMapConfig: (MapConfig) -> Unit,
     lunchPlacesStatus: Status<SearchFilter, List<LunchPlace>>?,
-    onSearchLunchPlaces: (String) -> Unit,
+    onSearchForLunchPlaces: (String) -> Unit,
     onDiscardLunchPlaces: () -> Unit,
     onNavigateToDetails: (Int) -> Unit,
     onNavigateToSettings: () -> Unit
@@ -65,7 +65,7 @@ fun SearchScreen(
         enteredQueryState = enteredQueryState,
         appliedQueryState = appliedQueryState,
         lunchPlacesStatus = lunchPlacesStatus,
-        onSearchLunchPlaces = onSearchLunchPlaces,
+        onSearchForLunchPlaces = onSearchForLunchPlaces,
         onDiscardLunchPlaces = onDiscardLunchPlaces,
         onNavigateToDetails = onNavigateToDetails,
         onNavigateToSettings = onNavigateToSettings
@@ -86,7 +86,7 @@ private fun SearchScreenImpl(
     enteredQueryState: MutableState<String>,
     appliedQueryState: MutableState<String>,
     lunchPlacesStatus: Status<SearchFilter, List<LunchPlace>>?,
-    onSearchLunchPlaces: (String) -> Unit,
+    onSearchForLunchPlaces: (String) -> Unit,
     onDiscardLunchPlaces: () -> Unit,
     onNavigateToDetails: (Int) -> Unit,
     onNavigateToSettings: () -> Unit
@@ -111,12 +111,12 @@ private fun SearchScreenImpl(
         }
     }
 
-    val onSearch: (String) -> Unit = remember(focusManager, onNavigateBack, onSearchLunchPlaces) {
+    val onSearch: (String) -> Unit = remember(focusManager, onNavigateBack, onSearchForLunchPlaces) {
         { enteredQuery ->
             appliedQueryState.value = enteredQuery
             if (enteredQuery.isNotEmpty()) {
                 focusManager.clearFocus()
-                onSearchLunchPlaces(enteredQuery)
+                onSearchForLunchPlaces(enteredQuery)
             } else {
                 onNavigateBack()
             }
@@ -156,7 +156,7 @@ private fun SearchStatus(
     when (lunchPlacesStatus) {
         null -> {}
         is Status.Pending -> SearchProgress()
-        is Status.Success -> SearchResult(
+        is Status.Success -> SearchResults(
             lunchPlaces = lunchPlacesStatus.result,
             onNavigateToDetails = onNavigateToDetails
         )
@@ -174,7 +174,7 @@ private fun SearchProgress() {
 }
 
 @Composable
-private fun SearchResult(
+private fun SearchResults(
     lunchPlaces: List<LunchPlace>,
     onNavigateToDetails: (Int) -> Unit
 ) {
@@ -183,13 +183,13 @@ private fun SearchResult(
         contentPadding = PaddingValues(vertical = 8.dp)
     ) {
         itemsIndexed(lunchPlaces) { lunchPlaceIndex, lunchPlace ->
-            SearchResultItem(lunchPlaceIndex, lunchPlace, onNavigateToDetails)
+            SearchResultsItem(lunchPlaceIndex, lunchPlace, onNavigateToDetails)
         }
     }
 }
 
 @Composable
-private fun SearchResultItem(
+private fun SearchResultsItem(
     lunchPlaceIndex: Int,
     lunchPlace: LunchPlace,
     onNavigateToDetails: (Int) -> Unit
@@ -302,7 +302,7 @@ private fun SearchScreenPreview(
                     )
                 )
             ),
-            onSearchLunchPlaces = {},
+            onSearchForLunchPlaces = {},
             onDiscardLunchPlaces = {},
             onNavigateToDetails = {},
             onNavigateToSettings = {}
