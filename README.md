@@ -42,7 +42,7 @@ The app has been created for experimental and educational purposes within Harvar
 
 * The MVVM pattern is used to further organize efficient relationships between different layers and sublayers of the app. 
 
-* The Hilt dependency injection framework is applied to facilitate loose coupling and cohesiveness of different entities all over the app.
+* The Hilt dependency injection framework is utilized to facilitate loose coupling and cohesiveness of different entities all over the app.
 
 * Internally, the app relies on the Google Places API (New) to accomplish searches for lunch places.
 
@@ -122,9 +122,11 @@ The app has been created for experimental and educational purposes within Harvar
 
 * The app can be installed on devices carrying Android 7 or later.
 
-* The app’s features related to the map and lunch places will work successfully as long as the Google Maps API Key and the Google Places API Key integrated into the app are valid. Currently, it’s not planned to invalidate those API Keys and generate new ones instead. However, the policy may change in case of suspected malicious use of the API Keys (for example, when they take part in too much traffic).
+* The app’s features related to the map and lunch places will work successfully as long as the Google Maps API Key and the Google Places API Key integrated into the app are valid. Currently, it’s not planned to invalidate those API Keys and generate new ones instead. However, the policy may change in case of suspected malicious use of those API Keys (for example, when they take part in too much traffic).
 
-  Consequently, if the app keeps signaling about an invalid configuration, it’s likely due to issues in the above dimension. In such a case, it’d make sense to ensure the API Keys integrated into the app are up-to-date. To do that, you’d have to redownload the app’s source code, rebuild the app, and reinstall it on the device.
+  By the way, it has to be noted that the above API Keys have been integrated into the app in such a way that it's difficult to steal them for use elsewhere.
+
+  Nonetheless, if the app keeps signaling about an invalid configuration, it’s likely due to issues with the API Keys' validity. In such a case, it’d make sense to ensure the API Keys integrated into the app are up-to-date. To do that, you’d have to redownload the app’s source code, rebuild the app, and reinstall it on the device.
 
 * For the app to be useful, it should be able to determine the current location. In such a case, the following conditions are required:
 
