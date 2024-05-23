@@ -122,7 +122,7 @@ The app has been created for experimental and educational purposes within Harvar
 
 * The app can be installed on devices carrying Android 7 or later.
 
-* The app’s features related to the map and lunch places will work successfully as long as the Google Maps and Places API Keys integrated into the app are valid. Currently, it’s not planned to invalidate those API Keys and generate new ones instead. However, the policy may change in case of suspected malicious use of the API Keys (for example, when they take part in too much traffic).
+* The app’s features related to the map and lunch places will work successfully as long as the Google Maps API Key and the Google Places API Key integrated into the app are valid. Currently, it’s not planned to invalidate those API Keys and generate new ones instead. However, the policy may change in case of suspected malicious use of the API Keys (for example, when they take part in too much traffic).
 
   Consequently, if the app keeps signaling about an invalid configuration, it’s likely due to issues in the above dimension. In such a case, it’d make sense to ensure the API Keys integrated into the app are up-to-date. To do that, you’d have to redownload the app’s source code, rebuild the app, and reinstall it on the device.
 
