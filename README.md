@@ -64,7 +64,7 @@ The app has been created to experiment with different technologies and as a fina
 
     The above two interfaces are related to storage. However, since those interfaces are used by the GeoVM belonging to the business logic layer of the app, they have been defined in the business logic layer as well. While their implementations have been defined in the storage layer as expected. (That way, we ensure the business logic layer is independent from the storage layer, in line with the Clean Architecture paradigm.)
 
-* __The the storage layer:__
+* __The storage layer:__
 
   * __store/SettingsRepoImpl__ - the default implementation of the biz/SettingsRepo interface, as a follow-up to the above. This implementation is based on using the Jetpack Preferences DataStore.
 
