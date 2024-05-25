@@ -40,9 +40,7 @@ The app has been created to experiment with different technologies and as a fina
 
 * Conceptually, the app’s architecture is shaped by the Clean Architecture paradigm. In the sense that the central layer of the app (business logic) is self-sufficient and independent from the external layers, while the external layers (storage and UI) depend on the central layer.
 
-* The MVVM pattern is used to further organize efficient relationships between different layers and sublayers of the app. 
-
-* The Hilt dependency injection framework is utilized to facilitate loose coupling and cohesiveness among various entities all over the app.
+* The MVVM pattern is used to further organize efficient relationships between different layers and sublayers of the app. Also, the Hilt dependency injection framework is used to facilitate loose coupling and cohesiveness among different entities all over the app.
 
 * Internally, the app relies on the Google Places API (New) to accomplish searches for lunch places.
 
