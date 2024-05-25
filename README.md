@@ -48,7 +48,7 @@ The app has been created to experiment with different technologies and as a fina
 
 ### Key files overview
 
-* The business logic layer:
+* In the business logic layer:
 
   * __biz/data/GeoState__ - a global state to be shared between any interested parties across the app. It consists of two elements: the status of determining the current location and the status of searching for lunch places. The above statuses include all the relevant information like arguments, results, and error types.
 
@@ -64,13 +64,13 @@ The app has been created to experiment with different technologies and as a fina
 
     The above two interfaces are related to storage. However, since those interfaces are used by the GeoVM belonging to the business logic layer of the app, they have been defined in the business logic layer as well. While their implementations have been defined in the storage layer as expected. (That way, we ensure the business logic layer is independent from the storage layer, in line with the Clean Architecture paradigm.)
 
-* The storage layer:
+* In the storage layer:
 
   * __store/SettingsRepoImpl__ - the default implementation of the biz/SettingsRepo interface, as a follow-up to the above. This implementation is based on using the Jetpack Preferences DataStore.
 
   * __store/PlacesRepoImpl__ - the default implementation of the biz/PlacesRepo interface, as a follow-up to the above. This implementation is based on using the Google Places SDK (New).
 
-* The UI layer:
+* In the UI layer:
 
   * __ui/RootActivity__ - the app’s entry point and the container of its UI:
 
