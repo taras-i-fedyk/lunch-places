@@ -48,69 +48,69 @@ The app has been created to experiment with different technologies and as a fina
 
 ### Key files overview
 
-#### the business logic layer
+* __The business logic layer:__
 
-* __biz/data/GeoState__ - a global state to be shared between any interested parties across the app. It consists of two elements: the status of determining the current location and the status of searching for lunch places. The above statuses include all the relevant information like arguments, results, and error types.
+  * __biz/data/GeoState__ - a global state to be shared between any interested parties across the app. It consists of two elements: the status of determining the current location and the status of searching for lunch places. The above statuses include all the relevant information like arguments, results, and error types.
 
-* __biz/GeoVM__ - a strategic ViewModel binding all the layers of the app together, in line with the MVVM pattern. This ViewModel serves as a producer of the GeoState. Since it is responsible for the following: determining the current location (based on the location permissions level) and searching for lunch places (based on the search settings). And it has to be noted that searching for lunch places always includes determining the current location.
+  * __biz/GeoVM__ - a strategic ViewModel binding all the layers of the app together, in line with the MVVM pattern. This ViewModel serves as a producer of the GeoState. Since it is responsible for the following: determining the current location (based on the location permissions level) and searching for lunch places (based on the search settings). And it has to be noted that searching for lunch places always includes determining the current location.
 
-* __biz/util/ReplaceableLauncher__ - a utility for launching coroutines in such a way that a newly launched coroutine gracefully replaces the previously launched one. It is used by the GeoVM to avoid potential conflicts between multiple simultaneously running instances of the same operation.
+  * __biz/util/ReplaceableLauncher__ - a utility for launching coroutines in such a way that a newly launched coroutine gracefully replaces the previously launched one. It is used by the GeoVM to avoid potential conflicts between multiple simultaneously running instances of the same operation.
 
-* __biz/LocationController__ - the entity directly responsible for determining the current location. Namely, a corresponding interface used by the GeoVM and its default implementation based on the Fused Location Provider.
+  * __biz/LocationController__ - the entity directly responsible for determining the current location. Namely, a corresponding interface used by the GeoVM and its default implementation based on the Fused Location Provider.
 
-* __biz/SettingsRepo__ - an interface of the repository responsible for storing the app settings, which provides you with read/write access.
+  * __biz/SettingsRepo__ - an interface of the repository responsible for storing the app settings, which provides you with read/write access.
 
-* __biz/PlacesRepo__ - an interface of the repository responsible for storing all places, which allows you to search for lunch places that match certain criteria.
+  * __biz/PlacesRepo__ - an interface of the repository responsible for storing all places, which allows you to search for lunch places that match certain criteria.
 
-  The above two interfaces are related to storage. However, since those interfaces are used by the GeoVM belonging to the business logic layer of the app, they have been defined in the business logic layer as well. While their implementations have been defined in the storage layer as expected. (That way, we ensure the business logic layer is independent from the storage layer, in line with the Clean Architecture paradigm.)
+    The above two interfaces are related to storage. However, since those interfaces are used by the GeoVM belonging to the business logic layer of the app, they have been defined in the business logic layer as well. While their implementations have been defined in the storage layer as expected. (That way, we ensure the business logic layer is independent from the storage layer, in line with the Clean Architecture paradigm.)
 
-#### the storage layer
+* __The the storage layer:__
 
-* __store/SettingsRepoImpl__ - the default implementation of the biz/SettingsRepo interface, as a follow-up to the above. This implementation is based on using the Jetpack Preferences DataStore.
+  * __store/SettingsRepoImpl__ - the default implementation of the biz/SettingsRepo interface, as a follow-up to the above. This implementation is based on using the Jetpack Preferences DataStore.
 
-* __store/PlacesRepoImpl__ - the default implementation of the biz/PlacesRepo interface, as a follow-up to the above. This implementation is based on using the Google Places SDK (New).
+  * __store/PlacesRepoImpl__ - the default implementation of the biz/PlacesRepo interface, as a follow-up to the above. This implementation is based on using the Google Places SDK (New).
 
-#### the UI layer
+* __The UI layer:__
 
-* __ui/RootActivity__ - the app’s entry point and the container of its UI:
+  * __ui/RootActivity__ - the app’s entry point and the container of its UI:
 
-  * first of all, this entity monitors changes to the GeoState and delegates the main tasks to the GeoVM.
+    * first of all, this entity monitors changes to the GeoState and delegates the main tasks to the GeoVM.
 
-  * this entity manages each of the screens and the relationship between them. In short, there’s the Map screen and a navigation graph that overlays it. The navigation graph consists of the following four screens: Search, Settings, Details, and Proximity. Depending on the state of the current screen in the navigation graph, the Map screen can look and behave differently.
+    * this entity manages each of the screens and the relationship between them. In short, there’s the Map screen and a navigation graph that overlays it. The navigation graph consists of the following four screens: Search, Settings, Details, and Proximity. Depending on the state of the current screen in the navigation graph, the Map screen can look and behave differently.
 
-  * last but not least, this entity monitors if the location permissions have been granted to the app and assists the user in granting them when needed.
+    * last but not least, this entity monitors if the location permissions have been granted to the app and assists the user in granting them when needed.
 
-* __ui/MapScreen__ - a screen displaying the map. Depending on its parameters that are changed dynamically, this screen has the following extra features:
+  * __ui/MapScreen__ - a screen displaying the map. Depending on its parameters that are changed dynamically, this screen has the following extra features:
 
-  * be visible or not.
+    * be visible or not.
 
-  * display the current location on the map.
+    * display the current location on the map.
 
-  * allow the user to determine the current location ad hoc.
+    * allow the user to determine the current location ad hoc.
 
-  * display the destination on the map, without displaying the origin on it.
+    * display the destination on the map, without displaying the origin on it.
 
-  * automatically or per the user’s request, position the map’s camera so that the current location is in the center of the screen or so that the distance between the origin and the destination is fully visible.
+    * automatically or per the user’s request, position the map’s camera so that the current location is in the center of the screen or so that the distance between the origin and the destination is fully visible.
 
-* __ui/SearchScreen__ - a screen allowing the user to search for lunch places by any text query and view the search results as a list.
+  * __ui/SearchScreen__ - a screen allowing the user to search for lunch places by any text query and view the search results as a list.
 
-  The user can navigate to the Details screen by clicking a search results item. Also, the user can navigate to the Settings screen by clicking a corresponding icon in the search bar.
+    The user can navigate to the Details screen by clicking a search results item. Also, the user can navigate to the Settings screen by clicking a corresponding icon in the search bar.
 
-  When no search is underway, this screen consists of a search bar only. In such a case, the Map screen is visible behind this screen and supports all the features related to the current location. Otherwise, the Map screen is not visible behind this screen.
+    When no search is underway, this screen consists of a search bar only. In such a case, the Map screen is visible behind this screen and supports all the features related to the current location. Otherwise, the Map screen is not visible behind this screen.
 
-* __ui/SettingsScreen__ - a screen allowing the user to configure search settings like the ranking criterion and the preferred radius.
+  * __ui/SettingsScreen__ - a screen allowing the user to configure search settings like the ranking criterion and the preferred radius.
 
-  The Map screen is not visible behind this screen.
+    The Map screen is not visible behind this screen.
 
-* __ui/DetailsScreen__ - a screen allowing the user to view the details of a found lunch place.
+  * __ui/DetailsScreen__ - a screen allowing the user to view the details of a found lunch place.
 
-  The user can navigate to the Proximity screen by clicking a corresponding icon in the top bar.
+    The user can navigate to the Proximity screen by clicking a corresponding icon in the top bar.
 
-  The Map screen is not visible behind this screen.
+    The Map screen is not visible behind this screen.
 
-* __ui/ProximityScreen__ - a screen allowing the user to view the distance between the location at which the search has been performed (the origin) and a found lunch place (the destination).
+  * __ui/ProximityScreen__ - a screen allowing the user to view the distance between the location at which the search has been performed (the origin) and a found lunch place (the destination).
 
-  This screen consists of a top bar only. The Map screen is visible behind this screen and is characterized by the following: it displays the current location on the map and supports all the features related to the destination.
+    This screen consists of a top bar only. The Map screen is visible behind this screen and is characterized by the following: it displays the current location on the map and supports all the features related to the destination.
 
 ### Prerequisites
 
