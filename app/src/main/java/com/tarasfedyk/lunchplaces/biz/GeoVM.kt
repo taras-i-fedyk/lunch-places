@@ -105,7 +105,7 @@ class GeoVM @Inject constructor(
                     e is ApiException && e.statusCode == CommonStatusCodes.API_NOT_CONNECTED -> {
                         ErrorType.LOCATION_SERVICES
                     }
-                    e is SecurityException -> ErrorType.LOCATION_PERMISSIONS
+                    e is SecurityException -> ErrorType.LOCATION_PERMISSION
                     else -> ErrorType.CURRENT_LOCATION
                 }
                 updateGeoState {
@@ -183,7 +183,7 @@ class GeoVM @Inject constructor(
                         ErrorType.INTERNET_CONNECTION
                     }
                     e is ApiException && e.statusCode == PlacesStatusCodes.OVER_QUERY_LIMIT -> {
-                        ErrorType.QUERY_LIMIT
+                        ErrorType.QUERY_LIMITS
                     }
                     else -> ErrorType.UNKNOWN
                 }

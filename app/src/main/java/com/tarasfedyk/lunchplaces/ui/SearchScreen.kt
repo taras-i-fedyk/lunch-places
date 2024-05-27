@@ -225,14 +225,14 @@ private fun SearchResultsItem(
 private fun SearchError(errorId: Int, errorType: ErrorType, onRetrySearch: () -> Unit) {
     val snackbarHostState = remember { SnackbarHostState() }
 
-    val isAppSettingsError = errorType == ErrorType.LOCATION_PERMISSIONS
+    val isAppSettingsError = errorType == ErrorType.LOCATION_PERMISSION
     val errorMessage = when (errorType) {
         ErrorType.INVALID_CONFIG -> stringResource(R.string.search_config_error_message)
         ErrorType.LOCATION_SERVICES -> stringResource(R.string.search_services_error_message)
-        ErrorType.LOCATION_PERMISSIONS -> stringResource(R.string.search_permissions_error_message)
+        ErrorType.LOCATION_PERMISSION -> stringResource(R.string.search_permission_error_message)
         ErrorType.CURRENT_LOCATION -> stringResource(R.string.search_location_error_message)
         ErrorType.INTERNET_CONNECTION -> stringResource(R.string.search_connection_error_message)
-        ErrorType.QUERY_LIMIT -> stringResource(R.string.search_query_error_message)
+        ErrorType.QUERY_LIMITS -> stringResource(R.string.search_query_error_message)
         else -> stringResource(R.string.search_error_message)
     }
 

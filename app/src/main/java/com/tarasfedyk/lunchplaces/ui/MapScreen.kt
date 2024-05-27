@@ -273,10 +273,10 @@ private fun CurrentLocationError(
     errorType: ErrorType,
     onDetermineCurrentLocation: () -> Unit
 ) {
-    val isAppSettingsError = errorType == ErrorType.LOCATION_PERMISSIONS
+    val isAppSettingsError = errorType == ErrorType.LOCATION_PERMISSION
     val errorMessage = when (errorType) {
         ErrorType.LOCATION_SERVICES -> stringResource(R.string.map_services_error_message)
-        ErrorType.LOCATION_PERMISSIONS -> stringResource(R.string.map_permissions_error_message)
+        ErrorType.LOCATION_PERMISSION -> stringResource(R.string.map_permission_error_message)
         else -> stringResource(R.string.map_location_error_message)
     }
 

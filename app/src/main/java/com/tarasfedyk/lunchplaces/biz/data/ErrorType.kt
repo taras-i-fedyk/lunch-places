@@ -3,9 +3,9 @@ package com.tarasfedyk.lunchplaces.biz.data
 enum class ErrorType {
     INVALID_CONFIG,
     LOCATION_SERVICES,
-    LOCATION_PERMISSIONS,
+    LOCATION_PERMISSION,
     CURRENT_LOCATION,
     INTERNET_CONNECTION,
-    QUERY_LIMIT,
+    QUERY_LIMITS,
     UNKNOWN
 }
