@@ -94,8 +94,8 @@ The app has been created to experiment with different technologies and as a fina
 
 * `ui/SearchScreen.kt` - a screen allowing the user to search for lunch places by any text query and view the search results as a list.
 
-  The user can navigate to the Details screen by clicking a search results item. Also, the user can navigate to the Settings screen by clicking a corresponding icon in the search bar.
-
+  The user can navigate to the Settings screen by clicking a corresponding icon in the search bar. Also, the user can navigate to the Details screen by clicking a search results item.
+ 
   When no search is underway, this screen consists of a search bar only. In such a case, the Map screen is visible behind this screen and supports all the features related to the current location. Otherwise, the Map screen is not visible behind this screen.
 
 * `ui/SettingsScreen.kt` - a screen allowing the user to configure search settings like the ranking criterion and the preferred radius.
