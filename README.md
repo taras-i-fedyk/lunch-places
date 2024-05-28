@@ -52,7 +52,7 @@ The app has been created to experiment with different technologies and as a fina
 
 * `biz/data/GeoState.kt` - a global state to be shared between any interested parties across the app. It consists of two elements: the status of determining the current location and the status of searching for lunch places. The above statuses include all the relevant information like arguments, results, and error types.
 
-* `biz/GeoVM.kt` - a strategic ViewModel binding all the layers of the app together, in line with the MVVM pattern. This ViewModel serves as a producer of the GeoState. Since it is responsible for the following: determining the current location (based on the location permission level) and searching for lunch places (based on the search settings). And it has to be noted that searching for lunch places always includes determining the current location.
+* `biz/GeoVM.kt` - a strategic ViewModel binding all the layers of the app together, in line with the MVVM pattern. This ViewModel serves as a producer of the GeoState. Since it is responsible for the following: determining the current location (based on the location permission level) and searching for lunch places (based on the search settings). And it has to be noted that searching for lunch places always includes determining the current location (albeit in an efficient overhead-less way).
 
 * `biz/util/ReplaceableLauncher.kt` - a utility for launching coroutines in such a way that a newly launched coroutine gracefully replaces the previously launched one. It is used by the GeoVM to avoid potential conflicts between multiple simultaneously running instances of the same operation.
 
