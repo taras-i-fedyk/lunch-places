@@ -78,7 +78,7 @@ The app has been created to experiment with different technologies and as a fina
 
   * it manages each of the screens and the relationships between them. In short, there’s the Map screen and a navigation graph that overlays it. The navigation graph consists of the following four screens: Search, Settings, Details, and Proximity. Depending on the state of the current screen in the navigation graph, the Map screen can look and behave differently.
 
-  * last but not least, it monitors if the app has been granted access to the device's location and assists the user in granting such access when needed.
+  * last but not least, it monitors if the app has been granted permission to access the device's location and assists the user in granting such permission when needed.
 
 * `ui/MapScreen.kt` - a screen displaying the map. Depending on its parameters that are changed dynamically, this screen has the following extra features:
 
@@ -134,7 +134,7 @@ The app has been created to experiment with different technologies and as a fina
 
   * the location services have been “initialized” on the device. (This is usually the case. However, it can be ensured by running the stock Maps app and waiting until it has determined the current location, which is typically needed for a new device only.)
 
-  * the app has been granted access to the device's location. (The app will assist you in granting such access. However, it can be configured via the stock Settings app.)
+  * the app has been granted permission to access the device's location. (The app will assist the user in granting such permission. However, it can be configured via the stock Settings app.)
 
 ### Simplifications
 

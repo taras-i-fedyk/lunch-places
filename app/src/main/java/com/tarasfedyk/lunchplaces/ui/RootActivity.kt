@@ -128,7 +128,7 @@ class RootActivity : ComponentActivity() {
             { onSetLocationPermissionLevel(LocationPermissionLevel.NONE) }
         }
         val onSolelyCoarseLocationPermissionGranted = remember(onSetLocationPermissionLevel) {
-            { onSetLocationPermissionLevel(LocationPermissionLevel.COARSE_ONLY) }
+            { onSetLocationPermissionLevel(LocationPermissionLevel.COARSE) }
         }
         val onFineLocationPermissionGranted = remember(onSetLocationPermissionLevel) {
             { onSetLocationPermissionLevel(LocationPermissionLevel.FINE) }
