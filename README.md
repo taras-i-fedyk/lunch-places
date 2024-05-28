@@ -56,7 +56,7 @@ The app has been created to experiment with different technologies and as a fina
 
 * `biz/util/ReplaceableLauncher.kt` - a utility for launching coroutines in such a way that a newly launched coroutine gracefully replaces the previously launched one. It is used by the GeoVM to avoid potential conflicts between multiple simultaneously running instances of the same operation.
 
-* `biz/LocationController.kt` - the entity directly responsible for determining the current location. Namely, a corresponding interface used by the GeoVM and its default implementation based on the Fused Location Provider.
+* `biz/LocationController.kt` - the entity directly responsible for determining the current location. Namely, the corresponding interface used by the GeoVM and its default implementation based on the Fused Location Provider.
 
 * `biz/SettingsRepo.kt` - an interface of the repository responsible for storing the app settings, which provides you with read/write access.
 
@@ -94,7 +94,7 @@ The app has been created to experiment with different technologies and as a fina
 
 * `ui/SearchScreen.kt` - a screen allowing the user to search for lunch places by any text query and view the search results as a list.
 
-  The user can navigate to the Settings screen by clicking a corresponding icon in the search bar. Also, the user can navigate to the Details screen by clicking a search results item.
+  The user can navigate to the Settings screen by clicking the corresponding icon in the search bar. Also, the user can navigate to the Details screen by clicking a search results item.
  
   When no search is underway, this screen consists of a search bar only. In such a case, the Map screen is visible behind this screen and supports all the features related to the current location. Otherwise, the Map screen is not visible behind this screen.
 
@@ -104,11 +104,11 @@ The app has been created to experiment with different technologies and as a fina
 
 * `ui/DetailsScreen.kt` - a screen allowing the user to view the details of a found lunch place.
 
-  The user can navigate to the Proximity screen by clicking a corresponding icon in the top bar.
+  The user can navigate to the Proximity screen by clicking the corresponding icon in the top bar.
 
   The Map screen is not visible behind this screen.
 
-* `ui/ProximityScreen.kt` - a screen allowing the user to view the distance between the location at which the search has been performed (the origin) and a found lunch place (the destination).
+* `ui/ProximityScreen.kt` - a screen allowing the user to view the distance between the search location as the origin and a found lunch place as the destination.
 
   This screen consists of a top bar only. The Map screen is visible behind this screen and is characterized by the following: it displays the current location on the map and supports all the features related to the destination.
 
