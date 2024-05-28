@@ -12,7 +12,7 @@ import com.tarasfedyk.lunchplaces.biz.data.GeoState
 import com.tarasfedyk.lunchplaces.biz.data.SearchFilter
 import com.tarasfedyk.lunchplaces.biz.data.Status
 import com.tarasfedyk.lunchplaces.biz.util.ReplaceableLauncher
-import com.tarasfedyk.lunchplaces.biz.data.LocationPermissionsLevel
+import com.tarasfedyk.lunchplaces.biz.data.LocationPermissionLevel
 import com.tarasfedyk.lunchplaces.biz.data.LocationSnapshot
 import com.tarasfedyk.lunchplaces.biz.data.LunchPlace
 import com.tarasfedyk.lunchplaces.biz.data.MediaLimits
@@ -39,10 +39,10 @@ class GeoVM @Inject constructor(
     private val placesRepo: PlacesRepo
 ) : ViewModel() {
 
-    private val _locationPermissionsLevelFlow: MutableStateFlow<LocationPermissionsLevel?> =
+    private val _locationPermissionLevelFlow: MutableStateFlow<LocationPermissionLevel?> =
         MutableStateFlow(value = null)
-    val locationPermissionsLevelFlow: StateFlow<LocationPermissionsLevel?> =
-        _locationPermissionsLevelFlow.asStateFlow()
+    val locationPermissionLevelFlow: StateFlow<LocationPermissionLevel?> =
+        _locationPermissionLevelFlow.asStateFlow()
 
     val searchSettingsFlow: StateFlow<SearchSettings?> = settingsRepo.searchSettingsFlow
         .stateIn(viewModelScope, SharingStarted.Eagerly, initialValue = null)
@@ -60,12 +60,12 @@ class GeoVM @Inject constructor(
         refreshLunchPlaces(RefreshFilter.PENDING_DATA)
     }
 
-    fun setLocationPermissionsLevel(locationPermissionsLevel: LocationPermissionsLevel) {
-        _locationPermissionsLevelFlow.value = locationPermissionsLevel
-        onLocationPermissionsLevelChanged()
+    fun setLocationPermissionLevel(locationPermissionLevel: LocationPermissionLevel) {
+        _locationPermissionLevelFlow.value = locationPermissionLevel
+        onLocationPermissionLevelChanged()
     }
 
-    private fun onLocationPermissionsLevelChanged() {
+    private fun onLocationPermissionLevelChanged() {
         determineCurrentLocation()
         refreshLunchPlaces(RefreshFilter.FAILED_DATA)
     }

@@ -25,7 +25,7 @@ import com.tarasfedyk.lunchplaces.biz.data.GeoState
 import com.tarasfedyk.lunchplaces.biz.data.LunchPlace
 import com.tarasfedyk.lunchplaces.biz.data.SearchFilter
 import com.tarasfedyk.lunchplaces.biz.data.Status
-import com.tarasfedyk.lunchplaces.biz.data.LocationPermissionsLevel
+import com.tarasfedyk.lunchplaces.biz.data.LocationPermissionLevel
 import com.tarasfedyk.lunchplaces.biz.data.SearchSettings
 import com.tarasfedyk.lunchplaces.biz.data.isCoarseOrFine
 import com.tarasfedyk.lunchplaces.ui.data.MapConfig
@@ -62,9 +62,9 @@ class RootActivity : ComponentActivity() {
 
         var isGooglePlayServicesAvailable by remember { mutableStateOf(false) }
 
-        val locationPermissionsLevel by geoVM.locationPermissionsLevelFlow.collectAsStateWithLifecycle()
-        val isNoLocationPermissionGranted = !locationPermissionsLevel.isCoarseOrFine
-        val onSetLocationPermissionsLevel = remember(geoVM) { geoVM::setLocationPermissionsLevel }
+        val locationPermissionLevel by geoVM.locationPermissionLevelFlow.collectAsStateWithLifecycle()
+        val isNoLocationPermissionGranted = !locationPermissionLevel.isCoarseOrFine
+        val onSetLocationPermissionLevel = remember(geoVM) { geoVM::setLocationPermissionLevel }
 
         val searchSettings by geoVM.searchSettingsFlow.collectAsStateWithLifecycle()
         val onSetSearchSettings = remember(geoVM) { geoVM::setSearchSettings }
@@ -77,7 +77,7 @@ class RootActivity : ComponentActivity() {
         RootContentImpl(
             isGooglePlayServicesAvailable= isGooglePlayServicesAvailable,
             isNoLocationPermissionGranted = isNoLocationPermissionGranted,
-            onSetLocationPermissionsLevel = onSetLocationPermissionsLevel,
+            onSetLocationPermissionLevel = onSetLocationPermissionLevel,
             searchSettings = searchSettings,
             onSetSearchSettings = onSetSearchSettings,
             geoState = geoState,
@@ -95,7 +95,7 @@ class RootActivity : ComponentActivity() {
     private fun RootContentImpl(
         isGooglePlayServicesAvailable: Boolean,
         isNoLocationPermissionGranted: Boolean,
-        onSetLocationPermissionsLevel: (LocationPermissionsLevel) -> Unit,
+        onSetLocationPermissionLevel: (LocationPermissionLevel) -> Unit,
         searchSettings: SearchSettings?,
         onSetSearchSettings: (SearchSettings) -> Unit,
         geoState: GeoState,
@@ -124,14 +124,14 @@ class RootActivity : ComponentActivity() {
             )
         }
 
-        val onNoLocationPermissionGranted = remember(onSetLocationPermissionsLevel) {
-            { onSetLocationPermissionsLevel(LocationPermissionsLevel.NONE) }
+        val onNoLocationPermissionGranted = remember(onSetLocationPermissionLevel) {
+            { onSetLocationPermissionLevel(LocationPermissionLevel.NONE) }
         }
-        val onSolelyCoarseLocationPermissionGranted = remember(onSetLocationPermissionsLevel) {
-            { onSetLocationPermissionsLevel(LocationPermissionsLevel.COARSE_ONLY) }
+        val onSolelyCoarseLocationPermissionGranted = remember(onSetLocationPermissionLevel) {
+            { onSetLocationPermissionLevel(LocationPermissionLevel.COARSE_ONLY) }
         }
-        val onFineLocationPermissionGranted = remember(onSetLocationPermissionsLevel) {
-            { onSetLocationPermissionsLevel(LocationPermissionsLevel.FINE) }
+        val onFineLocationPermissionGranted = remember(onSetLocationPermissionLevel) {
+            { onSetLocationPermissionLevel(LocationPermissionLevel.FINE) }
         }
         LocationPermissionsTracker(
             onNoLocationPermissionGranted = onNoLocationPermissionGranted,
@@ -197,7 +197,7 @@ class RootActivity : ComponentActivity() {
             RootContentImpl(
                 isGooglePlayServicesAvailable = true,
                 isNoLocationPermissionGranted = false,
-                onSetLocationPermissionsLevel = {},
+                onSetLocationPermissionLevel = {},
                 searchSettings = null,
                 onSetSearchSettings = {},
                 geoState = GeoState(),
