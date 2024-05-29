@@ -4,7 +4,7 @@
 
 This is a compact Android app for finding nearby places where you can have lunch or something. You're free to perform the search by any text query.
 
-The app has been created to experiment with different technologies and as a final project for Harvard University’s CS50 course. It's not for any distribution outside that context.
+The app has been created to experiment with different technologies and as a final project within Harvard University’s CS50 course. It's not for any distribution outside that context.
 
 ### Tech stack
 
