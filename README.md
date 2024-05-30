@@ -2,7 +2,7 @@
 
 ### Introduction
 
-This is a compact Android app for finding nearby places where you can have lunch or something. You're free to perform the search by any text query.
+This is a compact Android app for finding nearby places to have lunch or something. You can perform a search by any text query.
 
 The app has been created to experiment with different technologies and as a final project within Harvard University’s CS50 course. It's not for any distribution outside that context.
 
@@ -98,7 +98,7 @@ The app has been created to experiment with different technologies and as a fina
  
   When no search is underway, this screen consists of a search bar only. In such a case, the Map screen is visible behind this screen and supports all the features related to the current location. Otherwise, the Map screen is not visible behind this screen.
 
-* `ui/SettingsScreen.kt` - a screen allowing the user to configure search settings like the ranking criterion and the preferred radius.
+* `ui/SettingsScreen.kt` - a screen allowing the user to configure different search settings, like the ranking criterion and the preferred radius.
 
   The Map screen is not visible behind this screen.
 
