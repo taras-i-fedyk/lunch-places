@@ -1,5 +1,9 @@
 # Lunch Places
 
+### Demo
+
+Here’s a demo [video](https://youtu.be/Uuqr6z-5ppE).
+
 ### Introduction
 
 This is a compact Android app for finding nearby places to have lunch or something. You can perform a search by any text query.
