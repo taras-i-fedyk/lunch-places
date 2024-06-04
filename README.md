@@ -2,7 +2,7 @@
 
 ### Demo
 
-Here’s a demo [video](https://youtu.be/Uuqr6z-5ppE).
+Here’s a demo [video](https://youtu.be/J_tJKvOafcY).
 
 ### Introduction
 
