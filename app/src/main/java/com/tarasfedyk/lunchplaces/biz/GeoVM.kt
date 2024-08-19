@@ -88,15 +88,15 @@ class GeoVM @Inject constructor(
     }
 
     private suspend fun determineCurrentLocationImpl() {
-        updateGeoState { it.copy(currentLocationStatus = currentLocationStatusPending()) }
+        updateGeoState { it.copy(currentLocationStatus = createCurrentLocationStatusPending()) }
 
         try {
             val currentLocation = locationController.determineCurrentLocation()
 
             val currentLocationStatus = if (currentLocation != null) {
-                currentLocationStatusSuccess(currentLocation)
+                createCurrentLocationStatusSuccess(currentLocation)
             } else {
-                currentLocationStatusFailure(ErrorType.CURRENT_LOCATION)
+                createCurrentLocationStatusFailure(ErrorType.CURRENT_LOCATION)
             }
             updateGeoState { it.copy(currentLocationStatus = currentLocationStatus) }
         } catch (e: Exception) {
@@ -109,7 +109,7 @@ class GeoVM @Inject constructor(
                     else -> ErrorType.CURRENT_LOCATION
                 }
                 updateGeoState {
-                    it.copy(currentLocationStatus = currentLocationStatusFailure(errorType))
+                    it.copy(currentLocationStatus = createCurrentLocationStatusFailure(errorType))
                 }
             } else {
                 throw e
@@ -149,7 +149,7 @@ class GeoVM @Inject constructor(
         val searchSettings = searchSettingsFlow.filterNotNull().first()
         var searchFilter = SearchFilter(query, mediaLimits, searchSettings)
         updateGeoState {
-            it.copy(lunchPlacesStatus = lunchPlacesStatusPending(searchFilter))
+            it.copy(lunchPlacesStatus = createLunchPlacesStatusPending(searchFilter))
         }
 
         determineCurrentLocation()
@@ -165,12 +165,12 @@ class GeoVM @Inject constructor(
                 val lunchPlaces = placesRepo.searchForLunchPlaces(searchFilter)
 
                 updateGeoState {
-                    it.copy(lunchPlacesStatus = lunchPlacesStatusSuccess(searchFilter, lunchPlaces))
+                    it.copy(lunchPlacesStatus = createLunchPlacesStatusSuccess(searchFilter, lunchPlaces))
                 }
             } else {
                 val errorType = (currentLocationTerminalStatus as Status.Failure).errorType
                 updateGeoState {
-                    it.copy(lunchPlacesStatus = lunchPlacesStatusFailure(searchFilter, errorType))
+                    it.copy(lunchPlacesStatus = createLunchPlacesStatusFailure(searchFilter, errorType))
                 }
             }
         } catch (e: Exception) {
@@ -188,7 +188,7 @@ class GeoVM @Inject constructor(
                     else -> ErrorType.UNKNOWN
                 }
                 updateGeoState {
-                    it.copy(lunchPlacesStatus = lunchPlacesStatusFailure(searchFilter, errorType))
+                    it.copy(lunchPlacesStatus = createLunchPlacesStatusFailure(searchFilter, errorType))
                 }
             } else {
                 throw e
@@ -203,31 +203,31 @@ class GeoVM @Inject constructor(
         savedStateHandle[GEO_STATE_KEY] = newGeoState
     }
 
-    private fun currentLocationStatusPending(): Status<Unit, Nothing> {
+    private fun createCurrentLocationStatusPending(): Status<Unit, Nothing> {
         ++currentLocationStatusId
         return Status.Pending(id = currentLocationStatusId, arg = Unit)
     }
 
-    private fun currentLocationStatusSuccess(
+    private fun createCurrentLocationStatusSuccess(
         currentLocation: LocationSnapshot
     ): Status<Unit, LocationSnapshot> {
         ++currentLocationStatusId
         return Status.Success(id = currentLocationStatusId, arg = Unit, result = currentLocation)
     }
 
-    private fun currentLocationStatusFailure(errorType: ErrorType): Status<Unit, Nothing> {
+    private fun createCurrentLocationStatusFailure(errorType: ErrorType): Status<Unit, Nothing> {
         ++currentLocationStatusId
         return Status.Failure(id = currentLocationStatusId, arg = Unit, errorType = errorType)
     }
 
-    private fun lunchPlacesStatusPending(
+    private fun createLunchPlacesStatusPending(
         searchFilter: SearchFilter
     ): Status<SearchFilter, Nothing> {
         ++lunchPlacesStatusId
         return Status.Pending(id = lunchPlacesStatusId, arg = searchFilter)
     }
 
-    private fun lunchPlacesStatusSuccess(
+    private fun createLunchPlacesStatusSuccess(
         searchFilter: SearchFilter,
         lunchPlaces: List<LunchPlace>
     ): Status<SearchFilter, List<LunchPlace>> {
@@ -235,7 +235,7 @@ class GeoVM @Inject constructor(
         return Status.Success(id = lunchPlacesStatusId, arg = searchFilter, result = lunchPlaces)
     }
 
-    private fun lunchPlacesStatusFailure(
+    private fun createLunchPlacesStatusFailure(
         searchFilter: SearchFilter,
         errorType: ErrorType
     ): Status<SearchFilter, Nothing> {
