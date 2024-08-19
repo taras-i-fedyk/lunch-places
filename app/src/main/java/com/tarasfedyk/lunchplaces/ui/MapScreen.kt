@@ -45,9 +45,9 @@ import com.tarasfedyk.lunchplaces.ui.util.PermanentErrorSnackbar
 import kotlinx.coroutines.launch
 import kotlin.math.log2
 
-// the higher the zoom level, the larger the value of this constant as the degree of magnification
+// the higher the maximum zoom level, the larger the value of this constant as the degree of magnification
 private const val MAX_ZOOM_LEVEL: Float = 21f
-// the higher the location accuracy, the smaller the value of this constant as a radius in meters
+// the higher the maximum location accuracy, the smaller the value of this constant as a radius in meters
 private const val MAX_LOCATION_ACCURACY: Float = 4f
 
 private val MAP_VIEWPORT_PADDING: Dp = 48.dp
